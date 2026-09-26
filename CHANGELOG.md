@@ -1,6 +1,16 @@
 # Changelog
 
-## Fase 20 — 2026-09-26
+## Fase 21 — 2026-09-26
+
+- **Reconstrução das Cargas Terminais e Acumulação Radial a Montante no CQTS.**
+- Identificação analítica das três cargas unitárias elementares dos consumidores: Padrão 1 ($1.4664\text{ kVA}$), Padrão 2 ($1.8048\text{ kVA}$) e Ramal de Ligação Terminal ($1.88\text{ kVA}$), validadas em `CQT PROJ 7 REV2`, `CQT PROJ 4 REV1` e `QDT_ZNA855820_PROJ`.
+- Reconstrução da topologia em árvore radial e da regra de acumulação a montante para trechos lineares e pontos com ramificação/bifurcação ($E_{\text{trecho}} = S_{\text{local}} + \sum E_{\text{filhos}}$ e $D_{\text{trecho}} = N_{\text{local}} + \sum D_{\text{filhos}}$).
+- Fechamento da cadeia matemática completa no nó de bifurcação `LID`:
+  - `PROJ 7`: $53.2792\text{ kVA (Ramo 1)} + 14.5136\text{ kVA (Ramo 2)} + 6.6552\text{ kVA (Local)} = 74.4480\text{ kVA}$ ($D = 47$), reproduzindo $E13$ e $M13$ exatamente.
+  - `PROJ 4`: $26.9216\text{ kVA (Ramo 1)} + 41.9616\text{ kVA (Ramo 2)} + 6.8034\text{ kVA (Local)} = 75.6866\text{ kVA}$ ($D = 48$), reproduzindo $E13$ e $M13$ exatamente.
+- Implementadas as regras candidatas `CQTS.REAL_PROJECT.CONSUMER_LOAD_AGGREGATION` e `CQTS.REAL_PROJECT.RADIAL_LOAD_ACCUMULATION`.
+- Testes expandidos de 56 para 60 testes, todos aprovados com 0 falhas e cobertura coletada.
+- Gate: `GO`.
 
 - Consulta ao OneNote do usuário (`anotações GERAIS.one`) identificou os critérios corporativos de levantamento de demanda, normas (ET 285/283) e condutores multiplexados na Light.
 - Reconstrução de `M13`: identificado como a "Carga no fim do trecho escolhida", combinando a carga acumulada a jusante ($E13$), Fator de Diversidade ($G13$) e pisos de carga monofásica (4 kVA) e bifásica/trifásica (8 kVA).

@@ -2,7 +2,7 @@
 
 > **Documento de Memória Persistente do Projeto**  
 > **Última Atualização:** 2026-09-26  
-> **Versão do Sistema:** 0.3.0 (Fase 18 Concluída)  
+> **Versão do Sistema:** 0.3.0 (Fase 21 Concluída)  
 > **Branch Ativa:** `dev`  
 
 ---
@@ -65,7 +65,8 @@ Substituir o legado instável por uma aplicação desktop de alta precisão, det
 - **Fase 17:** Sessão com usuário especialista que revelou o significado físico dos campos no projeto real: `AM13` é o condutor (`185 Al - MX`), `AN13` é a corrente em Amperes (`430 A`), e `P13/BX13` não é tensão, mas sim a **Temperatura do Condutor [°C]**. A regra `CQTS.REAL_PROJECT.CABLE_TEMPERATURE` foi implementada e testada com sucesso.
 - **Fase 18:** Validação cruzada da fórmula de temperatura do cabo em múltiplos projetos reais (`CQT PROJ 7` e `CQT PROJ 4`). Confirmação de que `AN13` é input manual/externo nos snapshots. Suíte com 53 testes aprovados, 0 falhas.
 - **Fase 19:** Investigação da origem de `AN13 = 430 A`. Confirmado pelo usuário e pelas evidências textuais da planilha (*"Corrente do cabo para a condição"*) que `AN13` é a **ampacidade/capacidade admissível ($I_z$)** do condutor de catálogo e não uma corrente de carga ($I_b$). Teste de sanidade comprovou que a corrente nominal de carga ($195.38\text{ A}$) diverge de $430\text{ A}$. Cadeia intermediária da temperatura fechada com integridade. Gate: `GO RESTRICTED - AMPACITY CONFIRMED / THERMAL CHAIN CLOSED`. 53 testes aprovados, 0 falhas.
-- **Fase 20 (Estado Atual):** Reconstrução de `M13` através da consulta ao OneNote do usuário (`anotações GERAIS.one`) e análise de projetos reais (`CQT PROJ 7 REV2` e `CQT PROJ 4 REV1`). `M13` é a "Carga no fim do trecho escolhida", combinando a carga acumulada a jusante ($E13$), Fator de Diversidade ($G13$) e pisos de carga de 4 kVA (monofásico) e 8 kVA (bifásico/trifásico). Comprovada ramificação real da rede nas abas `LADO 1`, `LADO 2` e `LADO 3`. Implementada a regra `CQTS.REAL_PROJECT.END_LOAD_SELECTION`. Gate: `GO RESTRICTED - M13 RECONSTRUCTED / LOAD RULE CLOSED`. Suíte expandida para 56 testes aprovados, 0 falhas.
+- **Fase 20:** Reconstrução de `M13` através da consulta ao OneNote do usuário (`anotações GERAIS.one`) e análise de projetos reais (`CQT PROJ 7 REV2` e `CQT PROJ 4 REV1`). `M13` é a "Carga no fim do trecho escolhida", combinando a carga acumulada a jusante ($E13$), Fator de Diversidade ($G13$) e pisos de carga de 4 kVA (monofásico) e 8 kVA (bifásico/trifásico). Comprovada ramificação real da rede nas abas `LADO 1`, `LADO 2` e `LADO 3`. Implementada a regra `CQTS.REAL_PROJECT.END_LOAD_SELECTION`. Gate: `GO RESTRICTED - M13 RECONSTRUCTED / LOAD RULE CLOSED`. Suíte expandida para 56 testes aprovados, 0 falhas.
+- **Fase 21 (Estado Atual):** Reconstrução das cargas terminais e acumulação radial a montante no CQTS. Identificação analítica das três cargas unitárias elementares dos consumidores: Padrão 1 ($1.4664\text{ kVA}$), Padrão 2 ($1.8048\text{ kVA}$) e Ramal de Ligação ($1.88\text{ kVA}$), validadas em `CQT PROJ 7 REV2`, `CQT PROJ 4 REV1` e `QDT_ZNA855820_PROJ`. Reconstrução da topologia em árvore radial e da regra de acumulação a montante para trechos lineares e bifurcações ($E_{\text{trecho}} = S_{\text{local}} + \sum E_{\text{filhos}}$ e $D_{\text{trecho}} = N_{\text{local}} + \sum D_{\text{filhos}}$). Comprovação do fechamento exato no nó de bifurcação `LID` ($74.4480\text{ kVA}$ em PROJ 7 e $75.6866\text{ kVA}$ em PROJ 4). Implementadas as regras candidatas `CQTS.REAL_PROJECT.CONSUMER_LOAD_AGGREGATION` e `CQTS.REAL_PROJECT.RADIAL_LOAD_ACCUMULATION`. Gate: `GO`. 60 testes aprovados, 0 falhas.
 
 ---
 
@@ -76,20 +77,20 @@ Substituir o legado instável por uma aplicação desktop de alta precisão, det
 - `src/QdtCqts.Application`: Serviços orquestradores de casos de uso (`ProjectService`, `TopologyService`, `CalculationService`, `ParityService`).
 - `src/QdtCqts.Calculation.Abstractions`: Interfaces de motor (`ICalculationEngine`), requisições (`CalculationRequest`), resultados (`CalculationResult`) e trilhas (`TraceStep`).
 - `src/QdtCqts.Calculation.Qdt`: Regras comprovadas QDT e regras candidatas isoladas.
-- `src/QdtCqts.Calculation.Cqts`: Regras comprovadas CQTS e regra de temperatura de cabo.
+- `src/QdtCqts.Calculation.Cqts`: Regras comprovadas CQTS, regra de temperatura de cabo, regra de seleção de carga no fim do trecho, regra de agregação de consumidores e regra de acumulação radial a montante.
 - `src/QdtCqts.Infrastructure.Sqlite`: Banco de dados relacional e repositórios de dados SQLite.
 - `src/QdtCqts.Infrastructure.ExcelEvidence`: Importador seguro OpenXML e construção de grafo de precedência celular.
 - `src/QdtCqts.Infrastructure.Parity`: Mecanismos de comparação numérica e paridade com tolerância de engenharia.
 - `src/QdtCqts.Desktop.Wpf`: Aplicação desktop WPF para operadores de engenharia da Light.
 
 ### 4.2 Métricas de Teste
-- Total de testes automatizados: **53 testes**.
+- Total de testes automatizados: **60 testes**.
 - Falhas: **0**.
-- Duração da execução: **~1.2 segundos**.
+- Duração da execução: **~1.5 segundos**.
 
 ---
 
 ## 5. Próximos Passos
-1. Investigar a origem da corrente manual/externa (`AN13`) para reconstruir a regra de cálculo de corrente de trecho sem depender de preenchimento manual;
-2. Conectar a interface WPF (MVVM) aos serviços de aplicação já implementados;
+1. Fase 22: Reconstrução da Queda de Tensão ($\Delta V$) e Correntes de Curto-Circuito ($I_{\text{cc}}$) nos Trechos;
+2. Integrar a topologia e motor de cálculo com a interface gráfica desktop WPF (MVVM);
 3. Manter a integridade de todos os testes e a documentação organizada no diretório `docs/`.

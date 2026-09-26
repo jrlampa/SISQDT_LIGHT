@@ -26,6 +26,8 @@ Este diretório contém os relatórios e registros de evidência matemática de 
 | **Fase 18** | [fase18/](fase18/) | Validação da Temperatura em Múltiplos Projetos Reais (CQT 7 e CQT 4) | `GO RESTRICTED - TEMP VALIDATED / CURRENT ORIGIN UNRECONCILED` | 53 |
 | **Fase 19** | [fase19/](fase19/) | Origem da Amperagem AN13 (Ampacidade do Condutor) e Fechamento da Cadeia Térmica | `GO RESTRICTED - AMPACITY CONFIRMED / THERMAL CHAIN CLOSED` | 53 |
 | **Fase 20** | [fase20/](fase20/) | Reconstrução de M13 (Carga Escolhida), Regra de Seleção de Carga e Ramificação Real | `GO RESTRICTED - M13 RECONSTRUCTED / LOAD RULE CLOSED` | 56 |
+| **Fase 21** | [fase21/](fase21/) | Reconstrução das Cargas Terminais e Acumulação Radial a Montante no CQTS | `GO` | 60 |
+
 
 ---
 

@@ -206,6 +206,102 @@ public sealed class IsolatedRuleTests
         Assert.Equal(CalculationStatus.Unknown, wrongUnit.Status);
     }
 
+    [Fact]
+    public void CandidateConsumerLoadAggregationComputesLocalNodeLoad()
+    {
+        var terminalGroups = new (int, double)[] { (1, 1.88), (3, 1.8048) };
+        var terminalResult = new CandidateConsumerLoadAggregationRule().Execute(
+            Inputs(("ConsumerGroups", terminalGroups, UnitCode.Kva)), Context);
+
+        Assert.Equal(CalculationStatus.Pass, terminalResult.Status);
+        Assert.Equal(7.2944d, (double)terminalResult.OutputValue!, 4);
+        Assert.Equal(UnitCode.Kva, terminalResult.OutputUnit);
+        Assert.Equal("CQTS.REAL_PROJECT.CONSUMER_LOAD_AGGREGATION", terminalResult.RuleId);
+
+        var mixedGroups = new (int, double)[] { (6, 1.8048), (2, 1.4664) };
+        var mixedResult = new CandidateConsumerLoadAggregationRule().Execute(
+            Inputs(("ConsumerGroups", mixedGroups, UnitCode.Kva)), Context);
+
+        Assert.Equal(CalculationStatus.Pass, mixedResult.Status);
+        Assert.Equal(13.7616d, (double)mixedResult.OutputValue!, 4);
+    }
+
+    [Fact]
+    public void CandidateRadialLoadAccumulationComputesLinearSegment()
+    {
+        var result = new CandidateRadialLoadAccumulationRule().Execute(Inputs(
+            ("LocalLoadKva", 1.4664d, UnitCode.Kva),
+            ("DownstreamBranchesLoadKva", 23.9888d, UnitCode.Kva),
+            ("LocalConsumers", 1d, UnitCode.Unknown),
+            ("DownstreamConsumers", 14d, UnitCode.Unknown)), Context);
+
+        Assert.Equal(CalculationStatus.Pass, result.Status);
+        Assert.Equal(25.4552d, (double)result.OutputValue!, 4);
+        Assert.Equal(UnitCode.Kva, result.OutputUnit);
+        Assert.Equal("CQTS.REAL_PROJECT.RADIAL_LOAD_ACCUMULATION", result.RuleId);
+    }
+
+    [Fact]
+    public void CandidateRadialLoadAccumulationReproducesProj7BifurcationAtLid()
+    {
+        var branchLado1 = 53.2792d;
+        var branchLado2 = 14.5136d;
+        var localLidLoad = 6.6552d;
+
+        var result = new CandidateRadialLoadAccumulationRule().Execute(Inputs(
+            ("LocalLoadKva", localLidLoad, UnitCode.Kva),
+            ("DownstreamBranchesLoadKva", new[] { branchLado1, branchLado2 }, UnitCode.Kva),
+            ("LocalConsumers", 1d, UnitCode.Unknown),
+            ("DownstreamConsumers", 46d, UnitCode.Unknown)), Context);
+
+        Assert.Equal(CalculationStatus.Pass, result.Status);
+        Assert.Equal(74.4480d, (double)result.OutputValue!, 4);
+        Assert.Equal(UnitCode.Kva, result.OutputUnit);
+
+        // Cadeia completa Fase 21: E13 -> M13 -> Cable Temperature
+        var m13Result = new CandidateEndLoadSelectionRule().Execute(Inputs(
+            ("D13", 47d, UnitCode.Factor),
+            ("E13", (double)result.OutputValue!, UnitCode.Kva),
+            ("G13", 1d, UnitCode.Factor),
+            ("CH5", "SIM", UnitCode.Unknown)), Context);
+
+        Assert.Equal(74.4480d, (double)m13Result.OutputValue!, 4);
+
+        var tempResult = new CandidateCableTemperatureRule().Execute(Inputs(
+            ("M13", (double)m13Result.OutputValue!, UnitCode.Kva),
+            ("BX6", 220d, UnitCode.V),
+            ("H13", 3d, UnitCode.ConductorKey),
+            ("AN13", 430d, UnitCode.Ampere),
+            ("AP13", 2d, UnitCode.Meter)), Context);
+
+        Assert.Equal(43.630837053053675d, (double)tempResult.OutputValue!, 12);
+    }
+
+    [Fact]
+    public void CandidateRadialLoadAccumulationReproducesProj4BifurcationAtLid()
+    {
+        var branchLado1 = 26.9216d;
+        var branchLado2 = 41.9616d;
+        var localLidLoad = 6.80338823529411d;
+
+        var result = new CandidateRadialLoadAccumulationRule().Execute(Inputs(
+            ("LocalLoadKva", localLidLoad, UnitCode.Kva),
+            ("DownstreamBranchesLoadKva", new[] { branchLado1, branchLado2 }, UnitCode.Kva),
+            ("LocalConsumers", 4d, UnitCode.Unknown),
+            ("DownstreamConsumers", 44d, UnitCode.Unknown)), Context);
+
+        Assert.Equal(CalculationStatus.Pass, result.Status);
+        Assert.Equal(75.68658823529411d, (double)result.OutputValue!, 10);
+
+        var m13Result = new CandidateEndLoadSelectionRule().Execute(Inputs(
+            ("D13", 48d, UnitCode.Factor),
+            ("E13", (double)result.OutputValue!, UnitCode.Kva),
+            ("G13", 1d, UnitCode.Factor),
+            ("CH5", "SIM", UnitCode.Unknown)), Context);
+
+        Assert.Equal(75.68658823529411d, (double)m13Result.OutputValue!, 10);
+    }
+
     private static IReadOnlyList<RuleInput> Inputs(params (string Name, object? Value, UnitCode Unit)[] values) =>
         values.Select(value => new RuleInput(value.Name, value.Value, value.Unit)).ToArray();
 }

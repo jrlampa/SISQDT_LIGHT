@@ -95,6 +95,12 @@ Toda execução de cálculo registra um `CalculationRun` imutável com os seguin
 - `input_hash`: Hash SHA-256 do conjunto de entradas;
 - `trace_steps`: Vetor de passos determinísticos executados com insumos, fórmulas e resultados intermediários.
 
+### Regras Candidatas Reconstruídas no Motor:
+1. `CQTS.REAL_PROJECT.CONSUMER_LOAD_AGGREGATION`: Agregação linear de cargas de consumidores no nó ($S_{\text{local}} = \sum N_g \cdot S_{\text{unit}, g}$).
+2. `CQTS.REAL_PROJECT.RADIAL_LOAD_ACCUMULATION`: Acumulação a montante em árvore radial ($E_{\text{trecho}} = S_{\text{local}} + \sum E_{\text{filhos}}$ e $D_{\text{trecho}} = N_{\text{local}} + \sum D_{\text{filhos}}$).
+3. `CQTS.REAL_PROJECT.END_LOAD_SELECTION`: Seleção de carga no fim do trecho $M$ com diversidade e pisos regulatórios ($D \le 2$).
+4. `CQTS.REAL_PROJECT.CABLE_TEMPERATURE`: Cálculo de temperatura térmica de regime contínuo do condutor.
+
 ---
 
 ## 6. Governança de Código
@@ -102,3 +108,4 @@ Toda execução de cálculo registra um `CalculationRun` imutável com os seguin
 - Arquivos fonte devem se manter preferencialmente abaixo de 500 linhas.
 - Testes unitários obrigatórios para cada nova regra matemática adicionada ao motor.
 - Nenhuma alteração de baseline elétrico é permitida sem reconciliação completa documentada em `docs/phases/`.
+
