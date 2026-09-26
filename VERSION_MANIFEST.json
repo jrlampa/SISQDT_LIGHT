@@ -16,7 +16,7 @@
   "prototype_exclusion_policy_version": "PROTOTYPE-EXCLUSION-1",
   "precedence_graph_version": "PRECEDENCE-1-PROTOTYPE-EXCLUSION",
   "build_timestamp": "2026-09-26",
-  "commit_or_revision": "NOT_ESTABLISHED",
+  "commit_or_revision": "a5aab60df029bbab78911d9ea18370474940f134",
   "git_repository": true,
   "artifact_manifest": "docs/manifests/ARTIFACT_MANIFEST.md"
 }
