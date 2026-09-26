@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -23,6 +23,8 @@
     <ProjectReference Include="..\..\src\QdtCqts.Calculation.Abstractions\QdtCqts.Calculation.Abstractions.csproj" />
     <ProjectReference Include="..\..\src\QdtCqts.Calculation.Qdt\QdtCqts.Calculation.Qdt.csproj" />
     <ProjectReference Include="..\..\src\QdtCqts.Calculation.Cqts\QdtCqts.Calculation.Cqts.csproj" />
+    <ProjectReference Include="..\..\src\QdtCqts.Application\QdtCqts.Application.csproj" />
+    <ProjectReference Include="..\..\src\QdtCqts.Infrastructure.Observability\QdtCqts.Infrastructure.Observability.csproj" />
   </ItemGroup>
 
 </Project>

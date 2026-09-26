@@ -1,8 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <ProjectReference Include="..\QdtCqts.Domain\QdtCqts.Domain.csproj" />
     <ProjectReference Include="..\QdtCqts.Calculation.Abstractions\QdtCqts.Calculation.Abstractions.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
   </ItemGroup>
 
   <PropertyGroup>

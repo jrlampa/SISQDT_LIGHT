@@ -24,29 +24,36 @@ O **SISQDT_LIGHT** é orquestrado sob os seguintes papéis técnicos:
 ┌──────────────────────────────────────────────────────────┐
 │                   QdtCqts.Desktop.Wpf                    │
 │            Thin Frontend: UI / Views / ViewModels        │
-└────────────────────────────┬─────────────────────────────┘
-                             │ consome
-┌────────────────────────────▼─────────────────────────────┐
-│                   QdtCqts.Application                    │
-│      ProjectService, CalculationService, ParityService   │
-└──────────────┬─────────────────────────────┬─────────────┘
+└─────────────┬──────────────────────────────┬─────────────┘
+              │ consome                      │ registra ciclo de vida
+┌─────────────▼──────────────────────────────┼─────────────┐
+│                   QdtCqts.Application      │             │
+│      ProjectService, CalculationService,   │             │
+│      CalculationAuditService, TraceRecorder│             │
+└──────────────┬─────────────────────────────┼─────────────┘
                │ orquestra                   │ invoca
 ┌──────────────▼─────────────┐ ┌─────────────▼─────────────┐
 │      QdtCqts.Domain        │ │ Calculation.Abstractions  │
-│ NetworkModel, Circuit,     │ │ ICalculationEngine        │
-│ Node, Edge, Load, Conductor│ │ CalculationRequest/Result │
+│ NetworkModel, Circuit,     │ │ ICalculationEngine, Trace │
+│ EventIds, Redaction, Corr. │ │ DeterministicHashing      │
 └──────────────▲─────────────┘ └─────────────┬─────────────┘
                │ persiste                    │ implementa
 ┌──────────────┴─────────────┐ ┌─────────────▼─────────────┐
 │ Infrastructure.Sqlite      │ │ Calculation.Qdt           │
 │ Repositórios, DDL, WAL     │ │ Calculation.Cqts          │
 └────────────────────────────┘ └───────────────────────────┘
-               ▲
-               │ importa/valida
-┌──────────────┴─────────────┐ ┌───────────────────────────┐
+               ▲                             ▲
+               │ importa/valida              │
+┌──────────────┴─────────────┐ ┌─────────────┴─────────────┐
 │ Infrastructure.ExcelEvid.  │ │ Infrastructure.Parity     │
 │ OpenXML Reader, Precedence │ │ Comparador Numérico P0-P4 │
 └────────────────────────────┘ └───────────────────────────┘
+               ▲
+               │ sinks, formatação e rotação (DI puro)
+┌──────────────┴───────────────────────────────────────────┐
+│           QdtCqts.Infrastructure.Observability           │
+│ Serilog Provider, Rolling File 10MB/30d, StartupLogger   │
+└──────────────────────────────────────────────────────────┘
 ```
 
 ### Regras de Dependência:
@@ -112,4 +119,21 @@ Toda execução de cálculo registra um `CalculationRun` imutável com os seguin
 - Arquivos fonte devem se manter preferencialmente abaixo de 500 linhas.
 - Testes unitários obrigatórios para cada nova regra matemática adicionada ao motor.
 - Nenhuma alteração de baseline elétrico é permitida sem reconciliação completa documentada em `docs/phases/`.
+
+---
+
+## 7. Observabilidade, Logging e Rastreabilidade (Fase 22.2)
+
+### 7.1 Separação Rígida das Três Camadas de Rastreabilidade
+1. **Application Log:** Registra o comportamento operacional da aplicação via `ILogger<T>` (`Microsoft.Extensions.Logging`). Integrado à biblioteca isolada `QdtCqts.Infrastructure.Observability` (Serilog com sinks de Console e Rolling Files diários em `logs/qdtcqts-YYYYMMDD.log`, 10MB máximo por arquivo, retenção de 30 dias).
+2. **Calculation Trace:** Registra o passo a passo matemático estruturado (`CalculationTraceDetail`, `CalculationTraceRecorder`), suportando modos `Normal` e `Diagnostic`. Todas as grandezas possuem tipagem estrita com unidades (`UnitCode`), além de `InputHash` e `OutputHash` SHA-256 canônicos.
+3. **Audit / Evidence Trail:** Registra a proveniência dos fatos geradores e histórico de auditoria (`CalculationAuditService`, `EvidenceTrailRecord`, `ParityTraceRecord`, `GoldenTraceRecord`). Permite responder com precisão: *quem, quando, qual versão, qual regra, quais inputs, qual fórmula, qual resultado, qual evidência e qual disparidade com o Excel/Golden*.
+
+### 7.2 Isolamento Arquitetural de Providers
+- Os projetos `Domain`, `Calculation.Abstractions`, `Calculation.Qdt`, `Calculation.Cqts` e `Application` **NÃO possuem qualquer acoplamento ou dependência do Serilog**.
+- O Serilog é utilizado exclusivamente como provider de infraestrutura via injeção de dependência (`LoggingBootstrapper.AddQdtCqtsObservability`), respeitando o princípio de inversão de dependência (DIP).
+
+### 7.3 Segurança First e Redação de Segredos
+- Sanitização obrigatória de dados sensíveis (`SensitiveDataRedactor`) para impedir vazamento de senhas em strings de conexão, tokens `Bearer` e identificadores fiscais em logs.
+
 

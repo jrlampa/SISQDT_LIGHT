@@ -1,5 +1,27 @@
 # Changelog
 
+## Fase 22.2 — 2026-09-26
+
+- **Observabilidade, Logging Estruturado e Rastreabilidade de Cálculo.**
+- **Separação estrita de 3 camadas de rastreabilidade:**
+  1. *Application Log*: Comportamento operacional da aplicação via `ILogger<T>` com provedor Serilog isolado em `QdtCqts.Infrastructure.Observability`.
+  2. *Calculation Trace*: Rastreamento granular da execução física e matemática com insumos tipados (`UnitCode`), passos intermediários, fórmula e hashes determinísticos.
+  3. *Audit / Evidence Trail*: Proveniência de fatos derivados de Excel (arquivo, hash SHA-256, aba, célula, valor original).
+- **Taxonomia formal de Event IDs:** Implementada em `CalculationEventIds` cobrindo `APP-xxx`, `DB-xxx`, `IMPORT-xxx`, `CALC-xxx`, `RULE-xxx`, `TOPO-xxx`, `PARITY-xxx`, `EVID-xxx` e `GOLDEN-xxx`.
+- **Correlação e Identidade:** `CorrelationContext` com escopo ambiente `AsyncLocal` para correlação de fluxos operacionais (`CorrelationId`) e execuções matemáticas específicas (`CalculationId`).
+- **Hashes Determinísticos Canônicos:** Utilitário `DeterministicHashing` implementando ordenação alfabética estrita, cultura invariante, formatação lossless `G17`, representação de nulos e SHA-256 para `InputHash` e `OutputHash`.
+- **Modos de Trace:** Suporte aos modos `Normal` e `Diagnostic` em `CalculationAuditService` e `CalculationTraceRecorder`.
+- **Segurança First e Redação de Dados Sensíveis:** Utilitário `SensitiveDataRedactor` aplicando máscara automática em tokens (`Bearer`), credenciais e PII (CPF).
+- **Log File Rotation:** Política de rotação diária de arquivos em `logs/application-yyyyMMdd.log`, limite de 10 MB e retenção de 30 dias.
+- **Metadados de Startup:** Evento estruturado `APP-001` emitido no início com versão do código, commit, runtime .NET 8, SO e versões dos manifestos.
+- **Documentação de Arquitetura Criada:**
+  - `docs/architecture/LOGGING.md`
+  - `docs/architecture/CALCULATION_TRACE.md`
+  - `docs/architecture/AUDIT_TRAIL.md`
+  - `docs/architecture/OBSERVABILITY.md`
+- **Suíte de Testes:** 15 novos testes cobrindo configuração, taxonomia de IDs, correlation, calculation ID, determinismo de hashes, paridade, golden cases, redaction, rotação, metadados e cenário de auditoria `CQT PROJ 7 TR -> LID`. Total de testes expandido para **95 testes aprovados, 0 falhas**.
+- **Gates:** 5 gates aprovados com `GO` (`LOGGING_GATE`, `CALCULATION_TRACE_GATE`, `AUDIT_TRAIL_GATE`, `REPRODUCIBILITY_GATE`, `SECURITY_LOGGING_GATE`).
+
 ## Fase 22.1 — 2026-09-26
 
 - **Auditoria Corretiva Matemática e Paridade Estrita QDT + CQTS.**
