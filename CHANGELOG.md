@@ -1,5 +1,20 @@
 # Changelog
 
+## Fase 22 — 2026-09-26
+
+- **Consolidação da Topologia CQTS + QDT e Reconstrução da Queda de Tensão.**
+- Consolidação do modelo topológico unificado em grafo em árvore (Tree Topology): `TR` (raiz), `LID` (lâmina/transição inicial), `PONTO` (nós/postes), `TRECHO` (arestas orientadas `FROM, TO`), `MONTANTE` (pai no grafo) e `RL` (terminal de carga do ramal mais distante).
+- Reconstrução da fórmula física exata de queda de tensão no trecho (`BZ`):
+  $\Delta V\%_{\text{trecho}} = \frac{M \cdot Z \cdot L_{\text{equiv}}}{V^2 / 100} \cdot k_{\text{fase}}$, com impedância corrigida pela temperatura de regime contínuo $T_{\text{cabo}}$ ($R(T)$ e $X$).
+- Reconstrução da propagação acumulada ao longo dos caminhos da árvore (`CA`):
+  $CA(v) = CA(\text{pai}) + \Delta V\%_{\text{trecho}}$, comprovando que ramos irmãos (ex: Lado 1 e Lado 3 a partir de P2) não somam quedas entre si.
+- Comprovação da queda inicial em `LID`:
+  $CA13 = \Delta V\%_{\text{MT}} (1.833\%) + \Delta V\%_{\text{trafo}} (2.316\%) + \Delta V\%_{\text{trecho}} (0.0388\%) = 4.18803\%$.
+- Demonstração da convergência analítica 1:1 entre o fator unitário de queda $BJ$ do CQTS e o coeficiente $C_q$ da aba `Coeficiente Unitário` do QDT: $C_q = BJ = \frac{Z}{V^2 / 100}$.
+- Implementadas as regras candidatas `CQTS.REAL_PROJECT.SEGMENT_VOLTAGE_DROP` e `CQTS.REAL_PROJECT.ACCUMULATED_VOLTAGE_DROP`.
+- Testes expandidos de 60 para 70 testes automatizados, todos aprovados com 0 falhas.
+- Gates: `TOPOLOGY_GATE = GO`, `VOLTAGE_DROP_GATE = GO`, `QDT_CQTS_CONVERGENCE_GATE = GO`.
+
 ## Fase 21 — 2026-09-26
 
 - **Reconstrução das Cargas Terminais e Acumulação Radial a Montante no CQTS.**

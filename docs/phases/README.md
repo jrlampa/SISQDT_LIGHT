@@ -27,6 +27,8 @@ Este diretório contém os relatórios e registros de evidência matemática de 
 | **Fase 19** | [fase19/](fase19/) | Origem da Amperagem AN13 (Ampacidade do Condutor) e Fechamento da Cadeia Térmica | `GO RESTRICTED - AMPACITY CONFIRMED / THERMAL CHAIN CLOSED` | 53 |
 | **Fase 20** | [fase20/](fase20/) | Reconstrução de M13 (Carga Escolhida), Regra de Seleção de Carga e Ramificação Real | `GO RESTRICTED - M13 RECONSTRUCTED / LOAD RULE CLOSED` | 56 |
 | **Fase 21** | [fase21/](fase21/) | Reconstrução das Cargas Terminais e Acumulação Radial a Montante no CQTS | `GO` | 60 |
+| **Fase 22** | [fase22/](fase22/) | Consolidação da Topologia CQTS + QDT e Reconstrução de Queda de Tensão | `GO` (Topologia, Queda e Convergência) | 70 |
+
 
 
 ---

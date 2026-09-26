@@ -100,6 +100,8 @@ Toda execução de cálculo registra um `CalculationRun` imutável com os seguin
 2. `CQTS.REAL_PROJECT.RADIAL_LOAD_ACCUMULATION`: Acumulação a montante em árvore radial ($E_{\text{trecho}} = S_{\text{local}} + \sum E_{\text{filhos}}$ e $D_{\text{trecho}} = N_{\text{local}} + \sum D_{\text{filhos}}$).
 3. `CQTS.REAL_PROJECT.END_LOAD_SELECTION`: Seleção de carga no fim do trecho $M$ com diversidade e pisos regulatórios ($D \le 2$).
 4. `CQTS.REAL_PROJECT.CABLE_TEMPERATURE`: Cálculo de temperatura térmica de regime contínuo do condutor.
+5. `CQTS.REAL_PROJECT.SEGMENT_VOLTAGE_DROP`: Cálculo de queda de tensão percentual no trecho com impedância térmica corrigida ($\Delta V\% = \frac{M \cdot Z \cdot L_{\text{equiv}}}{V^2 / 100} \cdot k_{\text{fase}}$).
+6. `CQTS.REAL_PROJECT.ACCUMULATED_VOLTAGE_DROP`: Acumulação ao longo de caminhos independentes da árvore radial ($CA(v) = CA(\text{pai}) + \Delta V\%_{\text{trecho}}$).
 
 ---
 

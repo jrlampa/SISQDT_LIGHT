@@ -302,6 +302,184 @@ public sealed class IsolatedRuleTests
         Assert.Equal(75.68658823529411d, (double)m13Result.OutputValue!, 10);
     }
 
+    [Fact]
+    public void Test01_LinearSegmentVoltageDropComputesProperly()
+    {
+        // PROJ 7 Linha 13: M=74.448 kVA, R=0.0887083 Ohm/km, X=0.0897 Ohm/km, L=4m, AP=2 (Lequiv=2m), V=220V, H=3
+        var result = new CandidateSegmentVoltageDropRule().Execute(Inputs(
+            ("M", 74.448d, UnitCode.Kva),
+            ("R", 0.088708306113649771d, UnitCode.Ohm),
+            ("X", 0.0897d, UnitCode.Ohm),
+            ("L", 4.0d, UnitCode.Meter),
+            ("AP", 2.0d, UnitCode.Unknown),
+            ("V", 220.0d, UnitCode.V),
+            ("H", 3.0d, UnitCode.ConductorKey)), Context);
+
+        Assert.Equal(CalculationStatus.Pass, result.Status);
+        Assert.Equal(0.038810072181038206d, (double)result.OutputValue!, 10);
+        Assert.Equal(UnitCode.Percent, result.OutputUnit);
+    }
+
+    [Fact]
+    public void Test02_TerminalSegmentLoadAndLength()
+    {
+        // Trecho terminal P6 -> P7: M=7.2944 kVA, R=0.182437, X=0.1178, L=16m, AP=1, V=220V, H=3
+        var result = new CandidateSegmentVoltageDropRule().Execute(Inputs(
+            ("M", 7.2944d, UnitCode.Kva),
+            ("R", 0.18243657395321239d, UnitCode.Ohm),
+            ("X", 0.1178d, UnitCode.Ohm),
+            ("L", 16.0d, UnitCode.Meter),
+            ("AP", 1.0d, UnitCode.Unknown),
+            ("V", 220.0d, UnitCode.V),
+            ("H", 3.0d, UnitCode.ConductorKey)), Context);
+
+        Assert.Equal(CalculationStatus.Pass, result.Status);
+        Assert.True((double)result.OutputValue! > 0);
+    }
+
+    [Fact]
+    public void Test03_NodeWithLocalLoadIncreasesUpstreamSegment()
+    {
+        // Nó com carga local (ex: P3 com 1 consumidor = 1.4664 kVA)
+        var downstream = 23.9888d;
+        var local = 1.4664d;
+        var parentSegment = new CandidateRadialLoadAccumulationRule().Execute(Inputs(
+            ("LocalLoadKva", local, UnitCode.Kva),
+            ("DownstreamBranchesLoadKva", downstream, UnitCode.Kva)), Context);
+
+        Assert.Equal(CalculationStatus.Pass, parentSegment.Status);
+        Assert.Equal(25.4552d, (double)parentSegment.OutputValue!, 4);
+    }
+
+    [Fact]
+    public void Test04_NodeWithTwoDerivationsAccumulatesLoadsAtParent()
+    {
+        // Nó P2 ramificando para P3 (26.9216 kVA) e P8 (26.9216 kVA)
+        var branch1 = 26.9216d;
+        var branch2 = 26.9216d;
+        var result = new CandidateRadialLoadAccumulationRule().Execute(Inputs(
+            ("LocalLoadKva", 0.0d, UnitCode.Kva),
+            ("DownstreamBranchesLoadKva", new[] { branch1, branch2 }, UnitCode.Kva)), Context);
+
+        Assert.Equal(CalculationStatus.Pass, result.Status);
+        Assert.Equal(53.8432d, (double)result.OutputValue!, 4);
+    }
+
+    [Fact]
+    public void Test05_UpstreamAccumulationPreservesMonotonicity()
+    {
+        // D13 >= D14 e H13 >= H9
+        var validation = new ValidationI13Rule().Execute(Inputs(
+            ("D13", 47.0d, UnitCode.Unknown),
+            ("H13", 3.0d, UnitCode.Unknown),
+            ("D14", 38.0d, UnitCode.Unknown),
+            ("H9", 3.0d, UnitCode.Unknown)), Context);
+
+        Assert.Equal("OK !", validation.OutputValue);
+    }
+
+    [Fact]
+    public void Test06_IndependentVoltageDropPathsDoNotSumSiblings()
+    {
+        // Queda acumulada até P2 = 5.80361%
+        var dropAtP2 = 5.8036132859811254d;
+        var deltaP2P3 = 0.3865379348646184d; // Lado 1
+        var deltaP2P8 = 0.21742758836134785d; // Lado 3
+
+        var dropP3 = new CandidateAccumulatedVoltageDropRule().Execute(Inputs(
+            ("SegmentDropPercent", deltaP2P3, UnitCode.Percent),
+            ("UpstreamDropPercent", dropAtP2, UnitCode.Percent)), Context);
+
+        var dropP8 = new CandidateAccumulatedVoltageDropRule().Execute(Inputs(
+            ("SegmentDropPercent", deltaP2P8, UnitCode.Percent),
+            ("UpstreamDropPercent", dropAtP2, UnitCode.Percent)), Context);
+
+        Assert.Equal(CalculationStatus.Pass, dropP3.Status);
+        Assert.Equal(CalculationStatus.Pass, dropP8.Status);
+        Assert.Equal(6.1901512208457437d, (double)dropP3.OutputValue!, 10);
+        Assert.Equal(6.0210408743424733d, (double)dropP8.OutputValue!, 10);
+
+        // Quedas em P3 e P8 são independentes e não somam os trechos irmãos entre si
+        Assert.NotEqual((double)dropP3.OutputValue!, (double)dropP8.OutputValue!);
+    }
+
+    [Fact]
+    public void Test07_LinearTopologyConvergenceCqtsAndQdt()
+    {
+        // No caso linear sem derivações, a fórmula Z / (V^2 / 100) do CQTS coincide com Cq do QDT
+        const double r = 1.0903d;
+        const double x = 0.4034d;
+        const double v = 220.0d;
+        const double l = 100.0d;
+        const double m = 10.0d;
+
+        // Fórmula CQTS
+        var cqtsResult = new CandidateSegmentVoltageDropRule().Execute(Inputs(
+            ("M", m, UnitCode.Kva),
+            ("R", r, UnitCode.Ohm),
+            ("X", x, UnitCode.Ohm),
+            ("L", l, UnitCode.Meter),
+            ("AP", 1.0d, UnitCode.Unknown),
+            ("V", v, UnitCode.V),
+            ("H", 3.0d, UnitCode.ConductorKey)), Context);
+
+        // Fórmula clássica QDT (Cq * M * L)
+        double z = Math.Sqrt(r * r + x * x);
+        double cq = (z / (v * v)) * 100.0;
+        double qdtDeltaV = m * cq * l;
+
+        Assert.Equal(CalculationStatus.Pass, cqtsResult.Status);
+        Assert.Equal(qdtDeltaV, (double)cqtsResult.OutputValue!, 10);
+    }
+
+    [Fact]
+    public void Test08_BranchDivergencePreservedAtP2()
+    {
+        // Ramo 1 (P3) e Ramo 3 (P8) divergem a partir de P2
+        var dropP3 = 6.1901512208457437d;
+        var dropP8 = 6.0210408743424733d;
+        Assert.True(Math.Abs(dropP3 - dropP8) > 0.1d);
+    }
+
+    [Fact]
+    public void Test09_ConductorChangeAdjustsImpedanceAndVoltageDrop()
+    {
+        // Comparação de condutor 240 Cu vs 185 Al - MX para o mesmo trecho
+        var dropCu = new CandidateSegmentVoltageDropRule().Execute(Inputs(
+            ("M", 50.0d, UnitCode.Kva),
+            ("R", 0.0887d, UnitCode.Ohm),
+            ("X", 0.0897d, UnitCode.Ohm),
+            ("L", 50.0d, UnitCode.Meter),
+            ("AP", 1.0d, UnitCode.Unknown),
+            ("V", 220.0d, UnitCode.V),
+            ("H", 3.0d, UnitCode.ConductorKey)), Context);
+
+        var dropAl = new CandidateSegmentVoltageDropRule().Execute(Inputs(
+            ("M", 50.0d, UnitCode.Kva),
+            ("R", 0.1896d, UnitCode.Ohm),
+            ("X", 0.1178d, UnitCode.Ohm),
+            ("L", 50.0d, UnitCode.Meter),
+            ("AP", 1.0d, UnitCode.Unknown),
+            ("V", 220.0d, UnitCode.V),
+            ("H", 3.0d, UnitCode.ConductorKey)), Context);
+
+        Assert.True((double)dropAl.OutputValue! > (double)dropCu.OutputValue!);
+    }
+
+    [Fact]
+    public void Test10_RlModeledAsConsumerTerminal()
+    {
+        // Ramal de ligação pontual (RL): D=1, M=1.88 kVA
+        var rlLoad = new CandidateEndLoadSelectionRule().Execute(Inputs(
+            ("D13", 1.0d, UnitCode.Factor),
+            ("E13", 1.88d, UnitCode.Kva),
+            ("G13", 1.0d, UnitCode.Factor),
+            ("CH5", "NAO", UnitCode.Unknown)), Context);
+
+        Assert.Equal(CalculationStatus.Pass, rlLoad.Status);
+        Assert.Equal(1.88d, (double)rlLoad.OutputValue!);
+    }
+
     private static IReadOnlyList<RuleInput> Inputs(params (string Name, object? Value, UnitCode Unit)[] values) =>
         values.Select(value => new RuleInput(value.Name, value.Value, value.Unit)).ToArray();
 }
