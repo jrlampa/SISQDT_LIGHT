@@ -142,6 +142,70 @@ public sealed class IsolatedRuleTests
         Assert.Equal(CalculationStatus.Blocked, result.Status);
     }
 
+    [Fact]
+    public void CandidateEndLoadSelectionReproducesProj7AndProj4()
+    {
+        var proj7 = new CandidateEndLoadSelectionRule().Execute(Inputs(
+            ("D13", 47d, UnitCode.Factor),
+            ("E13", 74.448d, UnitCode.Kva),
+            ("G13", 1d, UnitCode.Factor),
+            ("CH5", "SIM", UnitCode.Unknown)), Context);
+
+        Assert.Equal(CalculationStatus.Pass, proj7.Status);
+        Assert.Equal(74.448d, (double)proj7.OutputValue!);
+        Assert.Equal(UnitCode.Kva, proj7.OutputUnit);
+        Assert.Equal("CQTS.REAL_PROJECT.END_LOAD_SELECTION", proj7.RuleId);
+
+        var proj4 = new CandidateEndLoadSelectionRule().Execute(Inputs(
+            ("D13", 48d, UnitCode.Factor),
+            ("E13", 75.68658823529411d, UnitCode.Kva),
+            ("G13", 1d, UnitCode.Factor),
+            ("CH5", "SIM", UnitCode.Unknown)), Context);
+
+        Assert.Equal(CalculationStatus.Pass, proj4.Status);
+        Assert.Equal(75.68658823529411d, (double)proj4.OutputValue!);
+    }
+
+    [Fact]
+    public void CandidateEndLoadSelectionAppliesConsumerFloors()
+    {
+        var singleConsumer = new CandidateEndLoadSelectionRule().Execute(Inputs(
+            ("D13", 1d, UnitCode.Factor),
+            ("E13", 1.88d, UnitCode.Kva),
+            ("G13", 1d, UnitCode.Factor),
+            ("CH5", "SIM", UnitCode.Unknown)), Context);
+
+        Assert.Equal(CalculationStatus.Pass, singleConsumer.Status);
+        Assert.Equal(4.0d, (double)singleConsumer.OutputValue!);
+
+        var twoConsumers = new CandidateEndLoadSelectionRule().Execute(Inputs(
+            ("D13", 2d, UnitCode.Factor),
+            ("E13", 3.0d, UnitCode.Kva),
+            ("G13", 1d, UnitCode.Factor),
+            ("CH5", "SIM", UnitCode.Unknown)), Context);
+
+        Assert.Equal(CalculationStatus.Pass, twoConsumers.Status);
+        Assert.Equal(8.0d, (double)twoConsumers.OutputValue!);
+    }
+
+    [Fact]
+    public void CandidateEndLoadSelectionBlocksMissingOrInvalidInputs()
+    {
+        var missing = new CandidateEndLoadSelectionRule().Execute(Inputs(
+            ("D13", null, UnitCode.Factor),
+            ("E13", 74.448d, UnitCode.Kva),
+            ("G13", 1d, UnitCode.Factor)), Context);
+
+        Assert.Equal(CalculationStatus.Blocked, missing.Status);
+
+        var wrongUnit = new CandidateEndLoadSelectionRule().Execute(Inputs(
+            ("D13", 47d, UnitCode.Factor),
+            ("E13", 74.448d, UnitCode.V),
+            ("G13", 1d, UnitCode.Factor)), Context);
+
+        Assert.Equal(CalculationStatus.Unknown, wrongUnit.Status);
+    }
+
     private static IReadOnlyList<RuleInput> Inputs(params (string Name, object? Value, UnitCode Unit)[] values) =>
         values.Select(value => new RuleInput(value.Name, value.Value, value.Unit)).ToArray();
 }

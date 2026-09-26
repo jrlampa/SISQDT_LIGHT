@@ -1,8 +1,8 @@
 {
   "project": "QdtCqts",
   "code_version": "0.3.0",
-  "phase": "FASE19",
-  "gate": "GO RESTRICTED - AMPACITY CONFIRMED / THERMAL CHAIN CLOSED",
+  "phase": "FASE20",
+  "gate": "GO RESTRICTED - M13 RECONSTRUCTED / LOAD RULE CLOSED",
   "schema_version": "1",
   "model_version": "NOT_ESTABLISHED",
   "ruleset_version": "F9-RULESET-1",

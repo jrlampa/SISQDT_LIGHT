@@ -1,5 +1,14 @@
 # Changelog
 
+## Fase 20 — 2026-09-26
+
+- Consulta ao OneNote do usuário (`anotações GERAIS.one`) identificou os critérios corporativos de levantamento de demanda, normas (ET 285/283) e condutores multiplexados na Light.
+- Reconstrução de `M13`: identificado como a "Carga no fim do trecho escolhida", combinando a carga acumulada a jusante ($E13$), Fator de Diversidade ($G13$) e pisos de carga monofásica (4 kVA) e bifásica/trifásica (8 kVA).
+- Comprovação da topologia ramificada real no CQT PROJ 7 REV2 através das abas `LADO 1`, `LADO 2` e `LADO 3`.
+- Implementada a regra `CQTS.REAL_PROJECT.END_LOAD_SELECTION`.
+- Testes expandidos de 53 para 56 testes, todos aprovados com 0 falhas.
+- Gate: `GO RESTRICTED - M13 RECONSTRUCTED / LOAD RULE CLOSED`.
+
 ## Fase 19 — 2026-09-26
 
 - Origem de `AN13` esclarecida: confirmada como a ampacidade admissível do cabo ($I_z = 430\text{ A}$ para o cabo `185 Al - MX`), obtida de tabela/catálogo da LIGHT ou entrada de condutores, e não corrente de carga ($I_b$).
