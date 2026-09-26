@@ -1,5 +1,20 @@
 # Changelog
 
+## Fase 22.1 — 2026-09-26
+
+- **Auditoria Corretiva Matemática e Paridade Estrita QDT + CQTS.**
+- Auditoria direta via OpenXML nas células, fórmulas, unidades e precedentes nos workbooks reais (`CQT PROJ 7 REV2` e `CQT PROJ 4 REV1`).
+- **Resolução definitiva de AP vs AQ:** Comprovado pelos cabeçalhos das linhas 10/11/12 que `AP` é o número de circuitos/cabos em paralelo por fase ($n_{\text{paralelo}}$), `AQ` é o comprimento real em metros ($L$), e `AR = AQ / AP` é o comprimento equivalente em metros ($L_{\text{equiv}}$).
+- **Cancelamento dimensional exato comprovado:** $M$ em kVA ($10^3\text{ VA}$) e $L$ em metros com $Z$ em $\Omega/\text{km}$ ($10^{-3}\text{ km}$) cancelam exatamente as potências de 10, explicando por que a fórmula direta $M \cdot BJ \cdot L_{\text{equiv}} \cdot k_{\text{fase}}$ resulta em $\Delta V\%$ sem fatores manuais artificiais.
+- **Fatores de fase comprovados na fórmula:** $H=3 \implies 1$, $H=2 \implies 2$, $H=1 \implies 6$, identificados textualmente na fórmula `=IF(H=3, BW*BJ*AR, IF(H=2, BW*BJ*AR*2, IF(H=1, BW*BJ*AR*6, 0)))`.
+- **Resistência CA térmica fechada:** Comprovada a fórmula de `BI` com correção térmica e fator de efeito pelicular $K^* = AY / AX$ (`CQTS.REAL_PROJECT.THERMAL_RESISTANCE`).
+- **Queda interna do transformador formalizada:** Regra `CandidateTransformerVoltageDropRule` (`CQTS.REAL_PROJECT.TRANSFORMER_VOLTAGE_DROP`) implementando `BV4 = (M13 / AS6) * BW6`.
+- **Rastreabilidade da queda de Média Tensão:** Célula `CV105 = (CU105 / (BX6 / SQRT(3))) * 100` rastreada até o bloco de MT (linhas 98-108).
+- **Paridade numérica bit-a-bit:** 100% dos trechos auditados fecharam com erro absoluto $0.00\times 10^0$ (IEEE-754).
+- **Reclassificação formal de Goldens:** 7 casos auditados promovidos a `OFFICIAL_GOLDEN`.
+- **Suíte de testes:** Adicionado `Fase22_1ParityTests.cs` cobrindo os 10 casos obrigatórios. Suíte expandida para **80 testes aprovados, 0 falhas**.
+- **Gates:** 6 gates aprovados (`TOPOLOGY_GATE = GO`, `VOLTAGE_DROP_GATE = GO`, `THERMAL_IMPEDANCE_GATE = GO`, `CA_ACCUMULATION_GATE = GO`, `QDT_CQTS_CONVERGENCE_GATE = GO`, `GOLDEN_GATE = GO`).
+
 ## Fase 22 — 2026-09-26
 
 - **Consolidação da Topologia CQTS + QDT e Reconstrução da Queda de Tensão.**

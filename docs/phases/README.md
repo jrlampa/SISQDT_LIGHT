@@ -28,6 +28,7 @@ Este diretório contém os relatórios e registros de evidência matemática de 
 | **Fase 20** | [fase20/](fase20/) | Reconstrução de M13 (Carga Escolhida), Regra de Seleção de Carga e Ramificação Real | `GO RESTRICTED - M13 RECONSTRUCTED / LOAD RULE CLOSED` | 56 |
 | **Fase 21** | [fase21/](fase21/) | Reconstrução das Cargas Terminais e Acumulação Radial a Montante no CQTS | `GO` | 60 |
 | **Fase 22** | [fase22/](fase22/) | Consolidação da Topologia CQTS + QDT e Reconstrução de Queda de Tensão | `GO` (Topologia, Queda e Convergência) | 70 |
+| **Fase 22.1** | [fase22_1/](fase22_1/) | Auditoria Corretiva Matemática e Paridade Estrita QDT + CQTS | `GO` (100% Paridade Bit-a-Bit / 6 Gates Aprovados) | 80 |
 
 
 

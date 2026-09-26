@@ -102,6 +102,8 @@ Toda execução de cálculo registra um `CalculationRun` imutável com os seguin
 4. `CQTS.REAL_PROJECT.CABLE_TEMPERATURE`: Cálculo de temperatura térmica de regime contínuo do condutor.
 5. `CQTS.REAL_PROJECT.SEGMENT_VOLTAGE_DROP`: Cálculo de queda de tensão percentual no trecho com impedância térmica corrigida ($\Delta V\% = \frac{M \cdot Z \cdot L_{\text{equiv}}}{V^2 / 100} \cdot k_{\text{fase}}$).
 6. `CQTS.REAL_PROJECT.ACCUMULATED_VOLTAGE_DROP`: Acumulação ao longo de caminhos independentes da árvore radial ($CA(v) = CA(\text{pai}) + \Delta V\%_{\text{trecho}}$).
+7. `CQTS.REAL_PROJECT.THERMAL_RESISTANCE`: Resistência CA corrigida na temperatura de regime com efeito pelicular ($R_{\text{ca}}(T) = R_{\text{cc},20} \cdot [1 + \alpha_{20} \cdot (T - 20)] \cdot K^*$).
+8. `CQTS.REAL_PROJECT.TRANSFORMER_VOLTAGE_DROP`: Queda interna percentual do transformador de distribuição ($\Delta V\%_{\text{trafo}} = \frac{M_{\text{trafo}}}{S_{\text{nom, trafo}}} \times Z\%_{\text{trafo}}$).
 
 ---
 
