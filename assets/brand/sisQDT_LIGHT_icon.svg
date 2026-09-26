@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0A58CA"/>
+      <stop offset="100%" stop-color="#3B82F6"/>
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#D97706"/>
+    </linearGradient>
+    <filter id="subtleGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+  
+  <!-- Malha geométrica de fundo / Circuito sutil -->
+  <g stroke="#64748B" stroke-width="2" stroke-opacity="0.25" stroke-dasharray="6 6">
+    <circle cx="256" cy="256" r="190" fill="none"/>
+    <circle cx="256" cy="256" r="110" fill="none"/>
+    <line x1="66" y1="256" x2="446" y2="256"/>
+    <line x1="256" y1="66" x2="256" y2="446"/>
+  </g>
+  
+  <!-- Linhas de Distribuição / Trechos de Tronco e Ramificação (Topologia Radial) -->
+  <g stroke="url(#blueGrad)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Alimentador Tronco Central (TR -> LID -> Barramento) -->
+    <line x1="256" y1="90" x2="256" y2="256"/>
+    <!-- Ramificações Radiais (Lados / Derivações de Rede) -->
+    <line x1="256" y1="256" x2="120" y2="340"/>
+    <line x1="256" y1="256" x2="392" y2="340"/>
+    <line x1="120" y1="340" x2="90" y2="420"/>
+    <line x1="120" y1="340" x2="180" y2="420"/>
+    <line x1="392" y1="340" x2="332" y2="420"/>
+    <line x1="392" y1="340" x2="422" y2="420"/>
+  </g>
+
+  <!-- Segmentos de cálculo de impedância / cota diferencial (Delta V) -->
+  <g stroke="#F59E0B" stroke-width="8" stroke-linecap="round">
+    <line x1="256" y1="130" x2="290" y2="130"/>
+    <line x1="256" y1="190" x2="290" y2="190"/>
+    <line x1="290" y1="130" x2="290" y2="190"/>
+  </g>
+
+  <!-- Nós de Distribuição (Postes, Caixas de Passagem, Transformador) -->
+  <!-- Nós Secundários / Cargas Terminais -->
+  <circle cx="90" cy="420" r="16" fill="#0A58CA" stroke="#F8FAFC" stroke-width="4"/>
+  <circle cx="180" cy="420" r="16" fill="#0A58CA" stroke="#F8FAFC" stroke-width="4"/>
+  <circle cx="332" cy="420" r="16" fill="#0A58CA" stroke="#F8FAFC" stroke-width="4"/>
+  <circle cx="422" cy="420" r="16" fill="#0A58CA" stroke="#F8FAFC" stroke-width="4"/>
+  
+  <!-- Nós de Bifurcação / Derivação -->
+  <circle cx="120" cy="340" r="22" fill="#3B82F6" stroke="#F8FAFC" stroke-width="5"/>
+  <circle cx="392" cy="340" r="22" fill="#3B82F6" stroke="#F8FAFC" stroke-width="5"/>
+
+  <!-- Nó Central de Derivação (LID) -->
+  <circle cx="256" cy="256" r="32" fill="url(#amberGrad)" stroke="#F8FAFC" stroke-width="6"/>
+  <circle cx="256" cy="256" r="12" fill="#F8FAFC"/>
+
+  <!-- Nó Raiz / Transformador (TR) -->
+  <circle cx="256" cy="90" r="28" fill="#0A58CA" stroke="#F59E0B" stroke-width="6"/>
+  <circle cx="256" cy="90" r="10" fill="#F59E0B"/>
+</svg>

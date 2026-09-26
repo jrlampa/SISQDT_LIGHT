@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 340" width="100%" height="100%">
+  <defs>
+    <linearGradient id="blueGradLg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#3B82F6"/>
+    </linearGradient>
+    <linearGradient id="amberGradLg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#D97706"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="340" rx="32" fill="#0F172A"/>
+
+  <!-- SÍMBOLO EMBUTIDO (Esquerda) -->
+  <g transform="translate(40, 20) scale(0.58)">
+    <!-- Malha sutil -->
+    <g stroke="#64748B" stroke-width="3" stroke-opacity="0.25" stroke-dasharray="6 6">
+      <circle cx="256" cy="256" r="190" fill="none"/>
+      <circle cx="256" cy="256" r="110" fill="none"/>
+    </g>
+    <!-- Linhas de Distribuição -->
+    <g stroke="url(#blueGradLg)" stroke-width="22" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="256" y1="90" x2="256" y2="256"/>
+      <line x1="256" y1="256" x2="120" y2="340"/>
+      <line x1="256" y1="256" x2="392" y2="340"/>
+      <line x1="120" y1="340" x2="90" y2="420"/>
+      <line x1="120" y1="340" x2="180" y2="420"/>
+      <line x1="392" y1="340" x2="332" y2="420"/>
+      <line x1="392" y1="340" x2="422" y2="420"/>
+    </g>
+    <!-- Cotas Delta V -->
+    <g stroke="#F59E0B" stroke-width="10" stroke-linecap="round">
+      <line x1="256" y1="130" x2="295" y2="130"/>
+      <line x1="256" y1="190" x2="295" y2="190"/>
+      <line x1="295" y1="130" x2="295" y2="190"/>
+    </g>
+    <!-- Nós -->
+    <circle cx="90" cy="420" r="18" fill="#3B82F6" stroke="#F8FAFC" stroke-width="5"/>
+    <circle cx="180" cy="420" r="18" fill="#3B82F6" stroke="#F8FAFC" stroke-width="5"/>
+    <circle cx="332" cy="420" r="18" fill="#3B82F6" stroke="#F8FAFC" stroke-width="5"/>
+    <circle cx="422" cy="420" r="18" fill="#3B82F6" stroke="#F8FAFC" stroke-width="5"/>
+    <circle cx="120" cy="340" r="24" fill="#3B82F6" stroke="#F8FAFC" stroke-width="6"/>
+    <circle cx="392" cy="340" r="24" fill="#3B82F6" stroke="#F8FAFC" stroke-width="6"/>
+    <circle cx="256" cy="256" r="36" fill="url(#amberGradLg)" stroke="#F8FAFC" stroke-width="7"/>
+    <circle cx="256" cy="256" r="14" fill="#F8FAFC"/>
+    <circle cx="256" cy="90" r="30" fill="#3B82F6" stroke="#F59E0B" stroke-width="7"/>
+    <circle cx="256" cy="90" r="12" fill="#F59E0B"/>
+  </g>
+
+  <!-- TIPOGRAFIA: sisQDT_LIGHT -->
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">
+    <!-- sis: Minúsculo, Regular/Médio -->
+    <text x="380" y="195" font-size="110" font-weight="400" fill="#F8FAFC" letter-spacing="-1">sis</text>
+    <!-- QDT: Maiúsculo, Bold Técnico -->
+    <text x="515" y="195" font-size="115" font-weight="800" fill="#3B82F6" letter-spacing="1">QDT</text>
+    <!-- _LIGHT: Maiúsculo com underscore, Semi-Bold Âmbar -->
+    <text x="795" y="195" font-size="115" font-weight="700" fill="#F59E0B" letter-spacing="2">_LIGHT</text>
+    
+    <!-- Subtítulo Técnico de Engenharia -->
+    <text x="385" y="245" font-size="24" font-weight="600" fill="#64748B" letter-spacing="5">SISTEMA UNIFICADO DE CÁLCULO DE REDES ELÉTRICAS</text>
+    
+    <!-- Linha técnica de precisão de rodapé -->
+    <line x1="385" y1="265" x2="1140" y2="265" stroke="#64748B" stroke-width="2" stroke-opacity="0.3"/>
+    <circle cx="385" cy="265" r="4" fill="#3B82F6"/>
+    <circle cx="1140" cy="265" r="4" fill="#F59E0B"/>
+  </g>
+</svg>

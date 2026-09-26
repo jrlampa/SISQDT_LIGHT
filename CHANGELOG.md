@@ -1,5 +1,37 @@
 # Changelog
 
+## Fase 23 — 2026-09-26
+
+- **Integração Ponta a Ponta da Cadeia de Cálculo + Identidade Visual Oficial (sisQDT_LIGHT).**
+- **Workstream A — Cadeia de Cálculo Ponta a Ponta:**
+  - Implementação do pipeline unificado ponta a ponta (`UnifiedCalculationPipeline`) integrando:
+    * *Cargas Individuais*: Agregação nos nós via `CandidateConsumerLoadAggregationRule`.
+    * *Topologia Radial*: Ordenação topológica e validação invariante estrita via `TopologyValidator`.
+    * *Acumulação a Montante*: Pós-ordem (folhas até a raiz) calculando $E$ e consumidores $D$ via `CandidateRadialLoadAccumulationRule`.
+    * *Demanda e Fim de Trecho*: Seleção de carga $M$ com fator de diversidade $G$ e piso regulatório $CH5$ via `CandidateEndLoadSelectionRule`.
+    * *Dimensionamento*: Corrente de projeto $I_b$, capacidade do condutor $I_z \cdot AP$ e detecção automática de sobrecarga (`IsOverloaded`).
+    * *Análise Térmica*: Temperatura de regime permanente $T$ via `CandidateCableTemperatureRule` e resistência CA corrigida $R_{\text{ca}}(T)$ via `CandidateThermalResistanceRule`.
+    * *Impedância e Queda no Trecho*: $Z = \sqrt{R_{\text{ca}}^2 + X^2}$, $BJ = Z / (V^2 / 100)$ e $\Delta V\%$ com multiplicador de fase via `CandidateSegmentVoltageDropRule`.
+    * *Transformador e MT*: Queda interna $\Delta V\%_{\text{trafo}}$ via `CandidateTransformerVoltageDropRule` e parcela de média tensão $\Delta V\%_{\text{MT}}$.
+    * *Queda Acumulada*: Pré-ordem (raiz até as folhas) calculando $CA\%$ com isolamento estrito de caminhos radiais via `CandidateAccumulatedVoltageDropRule`.
+  - Novos modelos estruturados em `src/QdtCqts.Calculation.Abstractions/CalculationOutputModels.cs`: `SegmentCalculationResult`, `NodeCalculationResult`, `TransformerCalculationResult` e `NetworkCalculationReport`.
+  - Orquestração de aplicação (`CalculationService`) gerenciando `CorrelationContext`, `CalculationId`, medição de duração, logging estruturado com `CalculationEventIds`, persistência de traces em `CalculationTraceRecorder` e hash canônico determinístico via `DeterministicHashing`.
+- **Workstream B — Identidade Visual Oficial (sisQDT_LIGHT):**
+  - Criação da marca e conceito gráfico original representando rede de distribuição radial, diagrama de circuito elétrico, nós técnicos e precisão matemática.
+  - Tipografia técnica estrita: `sisQDT_LIGHT` (sis em caixa baixa regular, QDT em caixa alta extra-bold azul elétrico, _LIGHT em caixa alta semi-bold âmbar energia).
+  - Geração de pacote completo de assets em `assets/brand/`:
+    * `sisQDT_LIGHT.svg`, `sisQDT_LIGHT_dark.svg`, `sisQDT_LIGHT_light.svg`, `sisQDT_LIGHT_mono.svg`, `sisQDT_LIGHT_icon.svg`.
+    * `sisQDT_LIGHT.png`, `sisQDT_LIGHT_dark.png`, `sisQDT_LIGHT_light.png`, `sisQDT_LIGHT_mono.png`, `sisQDT_LIGHT_icon.png`.
+    * `sisQDT_LIGHT.ico`: Ícone Windows oficial multi-resolução contendo 7 tamanhos (16×16, 24×24, 32×32, 48×48, 64×64, 128×128, 256×256) em 32-bit RGBA com transparência pura.
+  - Integração nativa no projeto `QdtCqts.Desktop.Wpf` (`ApplicationIcon`, Resources e Window Icon/Title no `MainWindow.xaml`).
+  - Criação do manual de diretrizes de marca em `docs/brand/README.md`.
+- **Suíte de Testes Automatizados:**
+  - 27 novos testes unitários e de integração adicionados:
+    * 23 testes em `BrandAssetTests.cs` validando existência física, headers de PNG, parsing de SVG, estrutura multi-resolução de ICO e espelhamento em WPF.
+    * 4 testes em `Fase23EndToEndIntegrationTests.cs` validando paridade com CQT PROJ 7 REV2, CQT PROJ 4 REV1, detecção de sobrecarga e rejeição de ciclos topológicos.
+  - Total da suíte expandido para **122 testes aprovados, 0 falhas, 0 warnings**.
+- **Gates:** 14 gates avaliados e aprovados com `GO` (8 para Fase 23 e 6 para Identidade Visual).
+
 ## Fase 22.2 — 2026-09-26
 
 - **Observabilidade, Logging Estruturado e Rastreabilidade de Cálculo.**

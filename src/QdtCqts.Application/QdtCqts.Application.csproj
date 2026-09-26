@@ -3,6 +3,8 @@
   <ItemGroup>
     <ProjectReference Include="..\QdtCqts.Domain\QdtCqts.Domain.csproj" />
     <ProjectReference Include="..\QdtCqts.Calculation.Abstractions\QdtCqts.Calculation.Abstractions.csproj" />
+    <ProjectReference Include="..\QdtCqts.Calculation.Cqts\QdtCqts.Calculation.Cqts.csproj" />
+    <ProjectReference Include="..\QdtCqts.Calculation.Qdt\QdtCqts.Calculation.Qdt.csproj" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
   </ItemGroup>
 

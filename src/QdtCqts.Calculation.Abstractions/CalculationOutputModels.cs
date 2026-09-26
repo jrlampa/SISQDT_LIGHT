@@ -1,0 +1,69 @@
+using System.Collections.Generic;
+using QdtCqts.Domain;
+
+namespace QdtCqts.Calculation.Abstractions;
+
+/// <summary>
+/// Resultado detalhado de cálculo para um trecho (edge/segmento) da rede.
+/// </summary>
+public sealed record SegmentCalculationResult(
+    string EdgeId,
+    string FromNodeId,
+    string ToNodeId,
+    string? ConductorKey,
+    int PhaseCount,
+    double ParallelCables,
+    double PhysicalLengthMeters,
+    double EquivalentLengthMeters,
+    double DownstreamAccumulatedConsumers,
+    double DownstreamAccumulatedLoadKva,
+    double DiversityFactor,
+    double EndLoadSelectedKva,
+    double OperatingCurrentAmperes,
+    double RatedAmpacityAmperes,
+    bool IsOverloaded,
+    double OperatingTemperatureCelsius,
+    double ResistanceCaOhmPerKm,
+    double ReactanceOhmPerKm,
+    double ImpedanceOhmPerKm,
+    double FactorBj,
+    double PhaseFactor,
+    double SegmentVoltageDropPercent);
+
+/// <summary>
+/// Resultado de cálculo para um nó da rede (poste, caixa, derivação, carga).
+/// </summary>
+public sealed record NodeCalculationResult(
+    string NodeId,
+    string ExternalKey,
+    int LocalConsumers,
+    double LocalLoadKva,
+    double AccumulatedVoltageDropPercent);
+
+/// <summary>
+/// Resultado de cálculo para o transformador de alimentação e média tensão.
+/// </summary>
+public sealed record TransformerCalculationResult(
+    string TransformerId,
+    string ExternalKey,
+    double NominalPowerKva,
+    double OperatingLoadKva,
+    double ImpedancePercent,
+    double TrafoVoltageDropPercent,
+    double MtVoltageDropPercent,
+    double TotalOriginVoltageDropPercent);
+
+/// <summary>
+/// Relatório consolidado e imutável de cálculo da rede elétrica para um circuito ou rede completa.
+/// </summary>
+public sealed record NetworkCalculationReport(
+    string RunId,
+    CalculationMode Mode,
+    string AlgorithmVersion,
+    string InputHash,
+    string OutputHash,
+    IReadOnlyList<TransformerCalculationResult> Transformers,
+    IReadOnlyList<SegmentCalculationResult> Segments,
+    IReadOnlyList<NodeCalculationResult> Nodes,
+    int TotalCircuitsCalculated,
+    double ExecutionDurationMs);

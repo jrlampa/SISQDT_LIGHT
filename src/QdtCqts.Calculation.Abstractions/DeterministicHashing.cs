@@ -67,4 +67,19 @@ public static class DeterministicHashing
             _ => value.ToString()?.Trim() ?? "<null>"
         };
     }
+
+    public static string ComputeReportHash(IEnumerable<SegmentCalculationResult> segments, IEnumerable<NodeCalculationResult> nodes)
+    {
+        var sb = new StringBuilder();
+        foreach (var s in segments.OrderBy(x => x.EdgeId, StringComparer.Ordinal))
+        {
+            sb.Append($"SEG:{s.EdgeId}:{s.EndLoadSelectedKva:G17}:{s.SegmentVoltageDropPercent:G17};");
+        }
+        foreach (var n in nodes.OrderBy(x => x.NodeId, StringComparer.Ordinal))
+        {
+            sb.Append($"NOD:{n.NodeId}:{n.AccumulatedVoltageDropPercent:G17};");
+        }
+        var bytes = Encoding.UTF8.GetBytes(sb.ToString());
+        return Convert.ToHexString(SHA256.HashData(bytes)).ToLowerInvariant();
+    }
 }

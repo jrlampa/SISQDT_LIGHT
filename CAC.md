@@ -10,6 +10,7 @@
 ## 1. Princípios Arquiteturais e Papéis
 
 O **SISQDT_LIGHT** é orquestrado sob os seguintes papéis técnicos:
+
 - **Tech Lead:** Governança técnica, integridade dos modelos e validação dos portões de decisão (Gates).
 - **Dev Fullstack Sênior:** Implementação de código limpo, contratos de cálculo e integração de dados.
 - **DevOps/QA:** Infraestrutura Docker, automação de testes contínuos, cobertura e manifestos criptográficos.
@@ -135,5 +136,29 @@ Toda execução de cálculo registra um `CalculationRun` imutável com os seguin
 
 ### 7.3 Segurança First e Redação de Segredos
 - Sanitização obrigatória de dados sensíveis (`SensitiveDataRedactor`) para impedir vazamento de senhas em strings de conexão, tokens `Bearer` e identificadores fiscais em logs.
+
+---
+
+## 8. Integração Ponta a Ponta e Identidade Visual (Fase 23)
+
+### 8.1 Cadeia de Cálculo Unificada (`UnifiedCalculationPipeline`)
+O pipeline de cálculo orquestra de ponta a ponta:
+1. Agregação de cargas de consumidores nos nós ($S_{\text{local}}, D_{\text{local}}$);
+2. Ordenação topológica e validação estrutural (`TopologyValidator`);
+3. Acumulação radial a montante (pós-ordem: folhas $\rightarrow$ raiz) para determinar $E$ e $D$;
+4. Seleção da carga no fim do trecho $M$ com fator de diversidade $G$ e piso regulatório $CH5$;
+5. Dimensionamento da corrente $I_b$, capacidade do condutor $I_z \cdot AP$ e detecção de sobrecarga (`IsOverloaded`);
+6. Cálculo térmico de regime permanente do cabo ($T$) e resistência CA corrigida ($R_{\text{ca}}$);
+7. Impedância linear do trecho $Z$ e fator $BJ = Z / (V^2 / 100)$;
+8. Queda de tensão percentual no trecho ($\Delta V\% = M \cdot BJ \cdot L_{\text{equiv}} \cdot k_{\text{fase}}$);
+9. Queda interna do transformador ($\Delta V\%_{\text{trafo}}$) e média tensão ($\Delta V\%_{\text{MT}}$);
+10. Acumulação ao longo dos caminhos da árvore (pré-ordem: raiz $\rightarrow$ folhas) para determinar $CA\%$ de cada nó com isolamento radial de caminhos.
+
+### 8.2 Identidade Visual Oficial (`sisQDT_LIGHT`)
+- **Marca Oficial:** `sisQDT_LIGHT` (grafia com sis minúsculo regular, QDT maiúsculo extra-bold azul e _LIGHT maiúsculo semi-bold âmbar).
+- **Repositório Central de Assets:** `assets/brand/` contendo arquivos SVG vetoriais, PNGs de alta resolução para temas claro, escuro e monocromático, e `sisQDT_LIGHT.ico` multi-resolução com 7 camadas (16×16 a 256×256 em 32-bit RGBA).
+- **Integração WPF:** Configuração nativa de `ApplicationIcon`, Resources e Window Icon no projeto `QdtCqts.Desktop.Wpf`.
+- **Manual Oficial de Diretrizes:** Documentado em `docs/brand/README.md`.
+
 
 

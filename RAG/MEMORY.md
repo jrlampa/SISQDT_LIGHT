@@ -2,7 +2,7 @@
 
 > **Documento de Memória Persistente do Projeto**  
 > **Última Atualização:** 2026-09-26  
-> **Versão do Sistema:** 0.3.2 (Fase 22.2 Concluída)  
+> **Versão do Sistema:** 0.4.0 (Fase 23 Concluída)  
 > **Branch Ativa:** `dev`  
 
 ---
@@ -10,6 +10,7 @@
 ## 1. Contexto e Missão do Projeto
 
 O **SISQDT_LIGHT** é a iniciativa de engenharia de software da IM3 Brasil voltada para a modernização das ferramentas de planejamento, dimensionamento e cálculo de rede elétrica de distribuição da concessionária **Light S.A.**. Historicamente, estes cálculos dependiam de duas grandes famílias de planilhas Excel/VBA:
+
 1. **QDT (Queda de Tensão):** Planilhas complexas com topologia linear bipartida (`LADO 1` e `LADO 2`), cálculo de queda de tensão em circuitos secundários de transformadores, ramais de ligação e balanceamento de cargas.
 2. **CQTS (Cálculo de Queda de Tensão Subterrânea / Malhas):** Planilhas com topologia em árvore direcionada (`PONTO`, `PONTO MONTANTE`), cálculo de corrente acumulada por trecho, verificação de ampacidade de condutores subterrâneos e proteção de rede.
 
@@ -69,7 +70,11 @@ Substituir o legado instável por uma aplicação desktop de alta precisão, det
 - **Fase 21:** Reconstrução das cargas terminais e acumulação radial a montante no CQTS. Identificação analítica das três cargas unitárias elementares dos consumidores: Padrão 1 ($1.4664\text{ kVA}$), Padrão 2 ($1.8048\text{ kVA}$) e Ramal de Ligação ($1.88\text{ kVA}$), validadas em `CQT PROJ 7 REV2`, `CQT PROJ 4 REV1` e `QDT_ZNA855820_PROJ`. Reconstrução da topologia em árvore radial e da regra de acumulação a montante para trechos lineares e bifurcações ($E_{\text{trecho}} = S_{\text{local}} + \sum E_{\text{filhos}}$ e $D_{\text{trecho}} = N_{\text{local}} + \sum D_{\text{filhos}}$). Comprovação do fechamento exato no nó de bifurcação `LID` ($74.4480\text{ kVA}$ em PROJ 7 e $75.6866\text{ kVA}$ em PROJ 4). Implementadas as regras candidatas `CQTS.REAL_PROJECT.CONSUMER_LOAD_AGGREGATION` e `CQTS.REAL_PROJECT.RADIAL_LOAD_ACCUMULATION`. Gate: `GO`. 60 testes aprovados, 0 falhas.
 - **Fase 22:** Consolidação da topologia CQTS + QDT e reconstrução da queda de tensão. Modelo unificado em grafo em árvore: `TR`, `LID`, `PONTO`, `TRECHO`, `MONTANTE` e `RL` (terminal de carga). Comprovada a fórmula exata de queda percentual no trecho ($\Delta V\% = \frac{M \cdot Z \cdot L_{\text{equiv}}}{V^2 / 100} \cdot k_{\text{fase}}$) e acumulação ao longo dos caminhos da árvore ($CA(v) = CA(\text{pai}) + \Delta V\%_{\text{trecho}}$), com paridade analítica 1:1 e convergência total entre o fator $BJ$ do CQTS e o coeficiente $C_q$ da aba `Coeficiente Unitário` do QDT ($C_q = BJ = \frac{Z}{V^2 / 100}$). Implementadas as regras `CQTS.REAL_PROJECT.SEGMENT_VOLTAGE_DROP` e `CQTS.REAL_PROJECT.ACCUMULATED_VOLTAGE_DROP`. Gates: `TOPOLOGY_GATE = GO`, `VOLTAGE_DROP_GATE = GO`, `QDT_CQTS_CONVERGENCE_GATE = GO`. 70 testes aprovados, 0 falhas.
 - **Fase 22.1:** Auditoria corretiva matemática e paridade estrita. Resolução definitiva de `AP` (cabos em paralelo) e `AQ` (comprimento real em metros). Demonstração do cancelamento dimensional exato ($10^3\text{ kVA} \times 10^{-3}\text{ km} = 1$). Comprovação literal dos fatores de fase ($3\phi \rightarrow 1$, $2\phi \rightarrow 2$, $1\phi \rightarrow 6$). Fechamento da resistência CA térmica com fator $K^*$ (`CandidateThermalResistanceRule`) e da queda interna do transformador $BV4$ (`CandidateTransformerVoltageDropRule`). Rastreamento da queda de MT ($CV105$). 7 casos Golden auditados e promovidos a `OFFICIAL_GOLDEN`. Gates: 6 gates aprovados com `GO`. 80 testes aprovados, 0 falhas.
-- **Fase 22.2 (Estado Atual):** Observabilidade, logging estruturado e rastreabilidade de cálculo. Separação estrita de 3 camadas (Application Log, Calculation Trace e Audit Trail). Taxonomia formal de Event IDs (`APP`, `DB`, `IMPORT`, `CALC`, `RULE`, `TOPO`, `PARITY`, `EVID`, `GOLDEN`). Escopos assíncronos de `CorrelationId` e `CalculationId` (`CorrelationContext`). Hashes determinísticos canônicos (`DeterministicHashing`). Modos de trace `Normal` e `Diagnostic`. Higienização de dados sensíveis e PII (`SensitiveDataRedactor`). Rotação diária de logs (10MB, retenção de 30 dias). Projeto isolado `QdtCqts.Infrastructure.Observability` desacoplando Serilog das regras de negócio. Suíte expandida para 95 testes aprovados, 0 falhas. Gates: 5 gates aprovados com `GO`.
+- **Fase 22.2:** Observabilidade, logging estruturado e rastreabilidade de cálculo. Separação estrita de 3 camadas (Application Log, Calculation Trace e Audit Trail). Taxonomia formal de Event IDs (`APP`, `DB`, `IMPORT`, `CALC`, `RULE`, `TOPO`, `PARITY`, `EVID`, `GOLDEN`). Escopos assíncronos de `CorrelationId` e `CalculationId` (`CorrelationContext`). Hashes determinísticos canônicos (`DeterministicHashing`). Modos de trace `Normal` e `Diagnostic`. Higienização de dados sensíveis e PII (`SensitiveDataRedactor`). Rotação diária de logs (10MB, retenção de 30 dias). Projeto isolado `QdtCqts.Infrastructure.Observability` desacoplando Serilog das regras de negócio. Suíte expandida para 95 testes aprovados, 0 falhas. Gates: 5 gates aprovados com `GO`.
+- **Fase 23 (Estado Atual):** Integração Ponta a Ponta da Cadeia de Cálculo + Identidade Visual Oficial (sisQDT_LIGHT).
+  - *Workstream A (Cadeia de Cálculo)*: Fechamento da cadeia completa em `UnifiedCalculationPipeline` e `CalculationService` (Cargas Individuais -> Topologia Radial -> Acumulação a Montante E e D -> Demanda M com FDIV e piso regulatório -> Corrente Ib e Capacidade Iz com detecção de sobrecarga -> Temperatura T -> Resistência CA com efeito pelicular -> Impedância Z e fator BJ -> Queda no Trecho Delta V% com multiplicador de fase -> Queda no Trafo e MT -> Queda Acumulada CA% com isolamento estrito de caminhos radiais). Paridade 1:1 comprovada com CQT PROJ 7 REV2 e CQT PROJ 4 REV1.
+  - *Workstream B (Identidade Visual)*: Criação da marca e identidade visual oficial `sisQDT_LIGHT`. Símbolo geométrico representando rede elétrica radial, nós de distribuição e precisão matemática. Paleta oficial (Azul Elétrico Técnico `#0A58CA`, Âmbar Energia `#F59E0B`, Grafite Profundo `#0F172A`). Pacote completo de assets vetoriais e rasterizados em `assets/brand/` (SVGs, PNGs transparentes, claros, escuros, monocromáticos) e `.ico` Windows multi-resolução de 7 camadas (16x16 até 256x256). Integração no WPF (`ApplicationIcon` e Window Icon). Manual oficial em `docs/brand/README.md`.
+  - *Testes e Gates*: 122 testes automatizados aprovados, 0 falhas. 14 gates aprovados com `GO`.
 
 ---
 
@@ -77,28 +82,25 @@ Substituir o legado instável por uma aplicação desktop de alta precisão, det
 
 ### 4.1 Projetos da Solução
 - `src/QdtCqts.Domain`: Entidades centrais (`Transformer`, `Circuit`, `TopologyNode`, `TopologyEdge`, `Load`, `Conductor`), tipos de versão, taxonomia de eventos, correlação e sanitização de dados.
-- `src/QdtCqts.Application`: Serviços orquestradores de casos de uso (`ProjectService`, `TopologyService`, `CalculationService`, `CalculationAuditService`, `CalculationTraceRecorder`, `ParityService`).
-- `src/QdtCqts.Calculation.Abstractions`: Interfaces de motor (`ICalculationEngine`), requisições (`CalculationRequest`), resultados (`CalculationResult`), trilhas (`TraceStep`, `CalculationTraceDetail`, `ParityTraceRecord`, `GoldenTraceRecord`, `EvidenceTrailRecord`) e hashing determinístico canônico.
-- `src/QdtCqts.Calculation.Qdt`: Regras comprovadas QDT e regras candidatas isoladas.
-- `src/QdtCqts.Calculation.Cqts`: Regras comprovadas CQTS, regra de temperatura de cabo, regra de seleção de carga no fim do trecho, regra de agregação de consumidores, regra de acumulação radial a montante, regra de queda de tensão no trecho, regra de queda de tensão acumulada, regra de resistência térmica CA ($K^*$) e regra de queda no transformador ($BV4$).
+- `src/QdtCqts.Application`: Serviços orquestradores de casos de uso (`CalculationService`, `CalculationAuditService`, `CalculationTraceRecorder`, `ProjectService`, `ParityService`).
+- `src/QdtCqts.Calculation.Abstractions`: Interfaces de motor (`ICalculationEngine`), requisições (`CalculationRequest`), resultados (`CalculationResult`), modelos de saída (`SegmentCalculationResult`, `NodeCalculationResult`, `TransformerCalculationResult`, `NetworkCalculationReport`), trilhas e hashing determinístico canônico (`DeterministicHashing`).
+- `src/QdtCqts.Calculation.Qdt`: Regras comprovadas QDT e motor QdtCalculationEngine.
+- `src/QdtCqts.Calculation.Cqts`: Motor CqtsCalculationEngine, pipeline unificado de cálculo (`UnifiedCalculationPipeline`) e regras matemáticas do CQTS (temperatura de cabo, seleção de carga M, agregação de cargas, acumulação radial E, queda de tensão no trecho, queda acumulada, resistência térmica CA e queda no transformador).
 - `src/QdtCqts.Infrastructure.Observability`: Provedor de logging estruturado (Serilog), políticas de rotação de arquivos e registrador de startup.
 - `src/QdtCqts.Infrastructure.Sqlite`: Banco de dados relacional e repositórios de dados SQLite.
 - `src/QdtCqts.Infrastructure.ExcelEvidence`: Importador seguro OpenXML e construção de grafo de precedência celular.
 - `src/QdtCqts.Infrastructure.Parity`: Mecanismos de comparação numérica e paridade com tolerância de engenharia.
-- `src/QdtCqts.Desktop.Wpf`: Aplicação desktop WPF para operadores de engenharia da Light.
+- `src/QdtCqts.Desktop.Wpf`: Aplicação desktop WPF para operadores de engenharia da Light com identidade visual e ícone oficial integrado.
 
 ### 4.2 Métricas de Teste
-- Total de testes automatizados: **95 testes**.
+- Total de testes automatizados: **122 testes**.
 - Falhas: **0**.
 - Duração da execução: **~1.5 segundos**.
 
 ---
 
-## 5. Próximos Passos
-1. Fase 23: Reconstrução das Correntes de Curto-Circuito ($I_{\text{cc}3\phi}$ e $I_{\text{cc}1\phi}$) e Coordenação de Proteção (Fusíveis NH / Disjuntores);
-2. Conectar a interface WPF (MVVM) aos serviços de aplicação já implementados;
-3. Manter a integridade de todos os testes e a documentação organizada no diretório `docs/`.
-1. Fase 23: Reconstrução das Correntes de Curto-Circuito ($I_{\text{cc}3\phi}$ e $I_{\text{cc}1\phi}$) e Coordenação de Proteção (Fusíveis NH / Disjuntores);
-2. Conectar a interface WPF (MVVM) aos serviços de aplicação já implementados;
-3. Manter a integridade de todos os testes e a documentação organizada no diretório `docs/`.
+## 5. Próximos Passos (Aguardando Autorização)
+1. Recomenda-se a **Fase 24: Reconstrução das Correntes de Curto-Circuito ($I_{\text{cc}3\phi}$ e $I_{\text{cc}1\phi}$) e Coordenação de Proteção (Fusíveis NH / Disjuntores)**;
+2. Conexão completa da interface gráfica WPF (MVVM) ao `CalculationService` do backend;
+3. Manter a integridade de todos os testes e documentação nos padrões estritos de governança.
 
