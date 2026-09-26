@@ -24,6 +24,7 @@ Este diretório contém os relatórios e registros de evidência matemática de 
 | **Fase 16** | [fase16/](fase16/) | Corpus de Projeto Real (CQT PROJ 7) e Cadeia de Paridade | `GO CORPUS REAL IDENTIFICADO` | 45 |
 | **Fase 17** | [fase17/](fase17/) | Reconstrução Assistida pelo Usuário: Temperatura de Cabo (`BX13`) | `GO FIRST REAL PROJECT RULE` | 45 |
 | **Fase 18** | [fase18/](fase18/) | Validação da Temperatura em Múltiplos Projetos Reais (CQT 7 e CQT 4) | `GO RESTRICTED - TEMP VALIDATED / CURRENT ORIGIN UNRECONCILED` | 53 |
+| **Fase 19** | [fase19/](fase19/) | Origem da Amperagem AN13 (Ampacidade do Condutor) e Fechamento da Cadeia Térmica | `GO RESTRICTED - AMPACITY CONFIRMED / THERMAL CHAIN CLOSED` | 53 |
 
 ---
 

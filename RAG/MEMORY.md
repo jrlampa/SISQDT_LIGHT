@@ -63,7 +63,8 @@ Substituir o legado instável por uma aplicação desktop de alta precisão, det
 - **Fase 15:** Implementação e validação fora do Excel da primeira regra candidata (`QDT.RAMAL.CANDIDATE_RX_COMBINATION`), reproduzindo exatamente `Ramais!C13` nos candidatos convergentes.
 - **Fase 16:** Identificação de corpus de projeto real em uso pela engenharia (`CQT PROJ 7 REV2`) e identificação da cadeia condicional em `LADO 1!P13` e `BX13`.
 - **Fase 17:** Sessão com usuário especialista que revelou o significado físico dos campos no projeto real: `AM13` é o condutor (`185 Al - MX`), `AN13` é a corrente em Amperes (`430 A`), e `P13/BX13` não é tensão, mas sim a **Temperatura do Condutor [°C]**. A regra `CQTS.REAL_PROJECT.CABLE_TEMPERATURE` foi implementada e testada com sucesso.
-- **Fase 18 (Estado Atual):** Validação cruzada da fórmula de temperatura do cabo em múltiplos projetos reais (`CQT PROJ 7` e `CQT PROJ 4`). Confirmação de que `AN13` é input manual/externo nos snapshots. Suíte com **53 testes aprovados, 0 falhas**. Decisão de gate: **GO RESTRICTED - TEMPERATURE VALIDATED / CURRENT ORIGIN UNRECONCILED**.
+- **Fase 18:** Validação cruzada da fórmula de temperatura do cabo em múltiplos projetos reais (`CQT PROJ 7` e `CQT PROJ 4`). Confirmação de que `AN13` é input manual/externo nos snapshots. Suíte com 53 testes aprovados, 0 falhas.
+- **Fase 19 (Estado Atual):** Investigação da origem de `AN13 = 430 A`. Confirmado pelo usuário e pelas evidências textuais da planilha (*"Corrente do cabo para a condição"*) que `AN13` é a **ampacidade/capacidade admissível ($I_z$)** do condutor de catálogo e não uma corrente de carga ($I_b$). Teste de sanidade comprovou que a corrente nominal de carga ($195.38\text{ A}$) diverge de $430\text{ A}$. Cadeia intermediária da temperatura fechada com integridade. Gate: `GO RESTRICTED - AMPACITY CONFIRMED / THERMAL CHAIN CLOSED`. 53 testes aprovados, 0 falhas.
 
 ---
 

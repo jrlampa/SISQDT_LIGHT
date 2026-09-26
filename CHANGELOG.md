@@ -1,5 +1,14 @@
 # Changelog
 
+## Fase 19 — 2026-09-26
+
+- Origem de `AN13` esclarecida: confirmada como a ampacidade admissível do cabo ($I_z = 430\text{ A}$ para o cabo `185 Al - MX`), obtida de tabela/catálogo da LIGHT ou entrada de condutores, e não corrente de carga ($I_b$).
+- Teste de sanidade teórico comprovou que a corrente nominal de carga ($195.38\text{ A}$) diverge do valor nominal de catálogo ($430\text{ A}$).
+- Inspeção estrutural da aba `LADO 1` e da aba `Tabela` corroborou referências às tabelas de ampacidade subterrânea da LIGHT.
+- Cadeia intermediária da temperatura fechada com integridade. Nenhuma regra espúria de corrente foi implementada.
+- Testes: 53 aprovados, 0 falhas.
+- Gate: `GO RESTRICTED - AMPACITY CONFIRMED / THERMAL CHAIN CLOSED`.
+
 ## Fase 18 — 2026-09-26
 
 - Temperatura do cabo validada em CQT PROJ 7 e CQT PROJ 4 com a mesma fórmula.
