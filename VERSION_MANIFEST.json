@@ -1,0 +1,22 @@
+{
+  "project": "QdtCqts",
+  "code_version": "0.3.0",
+  "phase": "FASE18",
+  "gate": "GO RESTRICTED - TEMPERATURE VALIDATED / CURRENT ORIGIN UNRECONCILED",
+  "schema_version": "1",
+  "model_version": "NOT_ESTABLISHED",
+  "ruleset_version": "F9-RULESET-1",
+  "reconstruction_version": "F14-RECON-1",
+  "candidate_implementation_version": "F17-CANDIDATE-1",
+  "evidence_version": "EVIDENCE-1-PARTIAL",
+  "baseline_version": "BASELINE-CODE-F12",
+  "electrical_baseline": "UNRECONCILED",
+  "golden_dataset_version": "NOT_ESTABLISHED",
+  "calculation_run_version": "NOT_ESTABLISHED",
+  "prototype_exclusion_policy_version": "PROTOTYPE-EXCLUSION-1",
+  "precedence_graph_version": "PRECEDENCE-1-PROTOTYPE-EXCLUSION",
+  "build_timestamp": "2026-09-26",
+  "commit_or_revision": "NOT_ESTABLISHED",
+  "git_repository": true,
+  "artifact_manifest": "docs/manifests/ARTIFACT_MANIFEST.md"
+}

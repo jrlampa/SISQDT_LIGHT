@@ -1,0 +1,25 @@
+# .NET build outputs
+**/bin/
+**/obj/
+**/TestResults/
+.vs/
+*.user
+*.suo
+
+# Dados locais e temporários
+application.db
+application.db-*
+*.db
+*.db-shm
+*.db-wal
+
+# Arquivos temporários do MS Office
+~$*.xlsx
+~$*.xlsm
+~$*.doc*
+~$*.ppt*
+
+# Logs e arquivos de sistema
+*.log
+Thumbs.db
+.DS_Store

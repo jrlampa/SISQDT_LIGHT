@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\QdtCqts.Domain\QdtCqts.Domain.csproj" />
+    <ProjectReference Include="..\QdtCqts.Calculation.Abstractions\QdtCqts.Calculation.Abstractions.csproj" />
+    <ProjectReference Include="..\QdtCqts.Application\QdtCqts.Application.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,19 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/QdtCqts.Application/QdtCqts.Application.csproj" />
+    <Project Path="src/QdtCqts.Calculation.Abstractions/QdtCqts.Calculation.Abstractions.csproj" />
+    <Project Path="src/QdtCqts.Calculation.Cqts/QdtCqts.Calculation.Cqts.csproj" />
+    <Project Path="src/QdtCqts.Calculation.Qdt/QdtCqts.Calculation.Qdt.csproj" />
+    <Project Path="src/QdtCqts.Desktop.Wpf/QdtCqts.Desktop.Wpf.csproj" />
+    <Project Path="src/QdtCqts.Domain/QdtCqts.Domain.csproj" />
+    <Project Path="src/QdtCqts.Infrastructure.ExcelEvidence/QdtCqts.Infrastructure.ExcelEvidence.csproj" />
+    <Project Path="src/QdtCqts.Infrastructure.Parity/QdtCqts.Infrastructure.Parity.csproj" />
+    <Project Path="src/QdtCqts.Infrastructure.Sqlite/QdtCqts.Infrastructure.Sqlite.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/QdtCqts.Tests.Domain/QdtCqts.Tests.Domain.csproj" />
+    <Project Path="tests/QdtCqts.Tests.Import/QdtCqts.Tests.Import.csproj" />
+    <Project Path="tests/QdtCqts.Tests.Parity/QdtCqts.Tests.Parity.csproj" />
+    <Project Path="tests/QdtCqts.Tests.Topology/QdtCqts.Tests.Topology.csproj" />
+  </Folder>
+</Solution>

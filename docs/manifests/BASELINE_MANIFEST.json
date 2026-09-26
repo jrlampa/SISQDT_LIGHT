@@ -1,0 +1,14 @@
+{
+  "code_baseline": "BASELINE-CODE-F12",
+  "code_version": "0.1.0",
+  "electrical_baseline": "UNRECONCILED",
+  "evidence_baseline": "PARTIAL",
+  "database_baseline": "MISSING",
+  "golden_baseline": "NOT_ESTABLISHED",
+  "historical_workbooks": "NOT_FOUND",
+  "application_db": "MISSING",
+  "prototype_policy": "EXCLUDED_PROTOTYPE",
+  "prototype_policy_version": "PROTOTYPE-EXCLUSION-1",
+  "schema_version": "1",
+  "source_manifest": "ARTIFACT_MANIFEST.md"
+}
