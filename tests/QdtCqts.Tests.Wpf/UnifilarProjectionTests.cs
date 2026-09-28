@@ -279,4 +279,197 @@ public sealed class UnifilarProjectionTests
         Assert.NotNull(vm.UnifilarDiagram);
         Assert.Equal(7, vm.UnifilarDiagram!.Edges.Count);
     }
+
+    [Fact]
+    public void ZoomAndPan_Operations_AreClampedAndFunctional()
+    {
+        var project = BuildTestProject();
+        var calcService = new CalculationService();
+        var result = calcService.ExecuteCalculation(project, CalculationMode.Cqts, "25.0.0");
+        var topoResult = new TopologyValidator().Validate(project.NetworkModel, "CIRC_1");
+        var diagram = new UnifilarPresentationBuilder().BuildDiagram(project.NetworkModel, topoResult, result.Report!);
+
+        Assert.Equal(1.0, diagram.ZoomLevel);
+        Assert.Equal(0.0, diagram.PanX);
+        Assert.Equal(0.0, diagram.PanY);
+
+        // Zoom In
+        diagram.ZoomIn();
+        Assert.True(diagram.ZoomLevel > 1.0);
+
+        // Zoom Out
+        diagram.ZoomOut();
+        diagram.ZoomOut();
+        Assert.True(diagram.ZoomLevel < 1.0);
+
+        // Pan
+        diagram.PanX = 120.5;
+        diagram.PanY = -45.0;
+        Assert.Equal(120.5, diagram.PanX);
+        Assert.Equal(-45.0, diagram.PanY);
+
+        // Reset
+        diagram.ResetZoom();
+        Assert.Equal(1.0, diagram.ZoomLevel);
+        Assert.Equal(0.0, diagram.PanX);
+        Assert.Equal(0.0, diagram.PanY);
+
+        // Clamp verifications
+        diagram.ZoomLevel = 10.0;
+        Assert.Equal(4.0, diagram.ZoomLevel);
+
+        diagram.ZoomLevel = 0.05;
+        Assert.Equal(0.25, diagram.ZoomLevel);
+    }
+
+    [Fact]
+    public void FitToView_ComputesValidScaleAndCentering()
+    {
+        var project = BuildTestProject();
+        var calcService = new CalculationService();
+        var result = calcService.ExecuteCalculation(project, CalculationMode.Cqts, "25.0.0");
+        var topoResult = new TopologyValidator().Validate(project.NetworkModel, "CIRC_1");
+        var diagram = new UnifilarPresentationBuilder().BuildDiagram(project.NetworkModel, topoResult, result.Report!);
+
+        diagram.FitToView(1000, 600);
+
+        Assert.True(diagram.ZoomLevel >= 0.25 && diagram.ZoomLevel <= 2.5);
+        // Pan deve ser calculado sem NaN ou Infinity
+        Assert.False(double.IsNaN(diagram.PanX));
+        Assert.False(double.IsNaN(diagram.PanY));
+        Assert.False(double.IsInfinity(diagram.PanX));
+        Assert.False(double.IsInfinity(diagram.PanY));
+    }
+
+    [Fact]
+    public async Task Selection_SynchronizesBetweenSegmentAndUnifilarDiagram()
+    {
+        var vm = new MainViewModel();
+        await vm.ExecuteCalculationAsync();
+
+        Assert.NotNull(vm.UnifilarDiagram);
+        Assert.Null(vm.SelectedSegment);
+        Assert.Null(vm.UnifilarDiagram!.SelectedElement);
+
+        // Seleciona um segmento na VM
+        var targetSegment = vm.Segments.First(s => s.SegmentId == "E2");
+        vm.SelectedSegment = targetSegment;
+
+        // O diagrama deve ter E2 selecionado e detalhe montado
+        Assert.NotNull(vm.UnifilarDiagram.SelectedElement);
+        var edgeVm = vm.UnifilarDiagram.SelectedElement as UnifilarEdgeViewModel;
+        Assert.NotNull(edgeVm);
+        Assert.Equal("E2", edgeVm!.EdgeId);
+        Assert.True(edgeVm.IsSelected);
+        Assert.Equal("E2", vm.UnifilarDiagram.SelectedDetail?.ElementId);
+
+        // Limpeza de seleção
+        vm.UnifilarDiagram.ClearSelection();
+        Assert.Null(vm.UnifilarDiagram.SelectedElement);
+        Assert.Null(vm.UnifilarDiagram.SelectedDetail);
+    }
+
+    [Fact]
+    public void BranchingTopology_Bifurcation_ProducesCorrectNodesAndTreeLayout()
+    {
+        // Teste de rede com bifurcação 1 -> N:
+        // Fonte (TR) -> Trecho (E1) -> Bifurcação (LID)
+        //                                ├-> Trecho (E2) -> Terminal A (P1)
+        //                                └-> Trecho (E3) -> Terminal B (P2)
+        var trafo = new Transformer("TR", "TR-112.5", new UnitValue(112.5, UnitCode.Kva), new UnitValue(3.5, UnitCode.Percent), new UnitValue(220, UnitCode.V), new UnitValue(0, UnitCode.Kva));
+        var circuit = new Circuit("CIRC_1", "LADO 1", "TR", 1, CalculationMode.Cqts);
+
+        var nodes = new[]
+        {
+            new Node("TR",  "TR",  "CIRC_1", 0, 0, true),
+            new Node("LID", "LID", "CIRC_1", 1, 0, false),
+            new Node("P1",  "P1",  "CIRC_1", 2, 0, false),
+            new Node("P2",  "P2",  "CIRC_1", 2, 1, false)
+        };
+
+        var edges = new[]
+        {
+            new Edge("E1", "TR-LID", "CIRC_1", "TR", "LID", new UnitValue(10.0, UnitCode.Meter), "240 Cu", "3", "1"),
+            new Edge("E2", "LID-P1", "CIRC_1", "LID", "P1", new UnitValue(20.0, UnitCode.Meter), "185 Al - MX", "3", "1"),
+            new Edge("E3", "LID-P2", "CIRC_1", "LID", "P2", new UnitValue(25.0, UnitCode.Meter), "185 Al - MX", "3", "1")
+        };
+
+        var loads = new[]
+        {
+            new Load("L1", "1", "P1", null, LoadKind.Client, 1, new UnitValue(20.0, UnitCode.Kva), 1.0),
+            new Load("L2", "1", "P2", null, LoadKind.Client, 1, new UnitValue(30.0, UnitCode.Kva), 1.0)
+        };
+
+        var conductors = new[]
+        {
+            new Conductor("240_Cu", "1", "240 Cu", "240 Cu", new UnitValue(430, UnitCode.Ampere), new UnitValue(0.0762, UnitCode.Ohm), new UnitValue(0.0897, UnitCode.Ohm)),
+            new Conductor("185_Al", "1", "185 Al - MX", "185 Al - MX", new UnitValue(335, UnitCode.Ampere), new UnitValue(0.164, UnitCode.Ohm), new UnitValue(0.1178, UnitCode.Ohm))
+        };
+
+        var parameters = new[]
+        {
+            new ElectricalParameter("V", 220.0, "220", UnitCode.V, true),
+            new ElectricalParameter("StationMva", 40.0, "40", UnitCode.Mva, true),
+            new ElectricalParameter("StationZPercent", 20.0, "20", UnitCode.Percent, true),
+            new ElectricalParameter("MtVoltageKv", 13.2, "13.2", UnitCode.Kv, true),
+            new ElectricalParameter("MtCableLengthKm", 2.0, "2", UnitCode.Meter, true),
+            new ElectricalParameter("MtResistancePerKm", 0.7171, "0.7171", UnitCode.OhmPerKilometer, true),
+            new ElectricalParameter("MtReactancePerKm", 0.3512, "0.3512", UnitCode.OhmPerKilometer, true),
+            new ElectricalParameter("CH5", null, "SIM", UnitCode.Unknown, true)
+        };
+
+        var model = new NetworkModel("NET_BRANCH", "1", new[] { trafo }, new[] { circuit }, nodes, edges, Array.Empty<Branch>(), loads, conductors, parameters);
+        var project = new ProjectVersion("V1", "PROJ_BRANCH", "Projeto Bifurcado", model, "HASH_BRANCH", true);
+
+        var calcService = new CalculationService();
+        var calcResult = calcService.ExecuteCalculation(project, CalculationMode.Cqts, "25.0.0");
+        Assert.Equal(CalculationStatus.Pass, calcResult.Status);
+
+        var topoResult = new TopologyValidator().Validate(model, "CIRC_1");
+        var diagram = new UnifilarPresentationBuilder().BuildDiagram(model, topoResult, calcResult.Report!);
+
+        Assert.Equal(4, diagram.Nodes.Count);
+        Assert.Equal(3, diagram.Edges.Count);
+
+        var lidNode = diagram.Nodes.First(n => n.NodeId == "LID");
+        Assert.Equal(UnifilarNodeType.Branch, lidNode.NodeType);
+
+        var p1Node = diagram.Nodes.First(n => n.NodeId == "P1");
+        var p2Node = diagram.Nodes.First(n => n.NodeId == "P2");
+        Assert.Equal(UnifilarNodeType.Terminal, p1Node.NodeType);
+        Assert.Equal(UnifilarNodeType.Terminal, p2Node.NodeType);
+
+        // Ambas as pontas devem estar mais à direita que o nó de bifurcação
+        Assert.True(p1Node.X > lidNode.X);
+        Assert.True(p2Node.X > lidNode.X);
+
+        // Pontas devem estar distribuídas verticalmente (posições Y distintas)
+        Assert.NotEqual(p1Node.Y, p2Node.Y);
+    }
+
+    [Fact]
+    public void VisualStates_RepresentNormalOverloadAndEvidenceBlockedFaithfully()
+    {
+        var project = BuildTestProject();
+        var calcService = new CalculationService();
+        var result = calcService.ExecuteCalculation(project, CalculationMode.Cqts, "25.0.0");
+        var topoResult = new TopologyValidator().Validate(project.NetworkModel, "CIRC_1");
+
+        // Cria apresentação passando estado de EvidenceBlocked
+        var diagram = new UnifilarPresentationBuilder().BuildDiagram(
+            project.NetworkModel,
+            topoResult,
+            result.Report!,
+            CalculationUiState.EvidenceBlocked);
+
+        Assert.Equal(CalculationUiState.EvidenceBlocked, diagram.UiState);
+
+        // Arestas consom IsOverloaded estritamente do cálculo do backend
+        foreach (var edgeVm in diagram.Edges)
+        {
+            var segReport = result.Report!.Segments.First(s => s.EdgeId == edgeVm.EdgeId);
+            Assert.Equal(segReport.IsOverloaded, edgeVm.IsOverloaded);
+            Assert.Equal(segReport.IsOverloaded ? "SOBRECARGA" : "OK", edgeVm.OverloadStatus);
+        }
+    }
 }

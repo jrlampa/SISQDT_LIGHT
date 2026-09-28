@@ -98,6 +98,22 @@ public sealed class MainViewModel : INotifyPropertyChanged
     public ObservableCollection<SegmentDisplayModel> Segments { get; }
     public ICommand ExecuteCalculationCommand { get; }
 
+    private SegmentDisplayModel? _selectedSegment;
+    public SegmentDisplayModel? SelectedSegment
+    {
+        get => _selectedSegment;
+        set
+        {
+            if (SetField(ref _selectedSegment, value))
+            {
+                if (value != null && UnifilarDiagram != null)
+                {
+                    UnifilarDiagram.SelectEdge(value.SegmentId);
+                }
+            }
+        }
+    }
+
     // ── Seleção de projeto ──
     public string SelectedProject
     {
@@ -396,6 +412,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
         InputHash = "-";
         OutputHash = "-";
         ExecutionDurationMs = 0.0;
+        SelectedSegment = null;
         UnifilarDiagram = null;
     }
 

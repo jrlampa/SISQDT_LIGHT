@@ -178,11 +178,11 @@ O pipeline de cálculo orquestra de ponta a ponta:
 - O pipeline não sintetiza condutor nem transformador quando faltam no modelo: ampacidade, R/X, potência e impedância de catálogo devem estar presentes; caso contrário, o cálculo é bloqueado com diagnóstico explícito.
 - O pipeline mantém o resultado elétrico geral `Pass` e a WPF sinaliza separadamente `EvidenceBlocked`; isso não deve ser convertido em `CalculationError` nem ocultar os resultados elétricos calculáveis.
 - O identificador e o SHA-256 de uma evidência externa são metadados de proveniência. Como o Evidence Store histórico está ausente, o sistema não afirma validar o hash contra o conteúdo do arquivo.
-- Estado de fases: Fase 24 fechada no escopo acima; Fase 25, Fase 26, Fase 27A e Fase 27B concluídas. Próxima fase: `FASE27C`.
+- Estado de fases: Fase 24 fechada no escopo acima; Fase 25, Fase 26, Fase 27A, Fase 27B e Fase 27C concluídas. Próxima fase: `FASE27D`.
 
 ---
 
-## 10. Arquitetura do Cockpit Operacional e Unifilar Elétrico (Fases 27A e 27B)
+## 10. Arquitetura do Cockpit Operacional e Unifilar Elétrico (Fases 27A, 27B e 27C)
 
 ### 10.1 Princípio da Projeção Visual Unificada
 - O Unifilar Elétrico é estritamente uma **projeção visual do modelo de rede (`NetworkModel`) e do relatório imutável de cálculo (`NetworkCalculationReport`)**.
@@ -196,6 +196,12 @@ O pipeline de cálculo orquestra de ponta a ponta:
 4. `UnifilarTransformerViewModel`: Projeção gráfica do transformador de alimentação e queda interna/MT.
 5. `SelectedElementDetailViewModel`: Projeção contextual no painel lateral de inspeção para o elemento atualmente selecionado (nó, trecho ou transformador), exibindo metadados Half-way BIM e rastreabilidade agrupados por categoria.
 6. `HierarchicalTreeLayoutEngine`: Motor geométrico determinístico (`IUnifilarLayoutEngine`) que calcula coordenadas visuais $(X, Y)$ através de árvore radial hierárquica, 100% desacoplado de grandezas elétricas.
+
+### 10.3 Implementação Visual do Cockpit Operacional (Fase 27C)
+1. **Viewport Central com Zoom e Pan:** Implementado via WPF nativo (`Canvas`, `ScaleTransform`, `TranslateTransform`) suportando níveis de zoom de 25% a 400%, pan contínuo por arraste do mouse e ajuste à tela (*Fit to View* determinístico).
+2. **Painel de Inspeção Lateral:** Integrado em split-view redimensionável com `GridSplitter`, exibindo títulos, subtítulos e categorias dinâmicas de dados técnicos (`DetailCategoryGroup` e `DetailItem`).
+3. **Sincronização de Seleção Bidirecional:** Seleção cruzada entre o Unifilar e o DataGrid de Segmentos sem duplicação de dados de engenharia.
+4. **Governança de Identidade Git:** Configuração local vinculada a `Jonatas` para novos commits sem reescrever histórico legado.
 
 
 

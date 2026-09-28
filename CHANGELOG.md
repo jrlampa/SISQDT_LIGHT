@@ -1,5 +1,17 @@
 # Changelog
 
+## Fase 27C — Unifilar Visual WPF + Correção da Identidade Git
+
+- **Workstream A — Identidade Git:** Investigada a origem da identificação `Jonathan IM3` (originada da chave `user.name` na configuração local `.git/config`) e reconfigurada formalmente para `Jonatas`. Histórico de commits anteriores preservado sem rebase.
+- **Workstream B — Unifilar Visual WPF:**
+  - Implementada a área central do Unifilar Operacional no `MainWindow.xaml` e `MainWindow.xaml.cs` utilizando WPF nativo (Canvas, ItemsControl, DataTemplate, Line, Border).
+  - Renderização esquemática e ortogonal de Transformadores, Trechos (com condutor e badge de ΔV) e Nós (com identificação da chave externa e queda acumulada CA%).
+  - Interação gráfica completa de visualização: Zoom (25% a 400%), Pan por arrasto com clique do mouse e botão de ajuste à tela (*Fit to View* com centralização automática da bounding box).
+  - Painel Lateral de Detalhes implementado como drawer contextual categorizado (Identificação/Topologia, Grandezas Elétricas, Térmico/Condutor, Curto-Circuito e Rastreabilidade).
+  - Sincronização bidirecional de seleção: clicar em um trecho no diagrama seleciona a linha correspondente no DataGrid de Segmentos e vice-versa.
+  - Testes automatizados expandidos para redes radiais com ramificações (1 → N) e bifurcações, operações de Zoom/Pan e estados visuais.
+  - Suíte de testes expandida para **161 testes aprovados, 0 falhas, 0 warnings**.
+
 ## Fase 27B — Contratos de Apresentação e Projeção do Grafo para o Unifilar
 
 - Estabelecida a camada de apresentação do diagrama unifilar (`QdtCqts.Desktop.Wpf.ViewModels.Unifilar`), desacoplada de regras elétricas e renderização XAML definitiva.

@@ -63,6 +63,82 @@ public sealed class UnifilarDiagramViewModel : INotifyPropertyChanged
         private set => SetField(ref _selectedDetail, value);
     }
 
+    // ── Zoom & Pan (UX de Apresentação) ──
+    private double _zoomLevel = 1.0;
+    private double _panX;
+    private double _panY;
+
+    public double ZoomLevel
+    {
+        get => _zoomLevel;
+        set => SetField(ref _zoomLevel, Math.Clamp(value, 0.25, 4.0));
+    }
+
+    public double PanX
+    {
+        get => _panX;
+        set => SetField(ref _panX, value);
+    }
+
+    public double PanY
+    {
+        get => _panY;
+        set => SetField(ref _panY, value);
+    }
+
+    public void ZoomIn() => ZoomLevel = Math.Round(ZoomLevel + 0.15, 2);
+    public void ZoomOut() => ZoomLevel = Math.Round(ZoomLevel - 0.15, 2);
+    public void ResetZoom()
+    {
+        ZoomLevel = 1.0;
+        PanX = 0;
+        PanY = 0;
+    }
+
+    public void FitToView(double viewportWidth, double viewportHeight)
+    {
+        if (Nodes.Count == 0 || viewportWidth <= 50 || viewportHeight <= 50)
+        {
+            ResetZoom();
+            return;
+        }
+
+        // Bounding box de todos os elementos renderizados (Nodes, Transformers)
+        double minX = Nodes.Min(n => n.X);
+        double maxX = Nodes.Max(n => n.X);
+        double minY = Nodes.Min(n => n.Y);
+        double maxY = Nodes.Max(n => n.Y);
+
+        foreach (var t in Transformers)
+        {
+            minX = Math.Min(minX, t.X);
+            maxX = Math.Max(maxX, t.X);
+            minY = Math.Min(minY, t.Y);
+            maxY = Math.Max(maxY, t.Y);
+        }
+
+        // Considera tamanho aproximado dos blocos (largura ~140, altura ~80)
+        minX -= 40;
+        maxX += 150;
+        minY -= 40;
+        maxY += 90;
+
+        double contentWidth = Math.Max(100, maxX - minX);
+        double contentHeight = Math.Max(100, maxY - minY);
+
+        double scaleX = viewportWidth / contentWidth;
+        double scaleY = viewportHeight / contentHeight;
+        double targetZoom = Math.Min(scaleX, scaleY) * 0.92; // 8% padding
+
+        ZoomLevel = Math.Clamp(targetZoom, 0.25, 2.5);
+
+        // Centraliza
+        double scaledWidth = contentWidth * ZoomLevel;
+        double scaledHeight = contentHeight * ZoomLevel;
+        PanX = ((viewportWidth - scaledWidth) / 2.0) - (minX * ZoomLevel);
+        PanY = ((viewportHeight - scaledHeight) / 2.0) - (minY * ZoomLevel);
+    }
+
     public void SelectNode(string nodeId)
     {
         var nodeVm = Nodes.FirstOrDefault(n => n.NodeId == nodeId);
