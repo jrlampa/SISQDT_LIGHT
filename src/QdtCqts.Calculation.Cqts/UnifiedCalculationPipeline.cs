@@ -519,17 +519,17 @@ public sealed class UnifiedCalculationPipeline
             if (protRuleResult.Status == CalculationStatus.Pass && protRuleResult.OutputValue is ProtectionAssessment ass)
             {
                 protectionResult = new ProtectionCalculationResult(
-                    ass.ProjectCurrentAmperes,
-                    ass.FuseRatedCurrentAmperes,
-                    ass.MinSinglePhaseShortCircuitAmperes,
-                    ass.ConductorKey,
-                    ass.ConductorSectionMm2,
-                    ass.ConductorOperatingTemperatureCelsius,
-                    ass.MaxAdmissibleTimeSeconds,
-                    ass.FuseMeltingTimeSeconds,
-                    ass.IsRatedCurrentAdequate,
-                    ass.IsThermalWithstandAdequate,
-                    ass.StatusMessage);
+                    ProjectCurrentAmperes: ass.ProjectCurrentAmperes,
+                    RecommendedFuseCurrentAmperes: ass.FuseRatedCurrentAmperes,
+                    MinSinglePhaseShortCircuitAmperes: ass.MinSinglePhaseShortCircuitAmperes,
+                    CriticalConductorKey: ass.ConductorKey,
+                    CriticalConductorSectionMm2: ass.ConductorSectionMm2,
+                    CriticalOperatingTemperatureCelsius: ass.ConductorOperatingTemperatureCelsius,
+                    MaxAdmissibleTimeSeconds: ass.MaxAdmissibleTimeSeconds,
+                    FuseMeltingTimeSeconds: ass.FuseMeltingTimeSeconds,
+                    IsRatedCurrentAdequate: ass.IsRatedCurrentAdequate,
+                    IsThermalWithstandAdequate: ass.IsThermalWithstandAdequate,
+                    StatusMessage: ass.StatusMessage);
             }
         }
 

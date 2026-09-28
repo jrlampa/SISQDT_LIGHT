@@ -40,7 +40,7 @@ public sealed class CalculationService
     public CalculationResult ExecuteCalculation(
         ProjectVersion projectVersion,
         CalculationMode mode,
-        string algorithmVersion = "23.0.0",
+        string algorithmVersion = "25.0.0",
         string? existingCorrelationId = null)
     {
         var correlationId = existingCorrelationId ?? CorrelationContext.Current?.CorrelationId ?? Guid.NewGuid().ToString("N");

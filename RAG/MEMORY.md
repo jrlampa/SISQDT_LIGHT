@@ -1,8 +1,8 @@
 # RAG MEMORY — SISQDT_LIGHT (QdtCqts)
 
 > **Documento de Memória Persistente do Projeto**  
-> **Última Atualização:** 2026-09-27  
-> **Versão do Sistema:** 0.5.0 (Fase 24 Concluída)  
+> **Última Atualização:** 2026-09-28  
+> **Versão do Sistema:** 0.6.0 (Fase 25 Concluída)  
 > **Branch Ativa:** `dev`  
 
 ---
@@ -72,12 +72,17 @@ Substituir o legado instável por uma aplicação desktop de alta precisão, det
 - **Fase 22.1:** Auditoria corretiva matemática e paridade estrita. Resolução definitiva de `AP` (cabos em paralelo) e `AQ` (comprimento real em metros). Demonstração do cancelamento dimensional exato ($10^3\text{ kVA} \times 10^{-3}\text{ km} = 1$). Comprovação literal dos fatores de fase ($3\phi \rightarrow 1$, $2\phi \rightarrow 2$, $1\phi \rightarrow 6$). Fechamento da resistência CA térmica com fator $K^*$ (`CandidateThermalResistanceRule`) e da queda interna do transformador $BV4$ (`CandidateTransformerVoltageDropRule`). Rastreamento da queda de MT ($CV105$). 7 casos Golden auditados e promovidos a `OFFICIAL_GOLDEN`. Gates: 6 gates aprovados com `GO`. 80 testes aprovados, 0 falhas.
 - **Fase 22.2:** Observabilidade, logging estruturado e rastreabilidade de cálculo. Separação estrita de 3 camadas (Application Log, Calculation Trace e Audit Trail). Taxonomia formal de Event IDs (`APP`, `DB`, `IMPORT`, `CALC`, `RULE`, `TOPO`, `PARITY`, `EVID`, `GOLDEN`). Escopos assíncronos de `CorrelationId` e `CalculationId` (`CorrelationContext`). Hashes determinísticos canônicos (`DeterministicHashing`). Modos de trace `Normal` e `Diagnostic`. Higienização de dados sensíveis e PII (`SensitiveDataRedactor`). Rotação diária de logs (10MB, retenção de 30 dias). Projeto isolado `QdtCqts.Infrastructure.Observability` desacoplando Serilog das regras de negócio. Suíte expandida para 95 testes aprovados, 0 falhas. Gates: 5 gates aprovados com `GO`.
 - **Fase 23:** Integração Ponta a Ponta da Cadeia de Cálculo + Identidade Visual Oficial (sisQDT_LIGHT). 122 testes automatizados aprovados, 0 falhas. 14 gates aprovados com `GO`.
-- **Fase 24 (Estado Atual):** Reconstrução da Cadeia de Curto-Circuito (Icc 3φ e Icc 1φ) e Análise de Evidências de Proteção.
-  - *Curto-Circuito Trifásico ($I_{\text{cc}3\phi}$)*: Decomposição analítica integral de `LADO 1!CB13` (`=($BX$6/SQRT(3))/IMABS(IMSUM($AS$8,BK13,BL13,$CA$8,$CF$8))`). Mapeamento dos 12 parâmetros constitutivos e isolamento da impedância equivalente de Thévenin: $R_{\text{total}} = 0.000575805501 \;\Omega$, $X_{\text{total}} = 0.015674288889 \;\Omega$, $|\mathbf{Z}_{\text{eq}}| = 0.015684861623 \;\Omega$. Paridade exata IEEE-754: Excel = Motor = `8098.066930449716 A` (Erro = $0.00 \times 10^0\text{ A}$).
-  - *Curto-Circuito Monofásico ($I_{\text{cc}1\phi}$)*: Descoberta e comprovação da fórmula em `LADO 1!CC13` (`=($BX$6/SQRT(3))/IMABS(IMSUM($AS$8,BN13,BO13,$CA$8,$CF$8))`). Resistência de laço fase-neutro: $BO13 = (R_{\text{fase}} + R_{\text{neutro}}) \times \frac{L_{\text{equiv}}}{1000}$. Paridade exata IEEE-754: Excel = Motor = `8182.488711140876 A` (Erro = $0.00 \times 10^0\text{ A}$).
-  - *Validação Cruzada em CQT PROJ 4 REV1*: Paridade 100% reproduzida para $I_{\text{cc}3\phi}$ (`8098.06418783237 A`) e $I_{\text{cc}1\phi}$ (`8182.474839937445 A`).
-  - *Auditoria de Proteção*: As abas `Curva NH` e `Curva Disj.` contêm unicamente imagens WMF estáticas e hiperlinks para arquivos externos (`.doc`, `.pdf`), sem dados numéricos ou tabelas de curvas embutidas. Coordenação por curvas classificada rigorosamente como `BLOCKED_BY_MISSING_EVIDENCE`. Fórmulas de suporte analítico fechadas: corrente de projeto de raiz (`CH40 = 195.3753 A`), menor falta monofásica (`CH36 = 500.1808 A`) e tempo admissível térmico do condutor via Equação de Onderdonk (`CR37`/`CR38`).
-  - *Testes e Gates*: 134 testes automatizados aprovados, 0 falhas. Gates: `SHORT_CIRCUIT_3PH_GATE = GO`, `IMPEDANCE_DECOMPOSITION_GATE = GO`, `SHORT_CIRCUIT_1PH_GATE = GO`, `PROTECTION_EVIDENCE_GATE = BLOCKED_BY_MISSING_EVIDENCE`, `PARITY_GATE = GO`, `TEST_GATE = GO`.
+- **Fase 24 (Fechada):** Reconstrução da Cadeia de Curto-Circuito (Icc 3φ e Icc 1φ) e Análise de Evidências de Proteção. 134 testes aprovados. Gates: todos `GO` exceto `PROTECTION_EVIDENCE_GATE = BLOCKED_BY_MISSING_EVIDENCE`.
+- **Fase 25 (Estado Atual):** Consolidação do Motor de Cálculo, Integração WPF Real e Normalização de Contratos.
+  - *WS-A — Auditoria de Contratos*: `CalculationOutputModels.cs` auditado; todos os records aprovados sem duplicação.
+  - *WS-B — Contract Mismatch F24.1-A Resolvido*: `ProtectionCalculationResult` normalizado com campos `IsRatedCurrentAdequate` e `IsThermalWithstandAdequate`; construção via nomeação explícita de parâmetros.
+  - *WS-C — Pipeline*: `UnifiedCalculationPipeline.cs` (582 linhas) auditado; dentro do Soft Limit; cadeia matemática inalterada.
+  - *WS-D/E — WPF*: Enum `CalculationUiState` introduzido (`Idle`, `Calculating`, `Success`, `ValidationError`, `CalculationError`, `EvidenceBlocked`). `MainViewModel` com separação de tipos de erro, exposição de `InputHash`, `IsRatedCurrentAdequate`, `IsThermalWithstandAdequate`.
+  - *WS-F — Rastreabilidade*: `InputHash` e `OutputHash` expostos e testados na ViewModel.
+  - *WS-G — Proteção*: Curvas NH e Disjuntores continuam `BLOCKED_BY_MISSING_EVIDENCE`.
+  - *WS-I/J — Testes*: 12 novos testes de integração e E2E. Suíte expandida para **146 testes aprovados, 0 falhas**.
+  - Gates: `CONTRACT_GATE=GO`, `PIPELINE_GATE=GO`, `WPF_ARCHITECTURE_GATE=GO`, `WPF_INTEGRATION_GATE=GO`, `END_TO_END_GATE=GO`, `PARITY_REGRESSION_GATE=GO`, `OBSERVABILITY_GATE=GO`, `DOMAIN_ISOLATION_GATE=GO`, `BUILD_GATE=GO`, `TEST_GATE=GO`, `DOCUMENTATION_GATE=GO`, `PROTECTION_SCOPE_GATE=GO`.
+
 
 ---
 
@@ -96,7 +101,7 @@ Substituir o legado instável por uma aplicação desktop de alta precisão, det
 - `src/QdtCqts.Desktop.Wpf`: Aplicação desktop WPF para operadores de engenharia da Light com identidade visual e ícone oficial integrado.
 
 ### 4.2 Métricas de Teste
-- Total de testes automatizados: **134 testes**.
+- Total de testes automatizados: **146 testes**.
 - Falhas: **0**.
 - Duração da execução: **~1.5 segundos**.
 

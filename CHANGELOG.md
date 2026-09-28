@@ -1,5 +1,36 @@
 # Changelog
 
+## Fase 25 — 2026-09-28
+
+- **Consolidação do Motor de Cálculo, Integração WPF e Contrato Normalizado.**
+- **WS-A — Auditoria de Contratos de Saída:**
+  - Verificação completa de `CalculationOutputModels.cs`: todos os campos de `SegmentCalculationResult`, `NodeCalculationResult`, `TransformerCalculationResult`, `ProtectionCalculationResult` e `NetworkCalculationReport` auditados e aprovados sem duplicação.
+- **WS-B — Normalização do Contract Mismatch F24.1-A:**
+  - Campos `IsCurrentAdequate` e `IsThermalAdequate` de `ProtectionCalculationResult` renomeados para `IsRatedCurrentAdequate` e `IsThermalWithstandAdequate`, alinhando com a nomenclatura canônica de `ProtectionAssessment` em `Domain`.
+  - Construção de `ProtectionCalculationResult` em `UnifiedCalculationPipeline` convertida para nomeação explícita de parâmetros, eliminando mapeamento posicional silencioso.
+  - Adicionado `<remarks>` de documentação no record para rastrear a decisão de design.
+- **WS-C — Modularização Controlada do Pipeline:**
+  - `UnifiedCalculationPipeline.cs` auditado (582 linhas): dentro do Soft Limit, sem violação. Responsabilidades bem definidas. Modularização adicional diferida para quando atingir Soft Limit com nova funcionalidade.
+- **WS-D/E — WPF — Integração Real e Estados Explícitos:**
+  - Enum `CalculationUiState` introduzido: `Idle`, `Calculating`, `Success`, `ValidationError`, `CalculationError`, `EvidenceBlocked`.
+  - `MainViewModel` refatorado com separação estrita de erro de validação vs. erro de cálculo vs. ausência de evidência.
+  - Adicionadas propriedades `InputHash`, `IsRatedCurrentAdequate`, `IsThermalWithstandAdequate` e `UiState` à ViewModel.
+  - `ResetResults()` limpa todos os campos de rastreabilidade corretamente.
+  - `ApplySuccessState()` e `ApplyCalculationErrorState()` como métodos privados nomeados para clareza de ciclo de vida.
+- **WS-F — Resultado Auditável:**
+  - `InputHash` e `OutputHash` agora expostos e populados na ViewModel após cálculo.
+  - `CorrelationId` e `CalculationId` preservados e propagados corretamente.
+- **WS-G — Proteção (Escopo Mantido):**
+  - Curvas NH, curvas de disjuntores, coordenação e seletividade continuam classificados como `BLOCKED_BY_MISSING_EVIDENCE`. Nenhuma alteração neste escopo.
+- **Limpeza:**
+  - Arquivo `Class1.cs` (stub vazio) removido de `QdtCqts.Application`.
+  - `algorithmVersion` default em `CalculationService` atualizado de `"23.0.0"` para `"25.0.0"`.
+- **WS-I/J — Testes de Integração e End-to-End:**
+  - 12 novos testes em `Fase25IntegrationTests.cs` cobrindo todos os 9 cenários do WS-I e 2 fluxos E2E (PROJ 7 e PROJ 4).
+  - Todos os valores elétricos verificados contra oráculos reais das Fases 22–24.
+  - Total da suíte expandido para **146 testes aprovados, 0 falhas, 0 warnings** relevantes.
+- **Gates:** `CONTRACT_GATE=GO`, `PIPELINE_GATE=GO`, `WPF_ARCHITECTURE_GATE=GO`, `WPF_INTEGRATION_GATE=GO`, `END_TO_END_GATE=GO`, `PARITY_REGRESSION_GATE=GO`, `OBSERVABILITY_GATE=GO`, `DOMAIN_ISOLATION_GATE=GO`, `BUILD_GATE=GO`, `TEST_GATE=GO`, `DOCUMENTATION_GATE=GO`, `PROTECTION_SCOPE_GATE=GO`.
+
 ## Fase 24 — 2026-09-27
 
 - **Reconstrução da Cadeia de Curto-Circuito (Icc 3φ e Icc 1φ) e Análise de Evidências de Proteção.**

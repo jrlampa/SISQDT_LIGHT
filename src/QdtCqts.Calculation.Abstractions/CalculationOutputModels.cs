@@ -60,6 +60,10 @@ public sealed record TransformerCalculationResult(
 /// <summary>
 /// Resultado de avaliação de proteção e suportabilidade térmica do circuito.
 /// </summary>
+/// <remarks>
+/// Nomenclatura canônica alinhada com <see cref="QdtCqts.Domain.ProtectionAssessment"/>.
+/// Fase 25 — WS-B: eliminação do contract mismatch F24.1-A.
+/// </remarks>
 public sealed record ProtectionCalculationResult(
     double ProjectCurrentAmperes,
     double RecommendedFuseCurrentAmperes,
@@ -69,8 +73,8 @@ public sealed record ProtectionCalculationResult(
     double CriticalOperatingTemperatureCelsius,
     double MaxAdmissibleTimeSeconds,
     double FuseMeltingTimeSeconds,
-    bool IsCurrentAdequate,
-    bool IsThermalAdequate,
+    bool IsRatedCurrentAdequate,
+    bool IsThermalWithstandAdequate,
     string StatusMessage);
 
 /// <summary>
