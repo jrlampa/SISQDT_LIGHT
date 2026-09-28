@@ -89,11 +89,11 @@ Estado da suíte no checkout da Fase 26: **149 testes aprovados, 0 falhas, 0 ign
 
 ## 5. Estado de Engenharia
 
-- Fases 24 e 25 concluídas nos escopos documentados; a Fase 26 está em andamento na branch `dev`.
+- Fases 24, 25 e 26 concluídas nos escopos documentados; release atual `0.7.0`.
 - Icc trifásico e monofásico permanecem calculáveis e independentes das curvas de proteção.
 - Sem evidência identificável de dispositivo/curva, a avaliação retorna `EvidenceBlocked`; a suportabilidade térmica só é calculada com seção e temperatura com proveniência identificada.
 - Curvas NH/disjuntor, coordenação e seletividade não são implementadas nem inferidas.
-- `VERSION_MANIFEST.json` identifica a última versão commitada (`0.6.0`, Fase 25); sua atualização aguarda autorização para os commits da Fase 26.
+- `VERSION_MANIFEST.json` identifica a release `0.7.0`/Fase 26; commit funcional `29c46ad`.
 - Roadmap posterior: `NEXT_PHASE_NOT_DEFINED`.
 
 ## 6. Documentação Adicional

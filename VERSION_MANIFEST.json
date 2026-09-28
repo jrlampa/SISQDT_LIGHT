@@ -1,11 +1,11 @@
 {
   "project": "QdtCqts",
-  "code_version": "0.6.0",
-  "phase": "FASE25",
+  "code_version": "0.7.0",
+  "phase": "FASE26",
   "gate": "GO",
   "schema_version": "1",
   "model_version": "NOT_ESTABLISHED",
-  "ruleset_version": "F25-INTEGRATION-1",
+  "ruleset_version": "F26-PROTECTION-1",
   "reconstruction_version": "F14-RECON-1",
   "candidate_implementation_version": "F17-CANDIDATE-1",
   "evidence_version": "EVIDENCE-1-PARTIAL",
@@ -15,8 +15,8 @@
   "calculation_run_version": "NOT_ESTABLISHED",
   "prototype_exclusion_policy_version": "PROTOTYPE-EXCLUSION-1",
   "precedence_graph_version": "PRECEDENCE-1-PROTOTYPE-EXCLUSION",
-  "build_timestamp": "2026-09-28",
-  "commit_or_revision": "5af1ac7",
+  "build_timestamp": "2026-09-27",
+  "commit_or_revision": "29c46ad",
   "git_repository": true,
   "artifact_manifest": "docs/manifests/ARTIFACT_MANIFEST.md"
 }

@@ -2,7 +2,7 @@
 
 > **Documento de Memória Persistente do Projeto**  
 > **Última Atualização:** 2026-09-27
-> **Versão publicada:** 0.6.0 (Fase 25); **Fase em andamento:** 26
+> **Versão publicada:** 0.7.0 (Fase 26 concluída)
 > **Branch Ativa:** `dev`  
 
 ---
@@ -83,7 +83,7 @@ Substituir o legado instável por uma aplicação desktop de alta precisão, det
   - *WS-I/J — Testes*: 12 novos testes de integração e E2E. Suíte expandida para **146 testes aprovados, 0 falhas**.
   - Gates: `CONTRACT_GATE=GO`, `PIPELINE_GATE=GO`, `WPF_ARCHITECTURE_GATE=GO`, `WPF_INTEGRATION_GATE=GO`, `END_TO_END_GATE=GO`, `PARITY_REGRESSION_GATE=GO`, `OBSERVABILITY_GATE=GO`, `DOMAIN_ISOLATION_GATE=GO`, `BUILD_GATE=GO`, `TEST_GATE=GO`, `DOCUMENTATION_GATE=GO`, `PROTECTION_SCOPE_GATE=GO`.
 
-- **Fase 26 (Atual — fail-closed de proteção):** Removidos defaults NH-1600 A/0,1 s, fallback de seção, catálogos sintéticos de condutor e `TR_DEF`; ausência de entradas de catálogo bloqueia com diagnóstico. Evidência de dispositivo passou a ter contrato e status próprios (`Available/Missing/Invalid`, `Pass/Fail/EvidenceBlocked`). `Ib`, Icc3φ/Icc1φ e `t_adm` com proveniência identificada permanecem calculáveis; a WPF mantém resultados elétricos e sinaliza `EvidenceBlocked` quando não há curva. Golden Icc foi reclassificado como `TOLERANCE_PARITY` com erro absoluto máximo de `1e-9 A`; fluxo WPF é `BEHAVIORAL`. Evidence Store histórico segue ausente e o SHA-256 externo não é verificado contra arquivo. Fase 26 aguarda validação final e autorização do ciclo de commits; `VERSION_MANIFEST.json` permanece no release Fase 25/0.6.0.
+- **Fase 26 (Concluída — fail-closed de proteção):** Removidos defaults NH-1600 A/0,1 s, fallback de seção, catálogos sintéticos de condutor e `TR_DEF`; ausência de entradas de catálogo bloqueia com diagnóstico. Evidência de dispositivo passou a ter contrato e status próprios (`Available/Missing/Invalid`, `Pass/Fail/EvidenceBlocked`). `Ib`, Icc3φ/Icc1φ e `t_adm` com proveniência identificada permanecem calculáveis; a WPF mantém resultados elétricos e sinaliza `EvidenceBlocked` quando não há curva. Golden Icc foi reclassificado como `TOLERANCE_PARITY` com erro absoluto máximo de `1e-9 A`; fluxo WPF é `BEHAVIORAL`. Evidence Store histórico segue ausente e o SHA-256 externo não é verificado contra arquivo. Commit funcional `29c46ad`; release `0.7.0` registrada no `VERSION_MANIFEST.json` pelo commit de governança.
 
 
 ---
@@ -113,6 +113,6 @@ Substituir o legado instável por uma aplicação desktop de alta precisão, det
 
 - Fase 24: fechada no escopo definido; curvas NH/disjuntor, coordenação e seletividade permanecem bloqueadas por falta de evidência.
 - Fase 25: concluída; integração WPF ao `CalculationService` não é mais um próximo passo.
-- Fase 26: atual; relatório de decisão em `docs/phases/fase26/FASE26_GATE_DECISION.md`.
+- Fase 26: concluída; relatório de decisão em `docs/phases/fase26/FASE26_GATE_DECISION.md`.
 - Próxima fase oficial: `NEXT_PHASE_NOT_DEFINED`. Não há roadmap numerado aprovado além da Fase 26.
 

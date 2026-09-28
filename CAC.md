@@ -179,7 +179,7 @@ O pipeline de cálculo orquestra de ponta a ponta:
 - O pipeline mantém o resultado elétrico geral `Pass` e a WPF sinaliza separadamente `EvidenceBlocked`; isso não deve ser convertido em `CalculationError` nem ocultar os resultados elétricos calculáveis.
 - O identificador e o SHA-256 de uma evidência externa são metadados de proveniência. Como o Evidence Store histórico está ausente, o sistema não afirma validar o hash contra o conteúdo do arquivo.
 - Paridade dos goldens de curto-circuito é `TOLERANCE_PARITY` (`1e-9 A` absoluta), não igualdade bit-a-bit; a ordem de operações IEEE-754 observada difere por poucos ULPs. Nenhuma alteração de motor foi feita para forçar igualdade.
-- Estado de fases: Fase 24 fechada no escopo acima; Fase 25 concluída; Fase 26 atual. Próxima fase oficial: `NEXT_PHASE_NOT_DEFINED`.
+- Estado de fases: Fase 24 fechada no escopo acima; Fase 25 e Fase 26 concluídas. Próxima fase oficial: `NEXT_PHASE_NOT_DEFINED`.
 
 
 

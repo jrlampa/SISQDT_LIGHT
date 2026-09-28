@@ -11,9 +11,9 @@
 - Evidência de temperatura propagada somente após sucesso de `CandidateCableTemperatureRule`; condutor inexistente no catálogo impede cálculo de seção/tempo térmico.
 - Corrigidos testes legados que afirmavam adequação de NH sem curva. Incluídos testes para falta/invalidez de evidência, cálculo térmico, consumo de contrato explícito e estado WPF.
 - Golden values completos mantidos. Os checks de curto-circuito são classificados `TOLERANCE_PARITY` com tolerância absoluta de `1e-9 A`; os fluxos WPF são `BEHAVIORAL`. A alegação anterior de “bit-a-bit” da Fase 24 foi reclassificada após constatação de diferenças de poucos ULPs, sem alterar o motor.
-- README, CAC, RAG e índice de fases reconciliados. `VERSION_MANIFEST.json` permanece como registro da release commitada Fase 25 (0.6.0) até autorização para o ciclo de commits previsto.
+- README, CAC, RAG e índice de fases reconciliados. Release `0.7.0`/Fase 26 registrada em `VERSION_MANIFEST.json`, apontando ao commit funcional `29c46ad`.
 - Roadmap posterior: `NEXT_PHASE_NOT_DEFINED`.
-- **Gates:** `PROTECTION_PROVENANCE_GATE=GO (restrito ao que é consumido)`, `NO_SILENT_DEFAULT_GATE=GO`, `FAIL_CLOSED_GATE=GO`, `SHORT_CIRCUIT_REGRESSION_GATE=GO`, `THERMAL_REGRESSION_GATE=GO (restrito)`, `WPF_EVIDENCE_GATE=GO`, `PARITY_GATE=GO (tolerância)`, `DOCUMENTATION_GATE=GO (manifesto é release anterior)`, `DOMAIN_ISOLATION_GATE=GO`, `BUILD_GATE=GO`, `TEST_GATE=GO`.
+- **Gates:** `PROTECTION_PROVENANCE_GATE=GO (restrito ao que é consumido)`, `NO_SILENT_DEFAULT_GATE=GO`, `FAIL_CLOSED_GATE=GO`, `SHORT_CIRCUIT_REGRESSION_GATE=GO`, `THERMAL_REGRESSION_GATE=GO (restrito)`, `WPF_EVIDENCE_GATE=GO`, `PARITY_GATE=GO (tolerância)`, `DOCUMENTATION_GATE=GO`, `DOMAIN_ISOLATION_GATE=GO`, `BUILD_GATE=GO`, `TEST_GATE=GO`.
 - **Validação final:** `dotnet restore` OK; `dotnet build --no-restore` OK (0 erros, 0 warnings); `dotnet test --no-build --no-restore`: **149 aprovados, 0 falhas, 0 ignorados**. `git diff --check` executado ao final.
 
 ## Fase 25 — 2026-09-28

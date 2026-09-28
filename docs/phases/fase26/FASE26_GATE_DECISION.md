@@ -3,7 +3,8 @@
 **Branch:** `dev`
 **Baseline elétrico:** `CONFIRMED_PARITY`
 **Fase anterior:** Fase 25 concluída (`5af1ac7`)
-**Estado deste checkout:** implementação validada antes do commit autorizado
+**Estado:** Fase 26 concluída; release `0.7.0`
+**Commit funcional:** `29c46ad`
 **Roadmap seguinte:** `NEXT_PHASE_NOT_DEFINED`
 
 ## Decisão
@@ -53,7 +54,7 @@ Os testes anteriores usavam arredondamento decimal de quatro casas. A tentativa 
 | `THERMAL_REGRESSION_GATE` | `GO` restrito | Onderdonk calculado quando seção e temperatura têm IDs identificáveis; `t_adm` nulo nos demais casos. |
 | `WPF_EVIDENCE_GATE` | `GO` | WPF exibe `EvidenceBlocked`, não `CalculationError`, mantém segmentos/Icc e não sugere fusível. |
 | `PARITY_GATE` | `GO` por tolerância | Goldens completos preservados; tolerância absoluta declarada de `1e-9 A`, não igualdade binária. |
-| `DOCUMENTATION_GATE` | `GO` restrito | README/RAG/CAC/CHANGELOG/índice atualizados; manifesto permanece na release commitada Fase 25 até autorização. |
+| `DOCUMENTATION_GATE` | `GO` | README/RAG/CAC/CHANGELOG/índice e manifesto atualizados para a release Fase 26. |
 | `DOMAIN_ISOLATION_GATE` | `GO` | Tipos de evidência/status ficam no Domain; sem dependência nova de UI/infraestrutura. |
 | `BUILD_GATE` | `GO` | `dotnet restore` e `dotnet build --no-restore` concluídos sem erro. |
 | `TEST_GATE` | `GO` | `dotnet test --no-build --no-restore`: 149 total, 149 aprovados, 0 falhas, 0 ignorados. |
@@ -64,6 +65,8 @@ Os testes anteriores usavam arredondamento decimal de quatro casas. A tentativa 
 
 O checkout inicial estava na branch `dev`, HEAD `6584042`, release `0.6.0`, com exclusão staged de `src/QdtCqts.Desktop.Wpf/QdtCqts.Desktop.Wpf_dwkfellp_wpftmp.csproj`. O arquivo contém referências locais a `obj/`, SDK e assemblies, sendo artefato gerado; a exclusão foi preservada sem alteração.
 
-Nenhum commit foi criado. `VERSION_MANIFEST.json` ainda identifica a última release commitada (Fase 25); sua atualização e o commit de governança aguardam autorização explícita conforme a sequência definida para a Fase 26.
+O commit funcional `29c46ad` contém somente os arquivos da Fase 26. O manifesto registra a release `0.7.0` e aponta ao commit funcional. O commit de governança atualiza somente o manifesto e os registros de estado final da release.
+
+Ao final, branch `dev`; sem alterações unstaged; permanece staged apenas a exclusão preexistente do `QdtCqts.Desktop.Wpf_dwkfellp_wpftmp.csproj`, fora dos commits da Fase 26.
 
 Não há roadmap oficial posterior à Fase 26: `NEXT_PHASE_NOT_DEFINED`.
