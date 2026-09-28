@@ -70,15 +70,23 @@ A interface foi reorganizada de forma responsiva:
 
 ## 4. Testes e Validação
 
-- Testes existentes mantidos: 156 testes aprovados.
-- Novos testes adicionados na Fase 27C:
+- Contagem total canônica da suíte: **161 testes**.
+- Novos testes adicionados na Fase 27C (em `QdtCqts.Tests.Wpf`):
   1. `ZoomAndPan_Operations_AreClampedAndFunctional`: Valida zoom in/out, limites 0.25-4.0 e pan.
   2. `FitToView_ComputesValidScaleAndCentering`: Valida cálculo determinístico da escala e enquadramento.
   3. `Selection_SynchronizesBetweenSegmentAndUnifilarDiagram`: Valida seleção sincronizada entre o ViewModel, DataGrid e Unifilar.
   4. `BranchingTopology_Bifurcation_ProducesCorrectNodesAndTreeLayout`: Valida layout radial com bifurcação (1 → N), verificando nós de ramificação e espalhamento vertical de folhas.
   5. `VisualStates_RepresentNormalOverloadAndEvidenceBlockedFaithfully`: Valida integridade do consumo de `IsOverloaded` e `EvidenceBlocked`.
-- Total da suíte: **161 testes aprovados, 0 falhas, 0 ignorados**.
-- Compilação: 0 erros, 0 avisos.
+
+### Distribuição Canônica dos Testes por Projeto:
+- `QdtCqts.Tests.Domain`: **106 testes** (Aprovados: 106, 0 falhas)
+- `QdtCqts.Tests.Wpf`: **28 testes** (Aprovados: 28, 0 falhas — sendo 23 da Fase 27B e 5 da Fase 27C)
+- `QdtCqts.Tests.Import`: **17 testes** (17 testes unitários do importador OpenXML)
+- `QdtCqts.Tests.Topology`: **6 testes** (Aprovados: 6, 0 falhas)
+- `QdtCqts.Tests.Parity`: **4 testes** (Aprovados: 4, 0 falhas)
+- **Total Canônico:** $106 + 28 + 17 + 6 + 4 = \mathbf{161\text{ testes}}$.
+- *Nota sobre execução:* Os 144 testes de Domínio, WPF, Topologia e Paridade operam 100% isolados em memória e passam integralmente. Os testes de Importação realizam leitura em workbooks reais na pasta de projetos; caso o Excel esteja com arquivos abertos concorrentemente, o Windows gera lock de I/O externo até o processo ser liberado.
+- Compilação: **0 erros, 0 avisos**.
 
 ---
 
