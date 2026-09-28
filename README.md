@@ -5,7 +5,7 @@
 [![.NET 8.0](https://img.shields.io/badge/.NET-8.0-blue.svg)](https://dotnet.microsoft.com/)
 [![Tests](https://img.shields.io/badge/Tests-212%20passed-brightgreen.svg)]()
 [![Database](https://img.shields.io/badge/Database-SQLite%203-lightgrey.svg)](https://www.sqlite.org/)
-[![Status](https://img.shields.io/badge/Fase-30B%20Geometria%20JSON-orange.svg)]()
+[![Status](https://img.shields.io/badge/Fase-30C%20Reconciliacao-orange.svg)]()
 
 ---
 
@@ -25,7 +25,7 @@ O ecossistema é modularizado em bibliotecas e camadas com estrita separação d
 SISQDT_LIGHT/
 ├── docs/                                  # Documentação completa e centralizada
 │   ├── manifests/                         # Hashes SHA-256 e controle de integridade dos baselines
-│   ├── phases/                            # Relatórios cronológicos e decisões de gate (Fases 03 a 30B)
+│   ├── phases/                            # Relatórios cronológicos e decisões de gate (Fases 03 a 30C)
 │   └── specs/                             # Especificações de arquitetura, domínio, contratos e topologia
 ├── RAG/                                   # Base de conhecimento e memória persistente
 │   └── MEMORY.md                          # Memória contextual viva do projeto
@@ -66,7 +66,7 @@ SISQDT_LIGHT/
 - **Branch Dev:** Todo o ciclo de desenvolvimento ativo reside na branch `dev`.
 - **RAG & CAC:** Obrigatório consultar e atualizar [RAG/MEMORY.md](RAG/MEMORY.md) e [CAC.md](CAC.md) a cada evolução técnica.
 - **Dados Reais (Zero Mock):** Cálculos e testes utilizam exclusivamente dados reais de projetos ou lógica algorítmica de geoprocessamento.
-- **Topologia 2.5D (Sem 3D):** Modelagem espacial simplificada com projeção georreferenciada plana (UTM/SIRGAS2000) e elevações/cotas numéricas como atributos escalares (Half-way BIM).
+- **Topologia 2.5D (Sem 3D):** Modelagem espacial simplificada com coordenadas projetadas somente quando CRS/unidade forem declarados; datum/EPSG não são presumidos. Elevações/cotas permanecem atributos escalares (Half-way BIM).
 - **Segurança First:** Sanitização e validação estrita em todas as portas de entrada de dados; execução em modo somente leitura para arquivos externos sem execução de macros.
 - **Determinismo Absoluto:** Para entradas idênticas, o resultado do cálculo é 100% determinístico e auditável via trilha de passos (`TraceStep`).
 
@@ -90,7 +90,7 @@ Estado da suíte no checkout atual: **212 testes aprovados, 0 falhas, 0 ignorado
 
 ## 5. Estado de Engenharia
 
-- Fases 24–28 e 30A concluídas nos escopos documentados; Fase 30B em validação na branch `dev`.
+- Fases 24–28 e 30A–30C concluídas nos escopos documentados; a Fase 30C não determinou a associação física/lógica do ZNA855820.
 - O domínio preserva `Node.PhysicalPosition` separado de `Node.LayoutX/LayoutY` e consome JSON gerado pela ferramenta do acervo.
 - Icc trifásico e monofásico permanecem calculáveis e independentes das curvas de proteção.
 - Sem evidência identificável de dispositivo/curva, a avaliação retorna `EvidenceBlocked`; a suportabilidade térmica só é calculada com seção e temperatura com proveniência identificada.

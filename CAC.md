@@ -78,7 +78,7 @@ public interface ICalculationEngine
 
 ### 3.2 Topologia 2.5D e Half-way BIM
 - **Layout lógico:** `Node.LayoutX/LayoutY` e Presentation Models WPF representam posições esquemáticas na tela; não são coordenadas CAD.
-- **Geometria física (Fase 30B):** `Node.PhysicalPosition` guarda Easting/Northing, unidade e referência espacial com CRS parcial. Unidade/fuso seguem a evidência da Fase 30A; datum e EPSG permanecem desconhecidos até serem fornecidos por metadado explícito.
+- **Geometria física (Fase 30B/30C):** `Node.PhysicalPosition` guarda Easting/Northing, unidade e referência espacial com CRS parcial. A Fase 30C não confirmou unidade/fuso no DWG ZNA855820 (`INSUNITS=4`, `MAPCSASSIGN=nil`, sem `ACAD_GEOGRAPHICDATA`); datum/EPSG e unidade das coordenadas permanecem desconhecidos até haver evidência explícita.
 - **Half-way BIM:** A cota altimétrica ($Z$), tipo de estrutura (poste, poço de visita, galeria), material e ampacidade são armazenados como atributos de metadados de engenharia associados aos nós e trechos, dispensando a complexidade de renderizadores 3D pesados sem perda da precisão física.
 
 ### 3.3 Contrato de Curto-Circuito (`CandidateShortCircuitRule`)
@@ -179,7 +179,7 @@ O pipeline de cálculo orquestra de ponta a ponta:
 - O pipeline não sintetiza condutor nem transformador quando faltam no modelo: ampacidade, R/X, potência e impedância de catálogo devem estar presentes; caso contrário, o cálculo é bloqueado com diagnóstico explícito.
 - O pipeline mantém o resultado elétrico geral `Pass` e a WPF sinaliza separadamente `EvidenceBlocked`; isso não deve ser convertido em `CalculationError` nem ocultar os resultados elétricos calculáveis.
 - O identificador e o SHA-256 de uma evidência externa são metadados de proveniência. Como o Evidence Store histórico está ausente, o sistema não afirma validar o hash contra o conteúdo do arquivo.
-- Estado de fases: Fases 24, 25, 26, 27A, 27B, 27C e 27D concluídas.
+- Estado de fases: Fases 24, 25, 26, 27A, 27B, 27C, 27D, 30A, 30B e 30C concluídas nos escopos documentados; Fase 30C encerra com identidade física/lógica ainda não determinada.
 
 ---
 
@@ -218,7 +218,7 @@ O pipeline de cálculo orquestra de ponta a ponta:
 
 ### 11.1 Princípio de Separação de Espaços
 - **Espaço Lógico (WPF):** Árvore esquemática hierárquica otimizada para cognição humana, inspeção elétrica e rastreabilidade na tela do operador.
-- **Espaço Físico (AutoCAD):** Representação métrica real georreferenciada em coordenadas planas UTM com azimutes de vãos calculados e cotas altimétricas reais. O layout de tela nunca é enviado como geometria física ao CAD.
+- **Espaço Físico (AutoCAD):** A futura representação CAD só pode consumir coordenadas quando unidade e CRS da fonte estiverem declarados e validados. A investigação ZNA855820 da Fase 30C não confirmou esses metadados. O layout de tela nunca é enviado como geometria física ao CAD.
 
 ### 11.2 Fluxo Semântico de Exportação
 ```
@@ -230,7 +230,7 @@ QDT/CQTS (Grafo Calculado)
 ```
 
 ### 11.3 Sistema de Coordenadas e Entidades CAD
-- **CRS (proposta preliminar da Fase 28):** SIRGAS 2000 / UTM Fuso 23S (`EPSG:31983`) foi uma hipótese arquitetural, não um CRS obrigatório do domínio. A Fase 30A confirmou unidade métrica e fuso 23, mas não determinou datum nem EPSG; consultar a seção 12 antes de consumir geometria.
+- **CRS (proposta preliminar da Fase 28):** SIRGAS 2000 / UTM Fuso 23S (`EPSG:31983`) foi uma hipótese arquitetural, não um CRS obrigatório do domínio. A Fase 30C não confirmou unidade, fuso, datum ou EPSG no DWG ZNA855820; consultar a seção 12 antes de consumir geometria.
 - **Entidades Semânticas:**
   - Nós / Postes: `BLOCK` com atributos técnicos ou `POINT` com bloco inserido;
   - Trechos de Rede: `LINE` ou `PLINE` em layers de condutor com dados de faseamento e bitola;
@@ -245,11 +245,18 @@ QDT/CQTS (Grafo Calculado)
 - A fonte física é `DWG → ferramenta existente do acervo → JSON → sisQDT_LIGHT`. O backend não lê DWG e não executa conversão, reprojeção ou transformação de CRS.
 - `Node.LayoutX/LayoutY` representam layout esquemático; `Node.PhysicalPosition` representa posição física com Easting/Northing, unidade, referência espacial e proveniência. `Edge.PhysicalGeometry` é opcional e recebe geometria linear somente com associação explícita.
 - A referência espacial registra sistema, zona, hemisfério, datum e EPSG em campos independentes e anuláveis. O perfil DWG-JSON é UTM; o fuso vem do JSON. Datum, hemisfério e EPSG não são presumidos e `EPSG:31983` não é default.
-- A unidade do perfil é metro conforme a evidência da Fase 30A; o chamador declara a unidade e qualquer campo de unidade no JSON é validado. Unidade diferente de metro é rejeitada nesta fase.
+- O adaptador da Fase 30B aceita o perfil em metros, mas a Fase 30C não confirmou a unidade das coordenadas do DWG ZNA855820. Não importar esse DWG como metros até a unidade ser confirmada; `INSUNITS=4` é configuração de unidade de inserção e não resolve sozinho a unidade numérica do modelo.
 - O adaptador `QdtCqts.Infrastructure.Geometry` recebe JSON, preserva postes e linhas e retorna contagens, advertências e inválidos. A chave externa só é vinculada a `Node.Id`/`Edge.Id` por mapas explícitos; sem mapa, o elemento permanece importado e não associado.
 - `Node.LayoutX/LayoutY` não recebem coordenadas físicas importadas; layout e Easting/Northing permanecem independentes.
 - Linhas sem ID de origem permanecem sem ID sintético e sem vínculo a trecho lógico. Não se presume correspondência pela ordem, `ExternalKey`, proximidade ou sequência de extração.
 - Evidência de origem: [Fase 30A](docs/phases/fase30a/FASE30A_FONTE_GEOMETRIA_FISICA.md). Decisões e limitações da Fase 30B: `docs/phases/fase30b/FASE30B_DOMINIO_ESPACIAL.md`.
+
+### 12.1 Reconciliação Física/Lógica (Fase 30C)
+
+- No DWG ZNA855820, os atributos `XX` em blocos `NUM_PLAN` carregam rótulos de planta `TR`/`P1...P11`, repetidos duas vezes; não foi encontrada chave única por poste nem atributo `LID` de nó.
+- O CQTS usa `ID LIGHT`, `PONTO`, `PONTO MONTANTE` e `TRECHO (m)`, mas `ExcelEvidenceImporter` somente captura evidência de workbook e não constrói `NetworkModel`. O `MainViewModel` contém modelo hardcoded de exemplo, não import do ZNA.
+- `cad2kmz.lsp` pode gerar IDs sequenciais pela ordem de seleção e as linhas JSON não têm ID/handle. Não usar ordem, bloco, proximidade ou rótulo repetido como associação automática.
+- Gate da Fase 30C: `GO PARA PRÓXIMA DECISÃO — identidade ainda não determinada`. Unidade/CRS do DWG também não foram confirmados. Nenhuma arquitetura de Fase 31 foi aprovada; relatório: `docs/phases/fase30c/FASE30C_RECONCILIACAO_IDENTIDADE_FISICA_LOGICA.md`.
 
 
 

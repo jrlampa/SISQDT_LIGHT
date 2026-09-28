@@ -2,7 +2,7 @@
 
 > **Documento de Memória Persistente do Projeto**  
 > **Última Atualização:** 2026-09-28  
-> **Versão do manifesto:** 0.7.0 (último release registrado — Fase 26; Fase 30B em desenvolvimento)
+> **Versão do manifesto:** 0.7.0 (último release registrado — Fase 26; Fase 30C concluída como investigação)
 > **Branch Ativa:** `dev`  
 
 ---
@@ -101,8 +101,9 @@ Substituir o legado instável por uma aplicação desktop de alta precisão, det
   - **Matriz de Paridade:** Status `CONFIRMADO` para grandezas elétricas e térmicas nos motores do `sisQDT_LIGHT`. Mapeadas lacunas de tensões nominais nodais explícitas em Volts e suporte nativo a cenários `ATUAL` vs `PROJETADO`.
   - **Arquitetura CAD/LISP:** Especificado o fluxo `sisQDT_LIGHT → CAD Export Model → LISP Generator → AutoCAD` e a separação entre espaço lógico e físico. SIRGAS 2000 / EPSG:31983 foi hipótese preliminar, não adotada como contrato; a Fase 30A não determinou datum/EPSG. Avaliadas as alternativas LISP e recomendada a Alternativa B.
 
-- **Fase 30A (Concluída — fonte de geometria física):** DWG é a fonte primária; ferramenta existente do acervo extrai JSON de postes `{id, block, x, y, fuso}` e linhas com coordenadas. Unidade metro e fuso 23 foram identificados; datum/CRS completo não foi determinado; vínculo entre ID CAD e `ExternalKey` lógico continua ausente. Relatório: `docs/phases/fase30a/FASE30A_FONTE_GEOMETRIA_FISICA.md`.
-- **Fase 30B (Atual — domínio espacial/importação JSON):** `PhysicalPosition` e `PhysicalLineGeometry` são separados de `LayoutX/LayoutY`; adaptador JSON valida e preserva IDs/blocos. Associação somente por mapas explícitos; sem vínculo, geometria permanece não associada. CRS UTM/fuso é preservado; datum/hemisfério/EPSG não têm defaults. Sem leitura DWG, transformação CRS ou mapa interativo.
+- **Fase 30A (Concluída originalmente — fonte de geometria física):** Identificou o fluxo DWG→JSON do acervo. Revalidação do DWG ZNA855820 na Fase 30C qualificou as conclusões de metro/fuso 23: os JSONs temporários citados eram de outros desenhos; o DWG não declara `MAPCSASSIGN` nem `ACAD_GEOGRAPHICDATA`, e a unidade coordenada segue indeterminada.
+- **Fase 30B (Concluída — domínio espacial/importação JSON):** `PhysicalPosition` e `PhysicalLineGeometry` são separados de `LayoutX/LayoutY`; adaptador JSON valida e preserva IDs/blocos. Associação somente por mapas explícitos; sem vínculo, geometria permanece não associada. Sem leitura DWG, transformação CRS ou mapa interativo.
+- **Fase 30C (Concluída — reconciliação de identidade física/lógica):** No ZNA855820, `NUM_PLAN.XX` contém rótulos repetidos (`P1...P11`, `TR`), não uma chave CAD única por poste; `LID` não aparece como atributo de nó. `ID LIGHT`/`PONTO`/montante no CQTS não têm importador que os ligue a `Node.ExternalKey`; JSON de linha não guarda ID/handle. Associação Node/Edge não determinada. DWG retorna `INSUNITS=4`, `MAPCSASSIGN=nil`, sem dicionário geográfico; CRS/unidade requerem confirmação. Gate: `GO PARA PRÓXIMA DECISÃO`; Fase 31 não aprovada. Relatório: `docs/phases/fase30c/FASE30C_RECONCILIACAO_IDENTIDADE_FISICA_LOGICA.md`.
 
 ---
 
@@ -122,7 +123,7 @@ Substituir o legado instável por uma aplicação desktop de alta precisão, det
 - `src/QdtCqts.Desktop.Wpf`: Aplicação desktop WPF para operadores de engenharia da Light com identidade visual, ícone oficial, cockpit operacional com diagrama unifilar interativo, trace elétrico determinístico, filtros visuais e painel de detalhes.
 
 ### 4.2 Métricas de Teste
-- Total de testes automatizados no checkout da Fase 30B: **212 aprovados, 0 falhas, 0 ignorados**; `dotnet test` completo aprovado.
+- Total de testes automatizados no checkout: **212 aprovados, 0 falhas, 0 ignorados**; a Fase 30C não alterou código nem fixtures.
 - Falhas: **0**.
 - Duração da execução: **~1.7 segundos**.
 
@@ -138,8 +139,9 @@ Substituir o legado instável por uma aplicação desktop de alta precisão, det
 - Fase 27C: concluída; renderização visual do unifilar no Canvas WPF, zoom/pan/fit, seleção sincronizada e painel de detalhes.
 - Fase 27D: concluída; navegação avançada, trace elétrico determinístico da raiz à ponta, filtros visuais (dimming) e zero fallbacks sintéticos.
 - Fase 28: concluída; engenharia reversa do caso real ZNA855820 e arquitetura CAD/LISP preliminar.
-- Fase 30A: concluída; fonte DWG/JSON, unidade/fuso e lacunas de datum/identidade documentadas.
-- Fase 30B: atual; domínio espacial mínimo e importação de geometria JSON.
+- Fase 30A: concluída; fonte DWG/JSON e lacunas documentadas, com unidade/fuso do ZNA qualificados pela investigação 30C.
+- Fase 30B: concluída; domínio espacial mínimo e importação de geometria JSON.
+- Fase 30C: investigação concluída; identidade física/lógica e CRS/unidade do ZNA ainda não determinados.
 - Próxima fase oficial: `NEXT_PHASE_NOT_DEFINED`.
 
 

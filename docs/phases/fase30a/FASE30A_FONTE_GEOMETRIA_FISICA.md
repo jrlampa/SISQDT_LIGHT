@@ -187,3 +187,12 @@ As coordenadas do DWG são métricas (metros), confirmado pela faixa dos valores
 | **GEOMETRIA** | **LINE(P1,P2)** — primário; LWPOLYLINE secundário |
 | **FONTE** | **DWG** (não o Excel) |
 | **CONFIANÇA** | **PARCIAL** — coordenadas e unidade confirmadas; datum e chave de identidade não confirmados |
+
+## 12. Reavaliação do Caso ZNA855820 (Fase 30C)
+
+Esta nota preserva a conclusão histórica da investigação original e registra a qualificação obtida pela inspeção direta posterior do DWG ZNA855820.
+
+- Os JSONs temporários usados na seção 2.4 não são extrações do ZNA855820: `cad2kmz_input.json` identifica `AN_A057152931_DESENHO` e `kmz_points_input.json` contém IDs `Bloco_*U729_n`.
+- No DWG real, foram encontrados atributos E/N em blocos `CO`, mas sem vínculo com nós/trechos do CQTS. O desenho retorna `MAPCSASSIGN=nil`, não contém `ACAD_GEOGRAPHICDATA` e declara `INSUNITS=4` (unidades de inserção em milímetros); isso não determina sozinho a unidade numérica das coordenadas do modelo.
+- Portanto, para o ZNA855820, metro e fuso 23 não podem ser tratados como confirmados por aqueles JSONs ou pelo default do LISP. A magnitude E/N é compatível com coordenadas projetadas, mas unidade/fuso/hemisfério/datum/EPSG permanecem sem declaração suficiente.
+- A fonte física continua sendo o DWG; esta reavaliação não escolhe CRS nem cria associação lógica/física. Ver [Fase 30C](../fase30c/FASE30C_RECONCILIACAO_IDENTIDADE_FISICA_LOGICA.md) para inventário e evidências.

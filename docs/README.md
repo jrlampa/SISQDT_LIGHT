@@ -10,7 +10,7 @@ Bem-vindo à documentação centralizada do projeto de reconstrução e unifica�
 docs/
 ├── specs/       # Modelos conceituais, topologia, contratos de cálculo, DDL e matrizes
 ├── manifests/   # Manifestos de hashes SHA-256 e controle de integridade dos baselines
-└── phases/      # Relatórios de engenharia reversa e portões de decisão (Fases 03 a 18)
+└── phases/      # Relatórios de engenharia reversa e portões de decisão (Fases 03 a 30C)
 ```
 
 ---

@@ -36,6 +36,7 @@ Este diretório contém os relatórios e registros de evidência matemática de 
 | **Fase 26** | [fase26/](fase26/) | Integridade da proteção, fail-closed e reconciliação de governança | `GO` restrito; 149 testes aprovados | 149 |
 | **Fase 30A** | [fase30a/](fase30a/) | Fonte da geometria física DWG/JSON, unidade, fuso, CRS e identidade | Investigação concluída; datum/identidade não determinados | - |
 | **Fase 30B** | [fase30b/](fase30b/) | Domínio espacial mínimo e importação física JSON | `GO` — 212 testes aprovados | 212 |
+| **Fase 30C** | [fase30c/](fase30c/) | Reconciliação de identidade física/lógica no ZNA855820 | `GO PARA PRÓXIMA DECISÃO` — identidade e CRS/unidade não determinados | 0 novos; suíte 212 |
 
 
 

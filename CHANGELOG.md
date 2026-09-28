@@ -1,5 +1,14 @@
 # Changelog
 
+## Fase 30C — Reconciliação de Identidade Física × Lógica
+
+- Investigado o projeto local real ZNA855820: DWG, workbooks QDT/CQTS `ATUAL/PROJ`, 11 planilhas auxiliares e PDF; macros não foram executadas e o DWG original não foi alterado.
+- Confirmado que `NUM_PLAN.XX` contém rótulos `TR`/`P1...P11` repetidos, enquanto o CQTS registra pares em `ID LIGHT`; não existe chave única ou importador que ligue esses dados a `Node.ExternalKey`/`Edge`.
+- Os LISP existentes atribuem IDs por ordem de seleção ou registram letras/comprimentos manuais; não preservam handle/coordenadas ↔ trecho lógico.
+- Requalificadas para o ZNA as afirmações anteriores de unidade/fuso: os JSONs temporários analisados pertencem a outros desenhos; `MAPCSASSIGN=nil`, sem `ACAD_GEOGRAPHICDATA`, `INSUNITS=4`; CRS/unidade seguem pendentes.
+- Sem mudança de código, testes ou `VERSION_MANIFEST.json`; sem LISP/exportador CAD e sem associação artificial.
+- **Gate:** `GO PARA PRÓXIMA DECISÃO — identidade ainda não determinada`; Fase 31 permanece não aprovada. Relatório: `docs/phases/fase30c/FASE30C_RECONCILIACAO_IDENTIDADE_FISICA_LOGICA.md`.
+
 ## Fase 30B — Domínio Espacial e Importação de Geometria Física
 
 - Criados `PhysicalPosition`, `PhysicalLineGeometry` e `SpatialReference`; `Node.LayoutX/LayoutY` não são usados como coordenadas físicas e `Edge.PhysicalGeometry` é opcional.
