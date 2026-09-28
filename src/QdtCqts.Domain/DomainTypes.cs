@@ -4,6 +4,8 @@ public enum CalculationMode { Qdt, Cqts }
 public enum CalculationStatus { Ready, Pass, Fail, Unknown, Blocked }
 public enum ProtectionEvidenceStatus { Available, Missing, Invalid }
 public enum ProtectionAssessmentStatus { Pass, Fail, EvidenceBlocked }
+public enum SpatialSystemType { Unknown, Utm }
+public enum CoordinateHemisphere { North, South }
 public enum ResultScope { Transformer, Circuit, Branch, Node, Edge, Load, Point, Global }
 public enum UnitCode { Unknown, Mva, Kva, Kv, V, Ampere, Meter, Ohm, OhmPerKilometer, Celsius, Percent, Factor, UtmMeter, ConductorKey, Second, SquareMillimeter }
 public enum LoadKind { Point, Ramal, Client, Distributed, Unknown }
@@ -69,10 +71,37 @@ public sealed record Node(
     string Id,
     string ExternalKey,
     string CircuitId,
-    double? X,
-    double? Y,
+    double? LayoutX,
+    double? LayoutY,
     bool IsSource,
-    string? ParentNodeId = null);
+    string? ParentNodeId = null,
+    PhysicalPosition? PhysicalPosition = null);
+
+public sealed record SpatialReference(
+    SpatialSystemType SystemType,
+    int? Zone,
+    CoordinateHemisphere? Hemisphere,
+    string? Datum,
+    int? Epsg);
+
+public sealed record PhysicalPosition(
+    double EastingX,
+    double NorthingY,
+    UnitCode Unit,
+    SpatialReference SpatialReference,
+    string SourceFormat,
+    string SourceId,
+    string? SourceBlock);
+
+public sealed record PhysicalCoordinate(double EastingX, double NorthingY);
+
+public sealed record PhysicalLineGeometry(
+    IReadOnlyList<PhysicalCoordinate> Coordinates,
+    UnitCode Unit,
+    SpatialReference SpatialReference,
+    string? SourceId,
+    string? Layer,
+    string SourceFormat);
 
 public sealed record Edge(
     string Id,
@@ -83,7 +112,8 @@ public sealed record Edge(
     UnitValue Length,
     string? ConductorId,
     string? Phase,
-    string? InstallationMethod);
+    string? InstallationMethod,
+    PhysicalLineGeometry? PhysicalGeometry = null);
 
 public sealed record Branch(string Id, string ExternalKey, string CircuitId, string RootNodeId);
 

@@ -1,5 +1,16 @@
 # Changelog
 
+## Fase 30B — Domínio Espacial e Importação de Geometria Física
+
+- Criados `PhysicalPosition`, `PhysicalLineGeometry` e `SpatialReference`; `Node.LayoutX/LayoutY` não são usados como coordenadas físicas e `Edge.PhysicalGeometry` é opcional.
+- Criado `QdtCqts.Infrastructure.Geometry` para adaptar JSON de postes/linhas do acervo ao modelo interno, sem parser DWG.
+- O adaptador exige unidade declarada pelo chamador, valida metro, IDs, duplicidades, coordenadas UTM e fuso; preserva origem (`DWG_JSON`, ID e bloco) e retorna contagens/avisos/erros.
+- Associação para `Node.Id`/`Edge.Id` exige mapas explícitos. Sem mapeamento, elementos são preservados não associados; linhas sem ID não recebem ID sintético.
+- CRS é representado com campos independentes/nuláveis. UTM é o perfil do adaptador, zona vem do JSON; hemisfério, datum e EPSG não recebem defaults. Fuso ausente é preservado como CRS parcial.
+- Testes cobrem payload válido, X/Y, unidade, fuso 23, CRS parcial, associação explícita, identidade ausente, dados inválidos, duplicidades, ausência de linhas e independência do layout WPF.
+- Limites: sem leitura DWG, transformação CRS, mapa interativo ou associação automática. Fixture de teste mínima anonimizada baseada no contrato evidenciado pela Fase 30A.
+- **Testes:** 14 testes do importador e 1 teste WPF de isolamento do layout; `dotnet test --nologo`: **212 aprovados, 0 falhas, 0 ignorados**.
+
 ## Fase 28 — Engenharia Reversa QDT/CQTS Real + Arquitetura Preliminar CAD/LISP
 
 - **Engenharia Reversa com Caso Real (ZNA855820):**
@@ -14,7 +25,7 @@
   - Definido o fluxo semântico: `QDT/CQTS → sisQDT_LIGHT → Unifilar → CAD Export Model → LISP Generator → AutoCAD`.
   - Estabelecida a separação rigorosa entre o espaço lógico (layout em árvore do unifilar WPF) e o espaço físico (georreferenciado em coordenadas planas UTM com azimutes reais).
   - Especificado o contrato preliminar do `CAD Export Model` com suporte a entidades nativas do AutoCAD (`LINE`, `PLINE`, `POINT/BLOCK`, `MTEXT`, `MLEADER`).
-  - Identificado o sistema de coordenadas de referência da concessão Light: SIRGAS 2000 / UTM Zone 23S (`EPSG:31983`).
+  - A arquitetura preliminar propôs SIRGAS 2000 / UTM Zone 23S (`EPSG:31983`); a investigação da Fase 30A não confirmou datum nem EPSG, portanto esse código não é um default nem contrato espacial.
   - Avaliação técnica das 3 alternativas LISP: recomendada a Alternativa B (Híbrida com Payload de Dados Estruturado).
 - **Documentação de Engenharia:**
   - Elaborado documento exaustivo `docs/phases/fase28/FASE28_ENGENHARIA_REVERSA_REAL_E_ARQUITETURA_CAD_LISP.md`.

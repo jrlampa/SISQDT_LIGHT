@@ -17,6 +17,28 @@ namespace QdtCqts.Tests.Wpf;
 /// </summary>
 public sealed class UnifilarProjectionTests
 {
+    [Fact]
+    public void Layout_UsesLayoutCoordinatesAndNotPhysicalUtmPosition()
+    {
+        var spatialReference = new SpatialReference(SpatialSystemType.Utm, 23, null, null, null);
+        var nodes = new[]
+        {
+            new Node("TR", "TR", "C1", null, null, true, PhysicalPosition: new PhysicalPosition(500000.0, 7400000.0, UnitCode.Meter, spatialReference, "DWG_JSON", "CAD-P-001", "POSTE PROJ")),
+            new Node("P1", "P1", "C1", null, null, false, "TR", new PhysicalPosition(500050.0, 7400030.0, UnitCode.Meter, spatialReference, "DWG_JSON", "CAD-P-002", "POSTE PROJ"))
+        };
+        var edge = new Edge("E1", "TR-P1", "C1", "TR", "P1", new UnitValue(50, UnitCode.Meter), "240 Cu", "3", "1");
+        var model = new NetworkModel("M1", "V1", Array.Empty<Transformer>(), new[] { new Circuit("C1", "C1", "TR", 1, CalculationMode.Cqts) },
+            nodes, new[] { edge }, Array.Empty<Branch>(), Array.Empty<Load>(), Array.Empty<Conductor>(), Array.Empty<ElectricalParameter>());
+        var topology = new TopologyValidator().Validate(model, "C1");
+
+        var layout = new HierarchicalTreeLayoutEngine().ComputeLayout(model, topology);
+
+        Assert.Equal((80.0, 80.0), layout["TR"]);
+        Assert.Equal((240.0, 80.0), layout["P1"]);
+        Assert.Equal(500000.0, model.Nodes[0].PhysicalPosition!.EastingX);
+        Assert.Equal(7400000.0, model.Nodes[0].PhysicalPosition!.NorthingY);
+    }
+
     private static ProjectVersion BuildTestProject(bool isProj4 = false)
     {
         var trafo = new Transformer("TR", "TR-112.5",

@@ -25,9 +25,9 @@ public sealed class HierarchicalTreeLayoutEngine : IUnifilarLayoutEngine
 
         // Se houver coordenadas 2D ricas e não colineares (variando em X e Y),
         // preservamos as proporções relativas escalonadas.
-        if (HasRichPlanarCoordinates(model.Nodes))
+        if (HasRichLayoutCoordinates(model.Nodes))
         {
-            return ProjectPlanarCoordinates(model.Nodes, startX, startY, horizontalSpacing, verticalSpacing);
+            return ProjectLayoutCoordinates(model.Nodes, startX, startY, horizontalSpacing, verticalSpacing);
         }
 
         // Caso contrário, gera layout esquemático radial ortogonal canônico
@@ -97,21 +97,21 @@ public sealed class HierarchicalTreeLayoutEngine : IUnifilarLayoutEngine
         return centerChildY;
     }
 
-    private static bool HasRichPlanarCoordinates(IReadOnlyList<Node> nodes)
+    private static bool HasRichLayoutCoordinates(IReadOnlyList<Node> nodes)
     {
-        var valid = nodes.Where(n => n.X.HasValue && n.Y.HasValue).ToList();
+        var valid = nodes.Where(n => n.LayoutX.HasValue && n.LayoutY.HasValue).ToList();
         if (valid.Count < 3) return false;
 
-        double minX = valid.Min(n => n.X!.Value);
-        double maxX = valid.Max(n => n.X!.Value);
-        double minY = valid.Min(n => n.Y!.Value);
-        double maxY = valid.Max(n => n.Y!.Value);
+        double minX = valid.Min(n => n.LayoutX!.Value);
+        double maxX = valid.Max(n => n.LayoutX!.Value);
+        double minY = valid.Min(n => n.LayoutY!.Value);
+        double maxY = valid.Max(n => n.LayoutY!.Value);
 
         // Se Y for constante (como 0, 0 em fixtures) ou delta muito pequeno, não é uma planta 2D
         return (maxX - minX) > 10.0 && (maxY - minY) > 10.0;
     }
 
-    private static IReadOnlyDictionary<string, (double X, double Y)> ProjectPlanarCoordinates(
+    private static IReadOnlyDictionary<string, (double X, double Y)> ProjectLayoutCoordinates(
         IReadOnlyList<Node> nodes,
         double startX,
         double startY,
@@ -119,12 +119,12 @@ public sealed class HierarchicalTreeLayoutEngine : IUnifilarLayoutEngine
         double verticalSpacing)
     {
         var result = new Dictionary<string, (double X, double Y)>(StringComparer.Ordinal);
-        var valid = nodes.Where(n => n.X.HasValue && n.Y.HasValue).ToList();
+        var valid = nodes.Where(n => n.LayoutX.HasValue && n.LayoutY.HasValue).ToList();
 
-        double minX = valid.Min(n => n.X!.Value);
-        double maxX = valid.Max(n => n.X!.Value);
-        double minY = valid.Min(n => n.Y!.Value);
-        double maxY = valid.Max(n => n.Y!.Value);
+        double minX = valid.Min(n => n.LayoutX!.Value);
+        double maxX = valid.Max(n => n.LayoutX!.Value);
+        double minY = valid.Min(n => n.LayoutY!.Value);
+        double maxY = valid.Max(n => n.LayoutY!.Value);
 
         double spanX = Math.Max(1.0, maxX - minX);
         double spanY = Math.Max(1.0, maxY - minY);
@@ -134,10 +134,10 @@ public sealed class HierarchicalTreeLayoutEngine : IUnifilarLayoutEngine
 
         foreach (var node in nodes)
         {
-            if (node.X.HasValue && node.Y.HasValue)
+            if (node.LayoutX.HasValue && node.LayoutY.HasValue)
             {
-                double normX = (node.X.Value - minX) / spanX;
-                double normY = (node.Y.Value - minY) / spanY;
+                double normX = (node.LayoutX.Value - minX) / spanX;
+                double normY = (node.LayoutY.Value - minY) / spanY;
                 result[node.Id] = (startX + (normX * targetWidth), startY + (normY * targetHeight));
             }
             else

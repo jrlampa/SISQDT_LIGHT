@@ -21,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\QdtCqts.Domain\QdtCqts.Domain.csproj" />
     <ProjectReference Include="..\..\src\QdtCqts.Infrastructure.ExcelEvidence\QdtCqts.Infrastructure.ExcelEvidence.csproj" />
+    <ProjectReference Include="..\..\src\QdtCqts.Infrastructure.Geometry\QdtCqts.Infrastructure.Geometry.csproj" />
     <ProjectReference Include="..\..\src\QdtCqts.Infrastructure.Sqlite\QdtCqts.Infrastructure.Sqlite.csproj" />
   </ItemGroup>
 

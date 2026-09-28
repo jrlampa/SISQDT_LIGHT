@@ -3,9 +3,9 @@
 **Sistema Unificado de Cálculo e Análise de Redes de Distribuição (QDT + CQTS)**
 
 [![.NET 8.0](https://img.shields.io/badge/.NET-8.0-blue.svg)](https://dotnet.microsoft.com/)
-[![Tests](https://img.shields.io/badge/Tests-149%20passed-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-212%20passed-brightgreen.svg)]()
 [![Database](https://img.shields.io/badge/Database-SQLite%203-lightgrey.svg)](https://www.sqlite.org/)
-[![Status](https://img.shields.io/badge/Fase-26%20Fail--Closed-orange.svg)]()
+[![Status](https://img.shields.io/badge/Fase-30B%20Geometria%20JSON-orange.svg)]()
 
 ---
 
@@ -25,7 +25,7 @@ O ecossistema é modularizado em bibliotecas e camadas com estrita separação d
 SISQDT_LIGHT/
 ├── docs/                                  # Documentação completa e centralizada
 │   ├── manifests/                         # Hashes SHA-256 e controle de integridade dos baselines
-│   ├── phases/                            # Relatórios cronológicos e decisões de gate (Fases 03 a 26)
+│   ├── phases/                            # Relatórios cronológicos e decisões de gate (Fases 03 a 30B)
 │   └── specs/                             # Especificações de arquitetura, domínio, contratos e topologia
 ├── RAG/                                   # Base de conhecimento e memória persistente
 │   └── MEMORY.md                          # Memória contextual viva do projeto
@@ -43,6 +43,7 @@ SISQDT_LIGHT/
 │   ├── QdtCqts.Desktop.Wpf/               # Interface desktop WPF (Thin Frontend)
 │   ├── QdtCqts.Domain/                    # Núcleo de domínio (Aggregates, Topologia, Tipos, Versionamento)
 │   ├── QdtCqts.Infrastructure.ExcelEvidence/ # Importador de planilhas somente leitura e grafos
+│   ├── QdtCqts.Infrastructure.Geometry/   # Adaptador de geometria física JSON (sem leitura DWG)
 │   ├── QdtCqts.Infrastructure.Parity/     # Harness de comparação de paridade matemática
 │   └── QdtCqts.Infrastructure.Sqlite/     # Repositórios e persistência relacional SQLite
 ├── tests/                                 # Suíte abrangente de testes automatizados (.NET xUnit)
@@ -83,13 +84,14 @@ dotnet test
 dotnet test --logger "console;verbosity=normal"
 ```
 
-Estado da suíte no checkout da Fase 26: **149 testes aprovados, 0 falhas, 0 ignorados**.
+Estado da suíte no checkout atual: **212 testes aprovados, 0 falhas, 0 ignorados**.
 
 ---
 
 ## 5. Estado de Engenharia
 
-- Fases 24, 25 e 26 concluídas nos escopos documentados; release atual `0.7.0`.
+- Fases 24–28 e 30A concluídas nos escopos documentados; Fase 30B em validação na branch `dev`.
+- O domínio preserva `Node.PhysicalPosition` separado de `Node.LayoutX/LayoutY` e consome JSON gerado pela ferramenta do acervo.
 - Icc trifásico e monofásico permanecem calculáveis e independentes das curvas de proteção.
 - Sem evidência identificável de dispositivo/curva, a avaliação retorna `EvidenceBlocked`; a suportabilidade térmica só é calculada com seção e temperatura com proveniência identificada.
 - Curvas NH/disjuntor, coordenação e seletividade não são implementadas nem inferidas.

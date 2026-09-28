@@ -7,6 +7,7 @@
     <Project Path="src/QdtCqts.Desktop.Wpf/QdtCqts.Desktop.Wpf.csproj" />
     <Project Path="src/QdtCqts.Domain/QdtCqts.Domain.csproj" />
     <Project Path="src/QdtCqts.Infrastructure.ExcelEvidence/QdtCqts.Infrastructure.ExcelEvidence.csproj" />
+    <Project Path="src/QdtCqts.Infrastructure.Geometry/QdtCqts.Infrastructure.Geometry.csproj" />
     <Project Path="src/QdtCqts.Infrastructure.Observability/QdtCqts.Infrastructure.Observability.csproj" />
     <Project Path="src/QdtCqts.Infrastructure.Parity/QdtCqts.Infrastructure.Parity.csproj" />
     <Project Path="src/QdtCqts.Infrastructure.Sqlite/QdtCqts.Infrastructure.Sqlite.csproj" />
@@ -19,4 +20,3 @@
     <Project Path="tests/QdtCqts.Tests.Wpf/QdtCqts.Tests.Wpf.csproj" />
   </Folder>
 </Solution>
-

@@ -2,7 +2,7 @@
 
 > **Documento de Memória Persistente do Projeto**  
 > **Última Atualização:** 2026-09-28  
-> **Versão publicada:** 0.7.0 (Fase 28 concluída — Engenharia Reversa e Arquitetura CAD)  
+> **Versão do manifesto:** 0.7.0 (último release registrado — Fase 26; Fase 30B em desenvolvimento)
 > **Branch Ativa:** `dev`  
 
 ---
@@ -99,7 +99,10 @@ Substituir o legado instável por uma aplicação desktop de alta precisão, det
   - **Engenharia Reversa ZNA855820:** Rastreamento ponta a ponta da obra real de Rede Invertida. Extraídas fórmulas exatas das planilhas legadas de corrente ($I_b$), temperatura ($T$), resistência térmica ($R_{ca}$), queda de trecho ($\Delta V$), queda acumulada percentual ($CA\%$) e tensões nodais ($V_{127}, V_{220}$).
   - **Auditoria VBA:** Confirmado que o código VBA tem função exclusiva de automação de UI e ordenação de tabelas; a física de engenharia é 100% suportada pelas fórmulas de cálculo, eliminando dependência de macros legadas.
   - **Matriz de Paridade:** Status `CONFIRMADO` para grandezas elétricas e térmicas nos motores do `sisQDT_LIGHT`. Mapeadas lacunas de tensões nominais nodais explícitas em Volts e suporte nativo a cenários `ATUAL` vs `PROJETADO`.
-  - **Arquitetura CAD/LISP:** Especificado o fluxo `sisQDT_LIGHT → CAD Export Model → LISP Generator → AutoCAD`. Definição estrita da separação entre espaço lógico (unifilar em árvore) e espaço físico (UTM Fuso 23S / SIRGAS 2000 / EPSG:31983 com azimutes reais). Avaliadas as 3 alternativas LISP e recomendada a Alternativa B (Híbrida com Payload Estruturado).
+  - **Arquitetura CAD/LISP:** Especificado o fluxo `sisQDT_LIGHT → CAD Export Model → LISP Generator → AutoCAD` e a separação entre espaço lógico e físico. SIRGAS 2000 / EPSG:31983 foi hipótese preliminar, não adotada como contrato; a Fase 30A não determinou datum/EPSG. Avaliadas as alternativas LISP e recomendada a Alternativa B.
+
+- **Fase 30A (Concluída — fonte de geometria física):** DWG é a fonte primária; ferramenta existente do acervo extrai JSON de postes `{id, block, x, y, fuso}` e linhas com coordenadas. Unidade metro e fuso 23 foram identificados; datum/CRS completo não foi determinado; vínculo entre ID CAD e `ExternalKey` lógico continua ausente. Relatório: `docs/phases/fase30a/FASE30A_FONTE_GEOMETRIA_FISICA.md`.
+- **Fase 30B (Atual — domínio espacial/importação JSON):** `PhysicalPosition` e `PhysicalLineGeometry` são separados de `LayoutX/LayoutY`; adaptador JSON valida e preserva IDs/blocos. Associação somente por mapas explícitos; sem vínculo, geometria permanece não associada. CRS UTM/fuso é preservado; datum/hemisfério/EPSG não têm defaults. Sem leitura DWG, transformação CRS ou mapa interativo.
 
 ---
 
@@ -114,11 +117,12 @@ Substituir o legado instável por uma aplicação desktop de alta precisão, det
 - `src/QdtCqts.Infrastructure.Observability`: Provedor de logging estruturado (Serilog), políticas de rotação de arquivos e registrador de startup.
 - `src/QdtCqts.Infrastructure.Sqlite`: Banco de dados relacional e repositórios de dados SQLite.
 - `src/QdtCqts.Infrastructure.ExcelEvidence`: Importador seguro OpenXML e construção de grafo de precedência celular.
+- `src/QdtCqts.Infrastructure.Geometry`: Adaptador isolado do JSON físico produzido pelo acervo; sem parser DWG.
 - `src/QdtCqts.Infrastructure.Parity`: Mecanismos de comparação numérica e paridade com tolerância de engenharia.
 - `src/QdtCqts.Desktop.Wpf`: Aplicação desktop WPF para operadores de engenharia da Light com identidade visual, ícone oficial, cockpit operacional com diagrama unifilar interativo, trace elétrico determinístico, filtros visuais e painel de detalhes.
 
 ### 4.2 Métricas de Teste
-- Total de testes automatizados: **186 aprovados, 0 falhas, 0 ignorados**; restore/build finalizados com 0 erros e 0 warnings.
+- Total de testes automatizados no checkout da Fase 30B: **212 aprovados, 0 falhas, 0 ignorados**; `dotnet test` completo aprovado.
 - Falhas: **0**.
 - Duração da execução: **~1.7 segundos**.
 
@@ -133,8 +137,10 @@ Substituir o legado instável por uma aplicação desktop de alta precisão, det
 - Fase 27B: concluída; contratos de apresentação, layout geométrico e projeção do grafo para o unifilar.
 - Fase 27C: concluída; renderização visual do unifilar no Canvas WPF, zoom/pan/fit, seleção sincronizada e painel de detalhes.
 - Fase 27D: concluída; navegação avançada, trace elétrico determinístico da raiz à ponta, filtros visuais (dimming) e zero fallbacks sintéticos.
-- Fase 28: concluída; engenharia reversa do caso real ZNA855820 e especificação da arquitetura preliminar CAD/LISP.
-- Próxima fase: **Fase 29** — Modelagem espacial UTM, múltiplos cenários (Atual vs Projetado) e tensões nodais nominais.
+- Fase 28: concluída; engenharia reversa do caso real ZNA855820 e arquitetura CAD/LISP preliminar.
+- Fase 30A: concluída; fonte DWG/JSON, unidade/fuso e lacunas de datum/identidade documentadas.
+- Fase 30B: atual; domínio espacial mínimo e importação de geometria JSON.
+- Próxima fase oficial: `NEXT_PHASE_NOT_DEFINED`.
 
 
 

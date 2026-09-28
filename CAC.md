@@ -77,7 +77,8 @@ public interface ICalculationEngine
 - **Tratamento de Exceções:** Ausência de dados de entrada ou grandezas sem unidade explícita **não geram fallbacks silenciosos ou valores zero**; produzem status `CalculationStatus.BLOCKED` com diagnósticos explicativos detalhados.
 
 ### 3.2 Topologia 2.5D e Half-way BIM
-- **2.5D:** Os nós da rede contêm coordenadas geográficas bidimensionais projetadas ($X, Y$ em UTM/SIRGAS2000).
+- **Layout lógico:** `Node.LayoutX/LayoutY` e Presentation Models WPF representam posições esquemáticas na tela; não são coordenadas CAD.
+- **Geometria física (Fase 30B):** `Node.PhysicalPosition` guarda Easting/Northing, unidade e referência espacial com CRS parcial. Unidade/fuso seguem a evidência da Fase 30A; datum e EPSG permanecem desconhecidos até serem fornecidos por metadado explícito.
 - **Half-way BIM:** A cota altimétrica ($Z$), tipo de estrutura (poste, poço de visita, galeria), material e ampacidade são armazenados como atributos de metadados de engenharia associados aos nós e trechos, dispensando a complexidade de renderizadores 3D pesados sem perda da precisão física.
 
 ### 3.3 Contrato de Curto-Circuito (`CandidateShortCircuitRule`)
@@ -229,13 +230,26 @@ QDT/CQTS (Grafo Calculado)
 ```
 
 ### 11.3 Sistema de Coordenadas e Entidades CAD
-- **CRS:** SIRGAS 2000 / UTM Fuso 23S (`EPSG:31983`), padrão da concessão Light no Estado do Rio de Janeiro.
+- **CRS (proposta preliminar da Fase 28):** SIRGAS 2000 / UTM Fuso 23S (`EPSG:31983`) foi uma hipótese arquitetural, não um CRS obrigatório do domínio. A Fase 30A confirmou unidade métrica e fuso 23, mas não determinou datum nem EPSG; consultar a seção 12 antes de consumir geometria.
 - **Entidades Semânticas:**
   - Nós / Postes: `BLOCK` com atributos técnicos ou `POINT` com bloco inserido;
   - Trechos de Rede: `LINE` ou `PLINE` em layers de condutor com dados de faseamento e bitola;
   - Transformadores: `BLOCK` dedicado com identificador e potência nominal;
   - Callouts de Engenharia: `MLEADER` perpendicular ao trecho com indicação de corrente, $\Delta V\%$, tensões nominais nodais ($V_{127}, V_{220}$) e carregamento térmico.
 - **Estratégia LISP:** Alternativa B (Híbrida com Payload de Dados Estruturado), garantindo portabilidade via Ctrl+V no console sem risco de buffer overflow nem dependência de arquivos temporários em disco.
+
+---
+
+## 12. Domínio Espacial e Importação de Geometria Física (Fase 30B)
+
+- A fonte física é `DWG → ferramenta existente do acervo → JSON → sisQDT_LIGHT`. O backend não lê DWG e não executa conversão, reprojeção ou transformação de CRS.
+- `Node.LayoutX/LayoutY` representam layout esquemático; `Node.PhysicalPosition` representa posição física com Easting/Northing, unidade, referência espacial e proveniência. `Edge.PhysicalGeometry` é opcional e recebe geometria linear somente com associação explícita.
+- A referência espacial registra sistema, zona, hemisfério, datum e EPSG em campos independentes e anuláveis. O perfil DWG-JSON é UTM; o fuso vem do JSON. Datum, hemisfério e EPSG não são presumidos e `EPSG:31983` não é default.
+- A unidade do perfil é metro conforme a evidência da Fase 30A; o chamador declara a unidade e qualquer campo de unidade no JSON é validado. Unidade diferente de metro é rejeitada nesta fase.
+- O adaptador `QdtCqts.Infrastructure.Geometry` recebe JSON, preserva postes e linhas e retorna contagens, advertências e inválidos. A chave externa só é vinculada a `Node.Id`/`Edge.Id` por mapas explícitos; sem mapa, o elemento permanece importado e não associado.
+- `Node.LayoutX/LayoutY` não recebem coordenadas físicas importadas; layout e Easting/Northing permanecem independentes.
+- Linhas sem ID de origem permanecem sem ID sintético e sem vínculo a trecho lógico. Não se presume correspondência pela ordem, `ExternalKey`, proximidade ou sequência de extração.
+- Evidência de origem: [Fase 30A](docs/phases/fase30a/FASE30A_FONTE_GEOMETRIA_FISICA.md). Decisões e limitações da Fase 30B: `docs/phases/fase30b/FASE30B_DOMINIO_ESPACIAL.md`.
 
 
 

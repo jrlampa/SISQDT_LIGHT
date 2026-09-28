@@ -34,6 +34,8 @@ Este diretório contém os relatórios e registros de evidência matemática de 
 | **Fase 24** | [CHANGELOG.md](../../CHANGELOG.md) | Curto-circuito 3φ/1φ e análise delimitada de evidências de proteção | `GO` para curto-circuito; curvas bloqueadas por ausência de evidência | 134 |
 | **Fase 25** | [CHANGELOG.md](../../CHANGELOG.md) | Consolidação do motor, integração WPF e contratos | `GO` nos gates declarados; curvas permanecem fora do escopo | 146 |
 | **Fase 26** | [fase26/](fase26/) | Integridade da proteção, fail-closed e reconciliação de governança | `GO` restrito; 149 testes aprovados | 149 |
+| **Fase 30A** | [fase30a/](fase30a/) | Fonte da geometria física DWG/JSON, unidade, fuso, CRS e identidade | Investigação concluída; datum/identidade não determinados | - |
+| **Fase 30B** | [fase30b/](fase30b/) | Domínio espacial mínimo e importação física JSON | `GO` — 212 testes aprovados | 212 |
 
 
 
