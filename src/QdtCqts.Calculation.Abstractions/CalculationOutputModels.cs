@@ -36,13 +36,24 @@ public sealed record SegmentCalculationResult(
 
 /// <summary>
 /// Resultado de cálculo para um nó da rede (poste, caixa, derivação, carga).
+/// Tensões nodais (VoltageV127/VoltageV220) são derivadas deterministicamente de
+/// AccumulatedVoltageDropPercent. As constantes nominais 127 V e 220 V representam
+/// o padrão de rede BT da concessão (Fase 29). Decisão arquitetural: constantes
+/// no contrato de domínio (Abstractions), nunca na camada de apresentação.
 /// </summary>
 public sealed record NodeCalculationResult(
     string NodeId,
     string ExternalKey,
     int LocalConsumers,
     double LocalLoadKva,
-    double AccumulatedVoltageDropPercent);
+    double AccumulatedVoltageDropPercent)
+{
+    /// <summary>Tensão fase-neutro nominal (127 V) corrigida pela queda acumulada.</summary>
+    public double VoltageV127 => 127.0 * (1.0 - AccumulatedVoltageDropPercent / 100.0);
+
+    /// <summary>Tensão fase-fase nominal (220 V) corrigida pela queda acumulada.</summary>
+    public double VoltageV220 => 220.0 * (1.0 - AccumulatedVoltageDropPercent / 100.0);
+}
 
 /// <summary>
 /// Resultado de cálculo para o transformador de alimentação e média tensão.

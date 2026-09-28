@@ -33,6 +33,10 @@ public sealed class UnifilarNodeViewModel : INotifyPropertyChanged
     public int LocalConsumers { get; init; }
     public double LocalLoadKva { get; init; }
     public double AccumulatedVoltageDropPercent { get; init; }
+    /// <summary>Tensão fase-neutro no nó (V) — projetada do DTO, não calculada aqui.</summary>
+    public double VoltageV127 { get; init; }
+    /// <summary>Tensão fase-fase no nó (V) — projetada do DTO, não calculada aqui.</summary>
+    public double VoltageV220 { get; init; }
     public string RunId { get; init; } = string.Empty;
 
     public bool IsSelected

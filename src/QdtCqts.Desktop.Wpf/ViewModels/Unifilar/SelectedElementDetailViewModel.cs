@@ -42,6 +42,8 @@ public sealed class SelectedElementDetailViewModel
         var electricalItems = new List<DetailItem>
         {
             new("Queda Acumulada (CA%)", $"{nodeVm.AccumulatedVoltageDropPercent:F3}", "%"),
+            new("Tensão 127 V", $"{nodeVm.VoltageV127:F2}", "V"),
+            new("Tensão 220 V", $"{nodeVm.VoltageV220:F2}", "V"),
             new("Carga Local", $"{nodeVm.LocalLoadKva:F2}", "kVA"),
             new("Consumidores Locais", $"{nodeVm.LocalConsumers}", "un")
         };

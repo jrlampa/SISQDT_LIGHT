@@ -64,6 +64,8 @@ public sealed class UnifilarPresentationBuilder
                 LocalConsumers = nodeResult?.LocalConsumers ?? 0,
                 LocalLoadKva = nodeResult?.LocalLoadKva ?? 0.0,
                 AccumulatedVoltageDropPercent = nodeResult?.AccumulatedVoltageDropPercent ?? 0.0,
+                VoltageV127 = nodeResult?.VoltageV127 ?? 127.0,
+                VoltageV220 = nodeResult?.VoltageV220 ?? 220.0,
                 RunId = report.RunId
             });
         }
