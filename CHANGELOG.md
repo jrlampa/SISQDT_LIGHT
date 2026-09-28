@@ -1,5 +1,24 @@
 # Changelog
 
+## Fase 28 — Engenharia Reversa QDT/CQTS Real + Arquitetura Preliminar CAD/LISP
+
+- **Engenharia Reversa com Caso Real (ZNA855820):**
+  - Desmontagem profunda da cadeia `ENTRADA → PROCESSAMENTO → RESULTADO` das planilhas legadas de QDT (`.xlsm`) e CQTS (`.xlsx`) da obra real de Rede Invertida ZNA855820.
+  - Extração e validação das fórmulas exatas de corrente ($I_b$), temperatura do condutor ($T$), resistência corrigida ($R_{ca}$), queda de tensão no trecho ($\Delta V$), queda acumulada percentual ($CA\%$) e tensões nominais nodais ($V_{127}$ e $V_{220}$).
+  - Análise de macros VBA (`Sequencial_Descricao`, `Workbook_Open`, `DesprotegeVB`): confirmado que o VBA exerce apenas automação de interface e ordenação de tabelas; 100% da engenharia elétrica reside nas fórmulas declarativas.
+- **Matriz de Paridade e Diagnóstico:**
+  - Status `CONFIRMADO` para corrente de carga, temperatura de condutor, resistência térmica e queda de tensão no trecho em relação aos motores de cálculo C# do `sisQDT_LIGHT`.
+  - Identificada lacuna de exposição explícita das grandezas de tensão nominal em Volts ($V_{127}$ e $V_{220}$) nos DTOs de nós (atualmente concentradas em $\Delta V\%$).
+  - Identificada necessidade de modelagem nativa de múltiplos cenários (`ATUAL` vs `PROJETADO`) dentro do mesmo caso de cálculo.
+- **Arquitetura Preliminar de Exportação CAD/LISP:**
+  - Definido o fluxo semântico: `QDT/CQTS → sisQDT_LIGHT → Unifilar → CAD Export Model → LISP Generator → AutoCAD`.
+  - Estabelecida a separação rigorosa entre o espaço lógico (layout em árvore do unifilar WPF) e o espaço físico (georreferenciado em coordenadas planas UTM com azimutes reais).
+  - Especificado o contrato preliminar do `CAD Export Model` com suporte a entidades nativas do AutoCAD (`LINE`, `PLINE`, `POINT/BLOCK`, `MTEXT`, `MLEADER`).
+  - Identificado o sistema de coordenadas de referência da concessão Light: SIRGAS 2000 / UTM Zone 23S (`EPSG:31983`).
+  - Avaliação técnica das 3 alternativas LISP: recomendada a Alternativa B (Híbrida com Payload de Dados Estruturado).
+- **Documentação de Engenharia:**
+  - Elaborado documento exaustivo `docs/phases/fase28/FASE28_ENGENHARIA_REVERSA_REAL_E_ARQUITETURA_CAD_LISP.md`.
+
 ## Fase 27D — Navegação Avançada, Trace Elétrico, Filtros Visuais e Otimização Controlada do Unifilar
 
 - **Zero Fallbacks Sintéticos de Domínio (27D-AUDIT-01):**

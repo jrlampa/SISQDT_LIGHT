@@ -1,8 +1,8 @@
 # RAG MEMORY — SISQDT_LIGHT (QdtCqts)
 
 > **Documento de Memória Persistente do Projeto**  
-> **Última Atualização:** 2026-09-27
-> **Versão publicada:** 0.7.0 (Fase 26 concluída)
+> **Última Atualização:** 2026-09-28  
+> **Versão publicada:** 0.7.0 (Fase 28 concluída — Engenharia Reversa e Arquitetura CAD)  
 > **Branch Ativa:** `dev`  
 
 ---
@@ -95,6 +95,12 @@ Substituir o legado instável por uma aplicação desktop de alta precisão, det
   - **Indexação $O(1)$ (27D-AUDIT-03):** Otimização de lookups por ID para grafos de grande escala.
   - **Suíte de Testes:** 25 novos testes dedicados em `UnifilarTraceAndNavigationTests.cs`. Suíte canônica expandida de 161 para **186 testes aprovados, 0 falhas, 0 warnings**.
 
+- **Fase 28 (Concluída — Engenharia Reversa QDT/CQTS Real + Arquitetura Preliminar CAD/LISP):**
+  - **Engenharia Reversa ZNA855820:** Rastreamento ponta a ponta da obra real de Rede Invertida. Extraídas fórmulas exatas das planilhas legadas de corrente ($I_b$), temperatura ($T$), resistência térmica ($R_{ca}$), queda de trecho ($\Delta V$), queda acumulada percentual ($CA\%$) e tensões nodais ($V_{127}, V_{220}$).
+  - **Auditoria VBA:** Confirmado que o código VBA tem função exclusiva de automação de UI e ordenação de tabelas; a física de engenharia é 100% suportada pelas fórmulas de cálculo, eliminando dependência de macros legadas.
+  - **Matriz de Paridade:** Status `CONFIRMADO` para grandezas elétricas e térmicas nos motores do `sisQDT_LIGHT`. Mapeadas lacunas de tensões nominais nodais explícitas em Volts e suporte nativo a cenários `ATUAL` vs `PROJETADO`.
+  - **Arquitetura CAD/LISP:** Especificado o fluxo `sisQDT_LIGHT → CAD Export Model → LISP Generator → AutoCAD`. Definição estrita da separação entre espaço lógico (unifilar em árvore) e espaço físico (UTM Fuso 23S / SIRGAS 2000 / EPSG:31983 com azimutes reais). Avaliadas as 3 alternativas LISP e recomendada a Alternativa B (Híbrida com Payload Estruturado).
+
 ---
 
 ## 4. Estado Atual do Código e Arquitetura
@@ -126,7 +132,9 @@ Substituir o legado instável por uma aplicação desktop de alta precisão, det
 - Fase 27A: concluída; auditoria completa da interface WPF, contratos e especificação do Unifilar Operacional.
 - Fase 27B: concluída; contratos de apresentação, layout geométrico e projeção do grafo para o unifilar.
 - Fase 27C: concluída; renderização visual do unifilar no Canvas WPF, zoom/pan/fit, seleção sincronizada e painel de detalhes.
-- Próxima fase: **Fase 27D** — aguardando autorização e especificação formal.
+- Fase 27D: concluída; navegação avançada, trace elétrico determinístico da raiz à ponta, filtros visuais (dimming) e zero fallbacks sintéticos.
+- Fase 28: concluída; engenharia reversa do caso real ZNA855820 e especificação da arquitetura preliminar CAD/LISP.
+- Próxima fase: **Fase 29** — Modelagem espacial UTM, múltiplos cenários (Atual vs Projetado) e tensões nodais nominais.
 
 
 

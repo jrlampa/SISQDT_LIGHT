@@ -211,6 +211,32 @@ O pipeline de cálculo orquestra de ponta a ponta:
 5. **Métricas Visuais e FitToView Centralizados:** `UnifilarVisualMetrics` e proteção total contra viewports nulos/degenerados e valores `NaN`/`Infinity`.
 6. **Lookup Indexado:** Dicionários indexados por ID no orquestrador visual para acesso $O(1)$ sem degradação em grafos extensos.
 
+---
+
+## 11. Arquitetura Preliminar de Exportação CAD/LISP (Fase 28)
+
+### 11.1 Princípio de Separação de Espaços
+- **Espaço Lógico (WPF):** Árvore esquemática hierárquica otimizada para cognição humana, inspeção elétrica e rastreabilidade na tela do operador.
+- **Espaço Físico (AutoCAD):** Representação métrica real georreferenciada em coordenadas planas UTM com azimutes de vãos calculados e cotas altimétricas reais. O layout de tela nunca é enviado como geometria física ao CAD.
+
+### 11.2 Fluxo Semântico de Exportação
+```
+QDT/CQTS (Grafo Calculado) 
+   ──► CAD Export Model (DTOs Neutros com UTM e Grandezas Elétricas)
+   ──► LISP Generator (Template com Payload Estruturado - Alternativa B)
+   ──► Área de Transferência ("Copiar para o CAD")
+   ──► AutoCAD (Entidades nativas LINE, PLINE, BLOCK, MLEADER em Layers padronizados)
+```
+
+### 11.3 Sistema de Coordenadas e Entidades CAD
+- **CRS:** SIRGAS 2000 / UTM Fuso 23S (`EPSG:31983`), padrão da concessão Light no Estado do Rio de Janeiro.
+- **Entidades Semânticas:**
+  - Nós / Postes: `BLOCK` com atributos técnicos ou `POINT` com bloco inserido;
+  - Trechos de Rede: `LINE` ou `PLINE` em layers de condutor com dados de faseamento e bitola;
+  - Transformadores: `BLOCK` dedicado com identificador e potência nominal;
+  - Callouts de Engenharia: `MLEADER` perpendicular ao trecho com indicação de corrente, $\Delta V\%$, tensões nominais nodais ($V_{127}, V_{220}$) e carregamento térmico.
+- **Estratégia LISP:** Alternativa B (Híbrida com Payload de Dados Estruturado), garantindo portabilidade via Ctrl+V no console sem risco de buffer overflow nem dependência de arquivos temporários em disco.
+
 
 
 
