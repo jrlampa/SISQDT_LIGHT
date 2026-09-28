@@ -3,7 +3,7 @@
 > **Conhecimento Arquitetural Compartilhado e Contratos de Componentes**  
 > **Sistema:** SISQDT_LIGHT (QdtCqts)  
 > **Status:** Ativo / Governança Técnica Estrita  
-> **Data:** 2026-09-27  
+> **Data:** 2026-09-28
 
 ---
 
@@ -257,6 +257,15 @@ QDT/CQTS (Grafo Calculado)
 - O CQTS usa `ID LIGHT`, `PONTO`, `PONTO MONTANTE` e `TRECHO (m)`, mas `ExcelEvidenceImporter` somente captura evidência de workbook e não constrói `NetworkModel`. O `MainViewModel` contém modelo hardcoded de exemplo, não import do ZNA.
 - `cad2kmz.lsp` pode gerar IDs sequenciais pela ordem de seleção e as linhas JSON não têm ID/handle. Não usar ordem, bloco, proximidade ou rótulo repetido como associação automática.
 - Gate da Fase 30C: `GO PARA PRÓXIMA DECISÃO — identidade ainda não determinada`. Unidade/CRS do DWG também não foram confirmados. Nenhuma arquitetura de Fase 31 foi aprovada; relatório: `docs/phases/fase30c/FASE30C_RECONCILIACAO_IDENTIDADE_FISICA_LOGICA.md`.
+
+### 12.2 Protocolo de Identidade Física/Lógica (Fase 30D)
+
+- O corpus local tem 47 pastas de primeiro nível; 37 contêm CAD+workbook e 25 também possuem CSV/JSON/KMZ/KML. Formatos semelhantes não implicam mesma obra ou revisão.
+- ZNA19165 oferece uma crosswalk única entre 39 ocorrências CQTS coordenadas e registros CSV/KMZ quando se usa a precisão inteira guardada no workbook; o sufixo `P#` coincide com `PONTO`. Essa evidência vale apenas para CQTS↔CSV/KMZ e não associa os registros ao handle/entidade do DWG.
+- `P15` aparece em duas posições no CSV/KMZ; tags/textos P# do DWG repetem e as inserções/POINT/endpoints varridos não coincidiram com pontos CSV. Não usar `NUM_PLAN.XX`, nome, ordem ou proximidade como chave automática.
+- Fonte canônica físico-lógica e procedimento humano escrito não encontrados. Estado: `IDENTIDADE NÃO DETERMINADA — REQUISITO EXTERNO NECESSÁRIO`; a identidade assistida é apenas hipótese de processo, não regra confirmada. Fase31 não aprovada.
+- Unidade/CRS seguem específicos por arquivo: DWG ZNA19165 `INSUNITS=0`, `MAPCSASSIGN=nil`; isso não declara unidade/CRS das coordenadas de modelo. Não propagar metro/fuso 23/EPSG entre obras.
+- Relatório: `docs/phases/fase30d/FASE30D_PROTOCOLO_IDENTIDADE_FISICA_LOGICA.md`.
 
 
 

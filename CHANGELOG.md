@@ -1,5 +1,14 @@
 # Changelog
 
+## Fase 30D — Protocolo de Identidade Física-Lógica
+
+- Inventariadas 47 pastas de projetos locais: 37 com CAD+workbook e 25 que também contêm CSV/JSON/KMZ/KML; amostras mantidas identificadas por obra.
+- No ZNA19165 foi demonstrado join único de 39 ocorrências CQTS→CSV/KMZ usando a precisão inteira gravada no CQTS, com correspondência numérica `PONTO`/sufixo P#. Isso não liga placemark/CSV a um handle do DWG.
+- Identificadores físicos P#/TR no DWG repetem; CSV `P15` tem duas posições; não houve coincidência de pontos CSV com blocos, POINTs ou endpoints CAD capturados. `cqt_cad_extractor.lsp` pede montante/letra e `cad2kmz.lsp` pode gerar nomes por ordem quando não reconhece atributo.
+- Fonte canônica e procedimento humano escrito não encontrados. Estado: `IDENTIDADE NÃO DETERMINADA — REQUISITO EXTERNO NECESSÁRIO`; Fase31 não aprovada.
+- DWG ZNA19165 declara `INSUNITS=0`, `MAPCSASSIGN=nil`, sem `ACAD_GEOGRAPHICDATA`; CRS/unidade das coordenadas do modelo não confirmados. Sem código/fixture/testes de produto e sem alteração do `VERSION_MANIFEST.json`.
+- Relatório: `docs/phases/fase30d/FASE30D_PROTOCOLO_IDENTIDADE_FISICA_LOGICA.md`.
+
 ## Fase 30C — Reconciliação de Identidade Física × Lógica
 
 - Investigado o projeto local real ZNA855820: DWG, workbooks QDT/CQTS `ATUAL/PROJ`, 11 planilhas auxiliares e PDF; macros não foram executadas e o DWG original não foi alterado.

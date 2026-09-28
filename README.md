@@ -5,7 +5,7 @@
 [![.NET 8.0](https://img.shields.io/badge/.NET-8.0-blue.svg)](https://dotnet.microsoft.com/)
 [![Tests](https://img.shields.io/badge/Tests-212%20passed-brightgreen.svg)]()
 [![Database](https://img.shields.io/badge/Database-SQLite%203-lightgrey.svg)](https://www.sqlite.org/)
-[![Status](https://img.shields.io/badge/Fase-30C%20Reconciliacao-orange.svg)]()
+[![Status](https://img.shields.io/badge/Fase-30D%20Identidade-orange.svg)]()
 
 ---
 
@@ -25,7 +25,7 @@ O ecossistema é modularizado em bibliotecas e camadas com estrita separação d
 SISQDT_LIGHT/
 ├── docs/                                  # Documentação completa e centralizada
 │   ├── manifests/                         # Hashes SHA-256 e controle de integridade dos baselines
-│   ├── phases/                            # Relatórios cronológicos e decisões de gate (Fases 03 a 30C)
+│   ├── phases/                            # Relatórios cronológicos e decisões de gate (Fases 03 a 30D)
 │   └── specs/                             # Especificações de arquitetura, domínio, contratos e topologia
 ├── RAG/                                   # Base de conhecimento e memória persistente
 │   └── MEMORY.md                          # Memória contextual viva do projeto
@@ -90,7 +90,7 @@ Estado da suíte no checkout atual: **212 testes aprovados, 0 falhas, 0 ignorado
 
 ## 5. Estado de Engenharia
 
-- Fases 24–28 e 30A–30C concluídas nos escopos documentados; a Fase 30C não determinou a associação física/lógica do ZNA855820.
+- Fases 24–28 e 30A–30D concluídas nos escopos documentados; a Fase 30D não determinou uma identidade canônica DWG↔NetworkModel. O join CQTS↔CSV/KMZ observado no ZNA19165 é local e depende da precisão gravada no workbook.
 - O domínio preserva `Node.PhysicalPosition` separado de `Node.LayoutX/LayoutY` e consome JSON gerado pela ferramenta do acervo.
 - Icc trifásico e monofásico permanecem calculáveis e independentes das curvas de proteção.
 - Sem evidência identificável de dispositivo/curva, a avaliação retorna `EvidenceBlocked`; a suportabilidade térmica só é calculada com seção e temperatura com proveniência identificada.

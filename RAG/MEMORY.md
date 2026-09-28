@@ -2,7 +2,7 @@
 
 > **Documento de Memória Persistente do Projeto**  
 > **Última Atualização:** 2026-09-28  
-> **Versão do manifesto:** 0.7.0 (último release registrado — Fase 26; Fase 30C concluída como investigação)
+> **Versão do manifesto:** 0.7.0 (último release registrado — Fase 26; Fase 30D concluída como investigação)
 > **Branch Ativa:** `dev`  
 
 ---
@@ -104,6 +104,7 @@ Substituir o legado instável por uma aplicação desktop de alta precisão, det
 - **Fase 30A (Concluída originalmente — fonte de geometria física):** Identificou o fluxo DWG→JSON do acervo. Revalidação do DWG ZNA855820 na Fase 30C qualificou as conclusões de metro/fuso 23: os JSONs temporários citados eram de outros desenhos; o DWG não declara `MAPCSASSIGN` nem `ACAD_GEOGRAPHICDATA`, e a unidade coordenada segue indeterminada.
 - **Fase 30B (Concluída — domínio espacial/importação JSON):** `PhysicalPosition` e `PhysicalLineGeometry` são separados de `LayoutX/LayoutY`; adaptador JSON valida e preserva IDs/blocos. Associação somente por mapas explícitos; sem vínculo, geometria permanece não associada. Sem leitura DWG, transformação CRS ou mapa interativo.
 - **Fase 30C (Concluída — reconciliação de identidade física/lógica):** No ZNA855820, `NUM_PLAN.XX` contém rótulos repetidos (`P1...P11`, `TR`), não uma chave CAD única por poste; `LID` não aparece como atributo de nó. `ID LIGHT`/`PONTO`/montante no CQTS não têm importador que os ligue a `Node.ExternalKey`; JSON de linha não guarda ID/handle. Associação Node/Edge não determinada. DWG retorna `INSUNITS=4`, `MAPCSASSIGN=nil`, sem dicionário geográfico; CRS/unidade requerem confirmação. Gate: `GO PARA PRÓXIMA DECISÃO`; Fase 31 não aprovada. Relatório: `docs/phases/fase30c/FASE30C_RECONCILIACAO_IDENTIDADE_FISICA_LOGICA.md`.
+- **Fase 30D (Concluída — protocolo de identidade física/lógica):** Inventariadas 47 pastas de projeto local (37 com CAD+workbook; 25 também com CSV/JSON/KMZ/KML) e amostrados ZNA855820, ZNA19165, ZNA17846, ZNA23479, ZNA402202, BTZERO_ZNA48495 e CLANDESTINO_ZNA33649. No ZNA19165, 39 ocorrências CQTS fizeram join único com CSV/KMZ usando a precisão inteira registrada no workbook e o sufixo P#; isso confirma apenas a crosswalk CQTS↔CSV/KMZ, não o handle/entidade DWG. `P15` repete em posições físicas distintas; rótulos DWG `NUM_PLAN.XX` também se repetem e nenhum bloco/POINT/endpoint capturado coincidiu com o CSV. Não foi encontrada fonte canônica nem procedimento humano escrito. DWG ZNA19165 `INSUNITS=0`, `MAPCSASSIGN=nil`; identidade CAD↔lógica/CRS permanecem sem contrato. Estado: `IDENTIDADE NÃO DETERMINADA — REQUISITO EXTERNO NECESSÁRIO`; Fase31 não aprovada. Relatório: `docs/phases/fase30d/FASE30D_PROTOCOLO_IDENTIDADE_FISICA_LOGICA.md`.
 
 ---
 
@@ -142,6 +143,7 @@ Substituir o legado instável por uma aplicação desktop de alta precisão, det
 - Fase 30A: concluída; fonte DWG/JSON e lacunas documentadas, com unidade/fuso do ZNA qualificados pela investigação 30C.
 - Fase 30B: concluída; domínio espacial mínimo e importação de geometria JSON.
 - Fase 30C: investigação concluída; identidade física/lógica e CRS/unidade do ZNA ainda não determinados.
+- Fase 30D: investigação de protocolo no corpus concluída; crosswalk CQTS↔CSV/KMZ local no ZNA19165 não comprova identidade handle-DWG↔NetworkModel.
 - Próxima fase oficial: `NEXT_PHASE_NOT_DEFINED`.
 
 
