@@ -2,6 +2,8 @@ namespace QdtCqts.Domain;
 
 public enum CalculationMode { Qdt, Cqts }
 public enum CalculationStatus { Ready, Pass, Fail, Unknown, Blocked }
+public enum ProtectionEvidenceStatus { Available, Missing, Invalid }
+public enum ProtectionAssessmentStatus { Pass, Fail, EvidenceBlocked }
 public enum ResultScope { Transformer, Circuit, Branch, Node, Edge, Load, Point, Global }
 public enum UnitCode { Unknown, Mva, Kva, Kv, V, Ampere, Meter, Ohm, OhmPerKilometer, Celsius, Percent, Factor, UtmMeter, ConductorKey, Second, SquareMillimeter }
 public enum LoadKind { Point, Ramal, Client, Distributed, Unknown }
@@ -14,17 +16,34 @@ public sealed record ComplexImpedance(double Real, double Imaginary)
     public static ComplexImpedance operator +(ComplexImpedance a, ComplexImpedance b) => new(a.Real + b.Real, a.Imaginary + b.Imaginary);
 }
 
+public sealed record ProtectionDeviceEvidence(
+    string EvidenceId,
+    string SourceReference,
+    string Sha256,
+    string Manufacturer,
+    string Model,
+    string CurveId,
+    double RatedCurrentAmperes,
+    double EvaluationCurrentAmperes,
+    double TotalClearingTimeSeconds,
+    double InterruptingCapacityAmperes);
+
 public sealed record ProtectionAssessment(
     string ConductorKey,
-    double ConductorSectionMm2,
+    double? ConductorSectionMm2,
+    string? ConductorSectionEvidenceId,
     double MinSinglePhaseShortCircuitAmperes,
+    double MaxThreePhaseShortCircuitAmperes,
     double ConductorOperatingTemperatureCelsius,
-    double MaxAdmissibleTimeSeconds,
+    string? ConductorTemperatureEvidenceId,
+    double? MaxAdmissibleTimeSeconds,
     double ProjectCurrentAmperes,
-    double FuseRatedCurrentAmperes,
-    double FuseMeltingTimeSeconds,
-    bool IsRatedCurrentAdequate,
-    bool IsThermalWithstandAdequate,
+    ProtectionEvidenceStatus EvidenceStatus,
+    ProtectionAssessmentStatus AssessmentStatus,
+    ProtectionDeviceEvidence? DeviceEvidence,
+    bool? IsRatedCurrentAdequate,
+    bool? IsThermalWithstandAdequate,
+    bool? IsInterruptingCapacityAdequate,
     string StatusMessage);
 
 public sealed record UnitValue(double Magnitude, UnitCode Unit)

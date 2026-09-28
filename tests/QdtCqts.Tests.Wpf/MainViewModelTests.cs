@@ -25,8 +25,8 @@ public sealed class MainViewModelTests
         Assert.Equal("-", vm.CalculationId);
         Assert.Equal("-", vm.InputHash);
         Assert.Equal("-", vm.OutputHash);
-        Assert.False(vm.IsRatedCurrentAdequate);
-        Assert.False(vm.IsThermalWithstandAdequate);
+        Assert.Null(vm.IsRatedCurrentAdequate);
+        Assert.Null(vm.IsThermalWithstandAdequate);
     }
 
     [Fact]
@@ -37,8 +37,8 @@ public sealed class MainViewModelTests
 
         await vm.ExecuteCalculationAsync();
 
-        Assert.Equal(CalculationUiState.Success, vm.UiState);
-        Assert.Equal("Concluído", vm.CalculationStatus);
+        Assert.Equal(CalculationUiState.EvidenceBlocked, vm.UiState);
+        Assert.Equal("Proteção bloqueada", vm.CalculationStatus);
         Assert.False(vm.IsCalculating);
         Assert.NotEqual("-", vm.CorrelationId);
         Assert.NotEqual("-", vm.CalculationId);
@@ -52,11 +52,11 @@ public sealed class MainViewModelTests
         Assert.True(vm.MaxVoltageDropPercent > 0);
         Assert.True(vm.MaxShortCircuit3PhaseAmperes > 5000); // 8098 A no TR
         Assert.True(vm.MinShortCircuit1PhaseAmperes > 0 && vm.MinShortCircuit1PhaseAmperes < 1000); // 500 A na ponta
-        Assert.StartsWith("NH-", vm.RecommendedFuse);
-        Assert.Contains("conforme", vm.ProtectionStatus, System.StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("Não avaliado", vm.AssessedProtectionDevice);
+        Assert.Contains("EVIDENCE_BLOCKED", vm.ProtectionStatus, System.StringComparison.Ordinal);
 
-        // Campos de proteção canônicos (WS-B: contrato normalizado)
-        Assert.True(vm.IsRatedCurrentAdequate, "Fusível 1600 A deve ser adequado para I_projeto ~195 A");
+        Assert.Null(vm.IsRatedCurrentAdequate);
+        Assert.Null(vm.IsThermalWithstandAdequate);
     }
 
     [Fact]
@@ -78,7 +78,7 @@ public sealed class MainViewModelTests
 
         // Executa PROJ 4
         await vm.ExecuteCalculationAsync();
-        Assert.Equal(CalculationUiState.Success, vm.UiState);
+        Assert.Equal(CalculationUiState.EvidenceBlocked, vm.UiState);
         Assert.Equal(7, vm.Segments.Count);
         Assert.True(vm.MaxShortCircuit3PhaseAmperes > 5000);
     }

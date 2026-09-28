@@ -1,8 +1,8 @@
 # RAG MEMORY — SISQDT_LIGHT (QdtCqts)
 
 > **Documento de Memória Persistente do Projeto**  
-> **Última Atualização:** 2026-09-28  
-> **Versão do Sistema:** 0.6.0 (Fase 25 Concluída)  
+> **Última Atualização:** 2026-09-27
+> **Versão publicada:** 0.6.0 (Fase 25); **Fase em andamento:** 26
 > **Branch Ativa:** `dev`  
 
 ---
@@ -73,7 +73,7 @@ Substituir o legado instável por uma aplicação desktop de alta precisão, det
 - **Fase 22.2:** Observabilidade, logging estruturado e rastreabilidade de cálculo. Separação estrita de 3 camadas (Application Log, Calculation Trace e Audit Trail). Taxonomia formal de Event IDs (`APP`, `DB`, `IMPORT`, `CALC`, `RULE`, `TOPO`, `PARITY`, `EVID`, `GOLDEN`). Escopos assíncronos de `CorrelationId` e `CalculationId` (`CorrelationContext`). Hashes determinísticos canônicos (`DeterministicHashing`). Modos de trace `Normal` e `Diagnostic`. Higienização de dados sensíveis e PII (`SensitiveDataRedactor`). Rotação diária de logs (10MB, retenção de 30 dias). Projeto isolado `QdtCqts.Infrastructure.Observability` desacoplando Serilog das regras de negócio. Suíte expandida para 95 testes aprovados, 0 falhas. Gates: 5 gates aprovados com `GO`.
 - **Fase 23:** Integração Ponta a Ponta da Cadeia de Cálculo + Identidade Visual Oficial (sisQDT_LIGHT). 122 testes automatizados aprovados, 0 falhas. 14 gates aprovados com `GO`.
 - **Fase 24 (Fechada):** Reconstrução da Cadeia de Curto-Circuito (Icc 3φ e Icc 1φ) e Análise de Evidências de Proteção. 134 testes aprovados. Gates: todos `GO` exceto `PROTECTION_EVIDENCE_GATE = BLOCKED_BY_MISSING_EVIDENCE`.
-- **Fase 25 (Estado Atual):** Consolidação do Motor de Cálculo, Integração WPF Real e Normalização de Contratos.
+- **Fase 25 (Concluída):** Consolidação do Motor de Cálculo, Integração WPF Real e Normalização de Contratos.
   - *WS-A — Auditoria de Contratos*: `CalculationOutputModels.cs` auditado; todos os records aprovados sem duplicação.
   - *WS-B — Contract Mismatch F24.1-A Resolvido*: `ProtectionCalculationResult` normalizado com campos `IsRatedCurrentAdequate` e `IsThermalWithstandAdequate`; construção via nomeação explícita de parâmetros.
   - *WS-C — Pipeline*: `UnifiedCalculationPipeline.cs` (582 linhas) auditado; dentro do Soft Limit; cadeia matemática inalterada.
@@ -82,6 +82,8 @@ Substituir o legado instável por uma aplicação desktop de alta precisão, det
   - *WS-G — Proteção*: Curvas NH e Disjuntores continuam `BLOCKED_BY_MISSING_EVIDENCE`.
   - *WS-I/J — Testes*: 12 novos testes de integração e E2E. Suíte expandida para **146 testes aprovados, 0 falhas**.
   - Gates: `CONTRACT_GATE=GO`, `PIPELINE_GATE=GO`, `WPF_ARCHITECTURE_GATE=GO`, `WPF_INTEGRATION_GATE=GO`, `END_TO_END_GATE=GO`, `PARITY_REGRESSION_GATE=GO`, `OBSERVABILITY_GATE=GO`, `DOMAIN_ISOLATION_GATE=GO`, `BUILD_GATE=GO`, `TEST_GATE=GO`, `DOCUMENTATION_GATE=GO`, `PROTECTION_SCOPE_GATE=GO`.
+
+- **Fase 26 (Atual — fail-closed de proteção):** Removidos defaults NH-1600 A/0,1 s, fallback de seção, catálogos sintéticos de condutor e `TR_DEF`; ausência de entradas de catálogo bloqueia com diagnóstico. Evidência de dispositivo passou a ter contrato e status próprios (`Available/Missing/Invalid`, `Pass/Fail/EvidenceBlocked`). `Ib`, Icc3φ/Icc1φ e `t_adm` com proveniência identificada permanecem calculáveis; a WPF mantém resultados elétricos e sinaliza `EvidenceBlocked` quando não há curva. Golden Icc foi reclassificado como `TOLERANCE_PARITY` com erro absoluto máximo de `1e-9 A`; fluxo WPF é `BEHAVIORAL`. Evidence Store histórico segue ausente e o SHA-256 externo não é verificado contra arquivo. Fase 26 aguarda validação final e autorização do ciclo de commits; `VERSION_MANIFEST.json` permanece no release Fase 25/0.6.0.
 
 
 ---
@@ -101,14 +103,16 @@ Substituir o legado instável por uma aplicação desktop de alta precisão, det
 - `src/QdtCqts.Desktop.Wpf`: Aplicação desktop WPF para operadores de engenharia da Light com identidade visual e ícone oficial integrado.
 
 ### 4.2 Métricas de Teste
-- Total de testes automatizados: **146 testes**.
+- Total de testes automatizados no checkout da Fase 26: **149 aprovados, 0 falhas, 0 ignorados**; restore/build finalizados com 0 erros e 0 warnings.
 - Falhas: **0**.
 - Duração da execução: **~1.5 segundos**.
 
 ---
 
-## 5. Próximos Passos (Aguardando Autorização)
-1. Conexão completa da interface gráfica WPF (MVVM) ao `CalculationService` do backend;
-2. Caso a concessionária forneça tabelas numéricas de curvas de atuação tempo-corrente (NH / Disjuntores), formalizar a digitalização na camada de catálogo;
-3. Manter a integridade de todos os testes e documentação nos padrões estritos de governança.
+## 5. Roadmap
+
+- Fase 24: fechada no escopo definido; curvas NH/disjuntor, coordenação e seletividade permanecem bloqueadas por falta de evidência.
+- Fase 25: concluída; integração WPF ao `CalculationService` não é mais um próximo passo.
+- Fase 26: atual; relatório de decisão em `docs/phases/fase26/FASE26_GATE_DECISION.md`.
+- Próxima fase oficial: `NEXT_PHASE_NOT_DEFINED`. Não há roadmap numerado aprovado além da Fase 26.
 

@@ -15,6 +15,9 @@ public sealed class Fase24ShortCircuitAndProtectionParityTests
 {
     private static readonly RuleExecutionContext Context = new("EXEC-F24-SC-PARITY", "GC-F24");
 
+    private static void AssertWithinGoldenTolerance(double expected, double actual) =>
+        Assert.InRange(Math.Abs(expected - actual), 0.0d, 1e-9d);
+
     // Parâmetros Upstream reais do Corpus Homologado (C6=40MVA, D6=20%, E6=13.2kV, G4=53SC, G6=2km, AS6=112.5kVA, BW6=3.5%, BX6=220V)
     private const double Vnom = 220.0d;
     private const double ZUpstreamReal = 0.000398388888888889d;
@@ -69,7 +72,7 @@ public sealed class Fase24ShortCircuitAndProtectionParityTests
         Assert.Equal(0.000575805501116189d, rTotal, 12);
         Assert.Equal(0.015674288888888889d, xTotal, 12);
         Assert.Equal(0.015684861623471893d, zMag, 10);
-        Assert.Equal(8098.066930449716d, icc3ph, 4);
+        AssertWithinGoldenTolerance(8098.066930449716d, icc3ph);
     }
 
     [Fact]
@@ -97,8 +100,8 @@ public sealed class Fase24ShortCircuitAndProtectionParityTests
         Assert.Equal(CalculationStatus.Pass, result.Status);
         var tuple = (ValueTuple<double, double, double, double, double, double, double>)result.OutputValue!;
 
-        Assert.Equal(8098.066930449716d, tuple.Item1, 4); // Icc 3ph
-        Assert.Equal(8182.488711140876d, tuple.Item2, 4); // Icc 1ph
+        AssertWithinGoldenTolerance(8098.066930449716d, tuple.Item1); // Cálculo reproduzido; ordem IEEE-754 gera poucos ULPs de diferença.
+        AssertWithinGoldenTolerance(8182.488711140876d, tuple.Item2);
     }
 
     [Fact]
@@ -126,8 +129,8 @@ public sealed class Fase24ShortCircuitAndProtectionParityTests
         Assert.Equal(CalculationStatus.Pass, result.Status);
         var tuple = (ValueTuple<double, double, double, double, double, double, double>)result.OutputValue!;
 
-        Assert.Equal(6025.833850528486d, tuple.Item1, 4); // Icc 3ph
-        Assert.Equal(5369.69463883112d, tuple.Item2, 4);  // Icc 1ph
+        AssertWithinGoldenTolerance(6025.833850528486d, tuple.Item1);
+        AssertWithinGoldenTolerance(5369.69463883112d, tuple.Item2);
     }
 
     [Fact]
@@ -155,8 +158,8 @@ public sealed class Fase24ShortCircuitAndProtectionParityTests
         Assert.Equal(CalculationStatus.Pass, result.Status);
         var tuple = (ValueTuple<double, double, double, double, double, double, double>)result.OutputValue!;
 
-        Assert.Equal(935.1046750325303d, tuple.Item1, 4); // Icc 3ph
-        Assert.Equal(500.1808236827155d, tuple.Item2, 4); // Icc 1ph
+        AssertWithinGoldenTolerance(935.1046750325303d, tuple.Item1);
+        AssertWithinGoldenTolerance(500.1808236827155d, tuple.Item2);
     }
 
     [Fact]
@@ -183,12 +186,12 @@ public sealed class Fase24ShortCircuitAndProtectionParityTests
         Assert.Equal(CalculationStatus.Pass, result.Status);
         var tuple = (ValueTuple<double, double, double, double, double, double, double>)result.OutputValue!;
 
-        Assert.Equal(8098.06418783237d, tuple.Item1, 4); // Icc 3ph
-        Assert.Equal(8182.474839937445d, tuple.Item2, 4); // Icc 1ph
+        AssertWithinGoldenTolerance(8098.06418783237d, tuple.Item1);
+        AssertWithinGoldenTolerance(8182.474839937445d, tuple.Item2);
     }
 
     [Fact]
-    public void Proj7_ProtectionRule_ProjectCurrentMatchesExcelCH40()
+    public void Proj7_ProtectionRule_CalculatesCurrentAndThermalLimit_ButBlocksWithoutCurveEvidence()
     {
         // PROJ 7 Linha 40: BW13 = 74.448 kVA, BX6 = 220 V
         // I_projeto = 74.448 / (sqrt(3) * 220 / 1000) = 195.37533109376938 A
@@ -198,18 +201,28 @@ public sealed class Fase24ShortCircuitAndProtectionParityTests
             new RuleInput("RootLoadKva", 74.448d, UnitCode.Kva),
             new RuleInput("Vnom", 220.0d, UnitCode.V),
             new RuleInput("MinIcc1Phase", 500.1808236827155d, UnitCode.Ampere),
+            new RuleInput("MaxIcc3Phase", 8098.066930449716d, UnitCode.Ampere),
             new RuleInput("CriticalTemperature", 34.698781411586566d, UnitCode.Celsius),
+            new RuleInput("CriticalTemperatureEvidenceId", CandidateCableTemperatureRule.EvidenceId, UnitCode.Unknown),
             new RuleInput("CriticalConductorKey", "16 Al_CONC_Tri", UnitCode.ConductorKey)
         }, Context);
 
-        Assert.Equal(CalculationStatus.Pass, result.Status);
+        Assert.Equal(CalculationStatus.Blocked, result.Status);
         var ass = Assert.IsType<ProtectionAssessment>(result.OutputValue);
         Assert.Equal(195.37533109376938d, ass.ProjectCurrentAmperes, 8);
-        Assert.True(ass.IsRatedCurrentAdequate);
+        Assert.True(ass.MaxAdmissibleTimeSeconds > 0.0);
+        Assert.Equal(CandidateProtectionRule.ConductorSectionEvidenceId, ass.ConductorSectionEvidenceId);
+        Assert.Equal(CandidateCableTemperatureRule.EvidenceId, ass.ConductorTemperatureEvidenceId);
+        Assert.Equal(ProtectionEvidenceStatus.Missing, ass.EvidenceStatus);
+        Assert.Equal(ProtectionAssessmentStatus.EvidenceBlocked, ass.AssessmentStatus);
+        Assert.Null(ass.DeviceEvidence);
+        Assert.Null(ass.IsRatedCurrentAdequate);
+        Assert.Null(ass.IsThermalWithstandAdequate);
+        Assert.Null(ass.IsInterruptingCapacityAdequate);
     }
 
     [Fact]
-    public void Proj4_ProtectionRule_ProjectCurrentMatchesExcelCH40()
+    public void Proj4_ProtectionRule_CalculatesCurrentAndThermalLimit_ButBlocksWithoutCurveEvidence()
     {
         // PROJ 4 Linha 40: BW13 = 75.68658823529411 kVA, BX6 = 220 V
         // I_projeto = 75.68658823529411 / (sqrt(3) * 220 / 1000) = 198.625782234961 A
@@ -219,14 +232,98 @@ public sealed class Fase24ShortCircuitAndProtectionParityTests
             new RuleInput("RootLoadKva", 75.68658823529411d, UnitCode.Kva),
             new RuleInput("Vnom", 220.0d, UnitCode.V),
             new RuleInput("MinIcc1Phase", 486.4088034361912d, UnitCode.Ampere),
+            new RuleInput("MaxIcc3Phase", 8098.06418783237d, UnitCode.Ampere),
             new RuleInput("CriticalTemperature", 34.698781411586566d, UnitCode.Celsius),
+            new RuleInput("CriticalTemperatureEvidenceId", CandidateCableTemperatureRule.EvidenceId, UnitCode.Unknown),
             new RuleInput("CriticalConductorKey", "16 Al_CONC_Tri", UnitCode.ConductorKey)
         }, Context);
 
-        Assert.Equal(CalculationStatus.Pass, result.Status);
+        Assert.Equal(CalculationStatus.Blocked, result.Status);
         var ass = Assert.IsType<ProtectionAssessment>(result.OutputValue);
         Assert.Equal(198.625782234961d, ass.ProjectCurrentAmperes, 8);
-        Assert.True(ass.IsRatedCurrentAdequate);
+        Assert.True(ass.MaxAdmissibleTimeSeconds > 0.0);
+        Assert.Equal(ProtectionAssessmentStatus.EvidenceBlocked, ass.AssessmentStatus);
+        Assert.Null(ass.IsRatedCurrentAdequate);
+    }
+
+    [Fact]
+    public void ExplicitProtectionEvidence_IsConsumedWithoutFallbackValues()
+    {
+        const double minIcc1Phase = 1800.0d;
+        var evidence = new ProtectionDeviceEvidence(
+            "TEST-ONLY-EVIDENCE",
+            "test fixture; not an engineering source",
+            new string('A', 64),
+            "TEST FIXTURE",
+            "TEST DEVICE",
+            "TEST CURVE POINT",
+            250.0d,
+            minIcc1Phase,
+            0.01d,
+            10000.0d);
+
+        var result = new CandidateProtectionRule().Execute(new[]
+        {
+            new RuleInput("RootLoadKva", 50.0d, UnitCode.Kva),
+            new RuleInput("Vnom", 220.0d, UnitCode.V),
+            new RuleInput("MinIcc1Phase", minIcc1Phase, UnitCode.Ampere),
+            new RuleInput("MaxIcc3Phase", 8098.066930449716d, UnitCode.Ampere),
+            new RuleInput("CriticalTemperature", 40.0d, UnitCode.Celsius),
+            new RuleInput("CriticalTemperatureEvidenceId", CandidateCableTemperatureRule.EvidenceId, UnitCode.Unknown),
+            new RuleInput("CriticalConductorKey", "70 Al - MX", UnitCode.ConductorKey),
+            new RuleInput("DeviceEvidence", evidence, UnitCode.Unknown)
+        }, Context);
+
+        Assert.Equal(CalculationStatus.Pass, result.Status);
+        var assessment = Assert.IsType<ProtectionAssessment>(result.OutputValue);
+        Assert.Equal(ProtectionEvidenceStatus.Available, assessment.EvidenceStatus);
+        Assert.Equal(ProtectionAssessmentStatus.Pass, assessment.AssessmentStatus);
+        Assert.Equal(CandidateProtectionRule.ConductorSectionEvidenceId, assessment.ConductorSectionEvidenceId);
+        Assert.Equal(CandidateCableTemperatureRule.EvidenceId, assessment.ConductorTemperatureEvidenceId);
+        Assert.Same(evidence, assessment.DeviceEvidence);
+        Assert.Equal(250.0d, assessment.DeviceEvidence!.RatedCurrentAmperes);
+        Assert.Equal(0.01d, assessment.DeviceEvidence.TotalClearingTimeSeconds);
+        Assert.True(assessment.IsRatedCurrentAdequate);
+        Assert.True(assessment.IsThermalWithstandAdequate);
+        Assert.True(assessment.IsInterruptingCapacityAdequate);
+    }
+
+    [Fact]
+    public void InvalidDeviceEvidenceAndUnprovenTemperature_AreBlockedWithoutFallbacks()
+    {
+        var invalidEvidence = new ProtectionDeviceEvidence(
+            "TEST-ONLY-EVIDENCE",
+            "test fixture; not an engineering source",
+            string.Empty,
+            "TEST FIXTURE",
+            "TEST DEVICE",
+            "TEST CURVE POINT",
+            250.0d,
+            500.1808236827155d,
+            0.01d,
+            10000.0d);
+
+        var result = new CandidateProtectionRule().Execute(new[]
+        {
+            new RuleInput("RootLoadKva", 50.0d, UnitCode.Kva),
+            new RuleInput("Vnom", 220.0d, UnitCode.V),
+            new RuleInput("MinIcc1Phase", 500.1808236827155d, UnitCode.Ampere),
+            new RuleInput("MaxIcc3Phase", 8098.066930449716d, UnitCode.Ampere),
+            new RuleInput("CriticalTemperature", 40.0d, UnitCode.Celsius),
+            new RuleInput("CriticalConductorKey", "70 Al - MX", UnitCode.ConductorKey),
+            new RuleInput("DeviceEvidence", invalidEvidence, UnitCode.Unknown)
+        }, Context);
+
+        Assert.Equal(CalculationStatus.Blocked, result.Status);
+        var assessment = Assert.IsType<ProtectionAssessment>(result.OutputValue);
+        Assert.Equal(ProtectionEvidenceStatus.Invalid, assessment.EvidenceStatus);
+        Assert.Equal(ProtectionAssessmentStatus.EvidenceBlocked, assessment.AssessmentStatus);
+        Assert.Equal(63.8014d, assessment.ConductorSectionMm2);
+        Assert.Equal(CandidateProtectionRule.ConductorSectionEvidenceId, assessment.ConductorSectionEvidenceId);
+        Assert.Null(assessment.ConductorTemperatureEvidenceId);
+        Assert.Null(assessment.MaxAdmissibleTimeSeconds);
+        Assert.Null(assessment.IsInterruptingCapacityAdequate);
+        Assert.Equal(0.0d, CandidateProtectionRule.ResolveRealConductorSection("unmapped conductor"));
     }
 
     [Fact]
@@ -246,11 +343,13 @@ public sealed class Fase24ShortCircuitAndProtectionParityTests
             new RuleInput("RootLoadKva", 50.0d, UnitCode.Kva),
             new RuleInput("Vnom", 220.0d, UnitCode.V),
             new RuleInput("MinIcc1Phase", icc, UnitCode.Ampere),
+            new RuleInput("MaxIcc3Phase", 8098.066930449716d, UnitCode.Ampere),
             new RuleInput("CriticalTemperature", tOp, UnitCode.Celsius),
+            new RuleInput("CriticalTemperatureEvidenceId", CandidateCableTemperatureRule.EvidenceId, UnitCode.Unknown),
             new RuleInput("CriticalConductorKey", "70 Al - MX", UnitCode.ConductorKey)
         }, Context);
 
         var ass = Assert.IsType<ProtectionAssessment>(result.OutputValue);
-        Assert.Equal(expectedTAl, ass.MaxAdmissibleTimeSeconds, 6);
+        Assert.Equal(expectedTAl, ass.MaxAdmissibleTimeSeconds!.Value, 6);
     }
 }

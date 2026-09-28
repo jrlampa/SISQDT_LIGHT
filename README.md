@@ -3,9 +3,9 @@
 **Sistema Unificado de Cálculo e Análise de Redes de Distribuição (QDT + CQTS)**
 
 [![.NET 8.0](https://img.shields.io/badge/.NET-8.0-blue.svg)](https://dotnet.microsoft.com/)
-[![Tests](https://img.shields.io/badge/Tests-53%20passed-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-149%20passed-brightgreen.svg)]()
 [![Database](https://img.shields.io/badge/Database-SQLite%203-lightgrey.svg)](https://www.sqlite.org/)
-[![Status](https://img.shields.io/badge/Gate-Fase%2018%20(Go%20Restricted)-yellow.svg)]()
+[![Status](https://img.shields.io/badge/Fase-26%20Fail--Closed-orange.svg)]()
 
 ---
 
@@ -25,7 +25,7 @@ O ecossistema é modularizado em bibliotecas e camadas com estrita separação d
 SISQDT_LIGHT/
 ├── docs/                                  # Documentação completa e centralizada
 │   ├── manifests/                         # Hashes SHA-256 e controle de integridade dos baselines
-│   ├── phases/                            # Relatórios cronológicos e decisões de gate (Fase 03 a Fase 18)
+│   ├── phases/                            # Relatórios cronológicos e decisões de gate (Fases 03 a 26)
 │   └── specs/                             # Especificações de arquitetura, domínio, contratos e topologia
 ├── RAG/                                   # Base de conhecimento e memória persistente
 │   └── MEMORY.md                          # Memória contextual viva do projeto
@@ -83,10 +83,19 @@ dotnet test
 dotnet test --logger "console;verbosity=normal"
 ```
 
-Estado da suíte atual: **53 testes aprovados, 0 falhas**.
+Estado da suíte no checkout da Fase 26: **149 testes aprovados, 0 falhas, 0 ignorados**.
 
 ---
 
-## 5. Documentação Adicional
+## 5. Estado de Engenharia
+
+- Fases 24 e 25 concluídas nos escopos documentados; a Fase 26 está em andamento na branch `dev`.
+- Icc trifásico e monofásico permanecem calculáveis e independentes das curvas de proteção.
+- Sem evidência identificável de dispositivo/curva, a avaliação retorna `EvidenceBlocked`; a suportabilidade térmica só é calculada com seção e temperatura com proveniência identificada.
+- Curvas NH/disjuntor, coordenação e seletividade não são implementadas nem inferidas.
+- `VERSION_MANIFEST.json` identifica a última versão commitada (`0.6.0`, Fase 25); sua atualização aguarda autorização para os commits da Fase 26.
+- Roadmap posterior: `NEXT_PHASE_NOT_DEFINED`.
+
+## 6. Documentação Adicional
 
 Para detalhes arquiteturais e especificações técnicas de engenharia, consulte o diretório [docs/](docs/README.md).

@@ -167,5 +167,19 @@ O pipeline de cálculo orquestra de ponta a ponta:
 - **Integração WPF:** Configuração nativa de `ApplicationIcon`, Resources e Window Icon no projeto `QdtCqts.Desktop.Wpf`.
 - **Manual Oficial de Diretrizes:** Documentado em `docs/brand/README.md`.
 
+---
+
+## 9. Integridade da Avaliação de Proteção (Fase 26)
+
+- `ProtectionDeviceEvidence` só pode ser consumida com referência de origem, SHA-256, fabricante, modelo, curva, corrente nominal, corrente do ponto de avaliação, tempo total de interrupção e capacidade de interrupção explícitos. O contrato atual não implementa curva completa, I²t, coordenação ou seletividade.
+- `ProtectionEvidenceStatus` (`Available`, `Missing`, `Invalid`) representa a evidência; `ProtectionAssessmentStatus` (`Pass`, `Fail`, `EvidenceBlocked`) representa a conclusão. Ausência/invalidez não equivale a falha elétrica.
+- A ausência de evidência não impede `Ib`, Icc3φ ou Icc1φ. Onderdonk requer seção catalogada (`CQTS.REAL_PROJECT.LADO1_CT38_CU40`) e temperatura de regime cuja regra passou (`F17-CQTS-PROJ7-LADO1-P13`); caso contrário, `t_adm` permanece nulo.
+- É proibido inferir corrente nominal, tempo de fusão/atuação, capacidade de interrupção ou seção de condutor. Indicadores de adequação são anuláveis até uma evidência válida ser fornecida.
+- O pipeline não sintetiza condutor nem transformador quando faltam no modelo: ampacidade, R/X, potência e impedância de catálogo devem estar presentes; caso contrário, o cálculo é bloqueado com diagnóstico explícito.
+- O pipeline mantém o resultado elétrico geral `Pass` e a WPF sinaliza separadamente `EvidenceBlocked`; isso não deve ser convertido em `CalculationError` nem ocultar os resultados elétricos calculáveis.
+- O identificador e o SHA-256 de uma evidência externa são metadados de proveniência. Como o Evidence Store histórico está ausente, o sistema não afirma validar o hash contra o conteúdo do arquivo.
+- Paridade dos goldens de curto-circuito é `TOLERANCE_PARITY` (`1e-9 A` absoluta), não igualdade bit-a-bit; a ordem de operações IEEE-754 observada difere por poucos ULPs. Nenhuma alteração de motor foi feita para forçar igualdade.
+- Estado de fases: Fase 24 fechada no escopo acima; Fase 25 concluída; Fase 26 atual. Próxima fase oficial: `NEXT_PHASE_NOT_DEFINED`.
+
 
 

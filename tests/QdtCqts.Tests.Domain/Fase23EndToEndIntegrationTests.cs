@@ -143,7 +143,8 @@ public sealed class Fase23EndToEndIntegrationTests
         {
             new Conductor("16_Al", "1", "16 Al_CONC_Tri", "16 Al_CONC_Tri", new UnitValue(80.0, UnitCode.Ampere), new UnitValue(2.06, UnitCode.Ohm), new UnitValue(0.85, UnitCode.Ohm))
         };
-        var model = new NetworkModel("M_OV", "1", new[] { trafo }, new[] { circuit }, nodes, edges, Array.Empty<Branch>(), loads, conductors, Array.Empty<ElectricalParameter>());
+        var model = new NetworkModel("M_OV", "1", new[] { trafo }, new[] { circuit }, nodes, edges, Array.Empty<Branch>(), loads, conductors,
+            new[] { new ElectricalParameter("V", 220.0, "220", UnitCode.V, true) });
         var version = new ProjectVersion("V_OV", "P_OV", "1", model, "HASH", true);
 
         var service = new CalculationService();
@@ -154,6 +155,18 @@ public sealed class Fase23EndToEndIntegrationTests
         var seg = result.Report!.Segments.Single();
         Assert.True(seg.IsOverloaded);
         Assert.True(seg.OperatingCurrentAmperes > seg.RatedAmpacityAmperes);
+
+        var modelWithoutConductor = new NetworkModel(model.Id, model.VersionId, model.Transformers, model.Circuits, model.Nodes, model.Edges,
+            model.Branches, model.Loads, Array.Empty<Conductor>(), model.Parameters);
+        var missingConductorResult = service.ExecuteCalculation(
+            new ProjectVersion("V_NO_CONDUCTOR", "P_OV", "1", modelWithoutConductor, "HASH", true), CalculationMode.Cqts);
+        Assert.Contains(missingConductorResult.Diagnostics, diagnostic => diagnostic.Code == "MISSING_CONDUCTOR_CATALOG");
+
+        var modelWithoutTransformer = new NetworkModel(model.Id, model.VersionId, Array.Empty<Transformer>(), model.Circuits, model.Nodes, model.Edges,
+            model.Branches, model.Loads, model.Conductors, model.Parameters);
+        var missingTransformerResult = service.ExecuteCalculation(
+            new ProjectVersion("V_NO_TRANSFORMER", "P_OV", "1", modelWithoutTransformer, "HASH", true), CalculationMode.Cqts);
+        Assert.Contains(missingTransformerResult.Diagnostics, diagnostic => diagnostic.Code == "MISSING_TRANSFORMER_CATALOG");
     }
 
     [Fact]
@@ -193,7 +206,8 @@ public sealed class Fase23EndToEndIntegrationTests
             new Conductor("70_Al", "1", "70 Al - MX", "70 Al - MX", new UnitValue(195.0, UnitCode.Ampere), new UnitValue(0.472, UnitCode.Ohm), new UnitValue(0.126, UnitCode.Ohm))
         };
 
-        var model = new NetworkModel("M_P4", "1", new[] { trafo }, new[] { circuit }, nodes, edges, Array.Empty<Branch>(), loads, conductors, Array.Empty<ElectricalParameter>());
+        var model = new NetworkModel("M_P4", "1", new[] { trafo }, new[] { circuit }, nodes, edges, Array.Empty<Branch>(), loads, conductors,
+            new[] { new ElectricalParameter("V", 220.0, "220", UnitCode.V, true) });
         var version = new ProjectVersion("V_P4", "P4", "REV1", model, "HASH_P4", true);
 
         var service = new CalculationService();

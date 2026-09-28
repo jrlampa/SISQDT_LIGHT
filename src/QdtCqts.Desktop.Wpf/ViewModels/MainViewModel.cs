@@ -71,10 +71,10 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private double _minShortCircuit1PhaseAmperes;
 
     // Proteção
-    private string _recommendedFuse = "-";
+    private string _assessedProtectionDevice = "-";
     private string _protectionStatus = "Aguardando cálculo";
-    private bool _isRatedCurrentAdequate;
-    private bool _isThermalWithstandAdequate;
+    private bool? _isRatedCurrentAdequate;
+    private bool? _isThermalWithstandAdequate;
 
     private string _selectedProject;
 
@@ -184,10 +184,10 @@ public sealed class MainViewModel : INotifyPropertyChanged
     }
 
     // ── Proteção ──
-    public string RecommendedFuse
+    public string AssessedProtectionDevice
     {
-        get => _recommendedFuse;
-        private set => SetField(ref _recommendedFuse, value);
+        get => _assessedProtectionDevice;
+        private set => SetField(ref _assessedProtectionDevice, value);
     }
 
     public string ProtectionStatus
@@ -197,14 +197,14 @@ public sealed class MainViewModel : INotifyPropertyChanged
     }
 
     /// <summary>Corrente de fusível adequada para a carga do circuito (Erro 06).</summary>
-    public bool IsRatedCurrentAdequate
+    public bool? IsRatedCurrentAdequate
     {
         get => _isRatedCurrentAdequate;
         private set => SetField(ref _isRatedCurrentAdequate, value);
     }
 
     /// <summary>Suportabilidade térmica do condutor no curto-circuito (Erro 07).</summary>
-    public bool IsThermalWithstandAdequate
+    public bool? IsThermalWithstandAdequate
     {
         get => _isThermalWithstandAdequate;
         private set => SetField(ref _isThermalWithstandAdequate, value);
@@ -307,30 +307,39 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
         ApplyProtectionState(report.Protection);
 
-        StatusMessage = $"Cálculo executado em {ExecutionDurationMs:F1} ms · {Segments.Count} trechos · " +
-                        $"ΔV máx: {MaxVoltageDropPercent:F2}% · Icc1φ mín: {MinShortCircuit1PhaseAmperes:F0} A";
+        string calculationSummary = $"Cálculo elétrico executado em {ExecutionDurationMs:F1} ms · {Segments.Count} trechos · " +
+                                    $"ΔV máx: {MaxVoltageDropPercent:F2}% · Icc1φ mín: {MinShortCircuit1PhaseAmperes:F0} A";
+        StatusMessage = UiState == CalculationUiState.EvidenceBlocked
+            ? $"{calculationSummary} · avaliação por curva bloqueada por falta de evidência."
+            : calculationSummary;
     }
 
     private void ApplyProtectionState(ProtectionCalculationResult? protection)
     {
         if (protection is null)
         {
-            RecommendedFuse = "N/D";
-            ProtectionStatus = "Dados de proteção indisponíveis.";
-            IsRatedCurrentAdequate = false;
-            IsThermalWithstandAdequate = false;
+            AssessedProtectionDevice = "Não avaliado";
+            ProtectionStatus = "EVIDENCE_BLOCKED: resultado de proteção ausente.";
+            IsRatedCurrentAdequate = null;
+            IsThermalWithstandAdequate = null;
+            UiState = CalculationUiState.EvidenceBlocked;
+            CalculationStatus = "Proteção bloqueada";
+            StatusColor = "#F59E0B";
             return;
         }
 
-        RecommendedFuse = $"NH-{protection.RecommendedFuseCurrentAmperes:F0} A";
+        AssessedProtectionDevice = protection.DeviceEvidence is null
+            ? "Não avaliado"
+            : $"{protection.DeviceEvidence.Model} · {protection.DeviceEvidence.RatedCurrentAmperes:F0} A";
         ProtectionStatus = protection.StatusMessage;
         IsRatedCurrentAdequate = protection.IsRatedCurrentAdequate;
         IsThermalWithstandAdequate = protection.IsThermalWithstandAdequate;
 
-        // Se a proteção apresenta restrição, sinalizar EvidenceBlocked sem sobreescrever o Success geral
-        if (!protection.IsRatedCurrentAdequate || !protection.IsThermalWithstandAdequate)
+        if (protection.AssessmentStatus == ProtectionAssessmentStatus.EvidenceBlocked)
         {
-            // Mantém UiState = Success mas ProtectionStatus já comunica o problema
+            UiState = CalculationUiState.EvidenceBlocked;
+            CalculationStatus = "Proteção bloqueada";
+            StatusColor = "#F59E0B";
         }
     }
 
@@ -355,10 +364,10 @@ public sealed class MainViewModel : INotifyPropertyChanged
         MaxVoltageDropPercent = 0.0;
         MaxShortCircuit3PhaseAmperes = 0.0;
         MinShortCircuit1PhaseAmperes = 0.0;
-        RecommendedFuse = "-";
+        AssessedProtectionDevice = "-";
         ProtectionStatus = "Aguardando cálculo";
-        IsRatedCurrentAdequate = false;
-        IsThermalWithstandAdequate = false;
+        IsRatedCurrentAdequate = null;
+        IsThermalWithstandAdequate = null;
         CorrelationId = "-";
         CalculationId = "-";
         InputHash = "-";

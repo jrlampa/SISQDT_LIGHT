@@ -100,8 +100,8 @@ public sealed class Fase25IntegrationTests
 
         await vm.ExecuteCalculationAsync();
 
-        Assert.Equal(CalculationUiState.Success, vm.UiState);
-        Assert.Equal("Concluído", vm.CalculationStatus);
+        Assert.Equal(CalculationUiState.EvidenceBlocked, vm.UiState);
+        Assert.Equal("Proteção bloqueada", vm.CalculationStatus);
         Assert.False(vm.IsCalculating);
         Assert.NotEmpty(vm.Segments);
     }
@@ -152,15 +152,30 @@ public sealed class Fase25IntegrationTests
     // WS-I.5 — Proteção térmica disponível no resultado
     // ═══════════════════════════════════════════════════════════════
     [Fact]
-    public async Task WsI5_Calculation_ProtectionThermalWithstandAvailable()
+    public async Task WsI5_Calculation_KeepsThermalLimitAndBlocksCurveAssessment()
     {
         var vm = new MainViewModel();
         await vm.ExecuteCalculationAsync();
 
-        // A proteção deve ter sido calculada (status não é "N/D" genérico)
-        Assert.NotEqual("N/D", vm.RecommendedFuse);
-        Assert.Contains("NH-", vm.RecommendedFuse, StringComparison.OrdinalIgnoreCase);
-        Assert.NotEmpty(vm.ProtectionStatus);
+        Assert.Equal(CalculationUiState.EvidenceBlocked, vm.UiState);
+        Assert.Equal("Não avaliado", vm.AssessedProtectionDevice);
+        Assert.Contains("EVIDENCE_BLOCKED", vm.ProtectionStatus, StringComparison.Ordinal);
+        Assert.Contains("suportabilidade térmica", vm.ProtectionStatus, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task P07ToP09_WpfBlocksOnlyProtectionAndKeepsShortCircuitResults()
+    {
+        var vm = new MainViewModel();
+        await vm.ExecuteCalculationAsync();
+
+        Assert.Equal(CalculationUiState.EvidenceBlocked, vm.UiState);
+        Assert.NotEqual(CalculationUiState.CalculationError, vm.UiState);
+        Assert.Equal(7, vm.Segments.Count);
+        Assert.True(vm.Segments[0].ShortCircuit3PhaseAmperes > 5000.0);
+        Assert.Contains(vm.Segments, segment => segment.ShortCircuit1PhaseAmperes > 0.0);
+        Assert.True(vm.MaxShortCircuit3PhaseAmperes > 8000.0);
+        Assert.True(vm.MinShortCircuit1PhaseAmperes > 0.0);
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -184,9 +199,9 @@ public sealed class Fase25IntegrationTests
         var vm = new MainViewModel();
         await vm.ExecuteCalculationAsync();
 
-        // Proteção com fusível default 1600A > I_projeto (~195A) → deve ser adequada
-        Assert.True(vm.IsRatedCurrentAdequate,
-            "Fusível de 1600 A deve ser adequado para I_projeto de ~195 A.");
+        // Expectativa histórica substituída: sem curva, a avaliação agora é EvidenceBlocked.
+        Assert.Null(vm.IsRatedCurrentAdequate);
+        Assert.Null(vm.IsThermalWithstandAdequate);
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -279,6 +294,7 @@ public sealed class Fase25IntegrationTests
         // 7. Avaliação térmica disponível
         Assert.NotNull(report.Protection);
         Assert.True(report.Protection!.MaxAdmissibleTimeSeconds > 0);
+        Assert.Equal(ProtectionAssessmentStatus.EvidenceBlocked, report.Protection.AssessmentStatus);
 
         // 8. Status coerente
         Assert.Equal(CalculationStatus.Pass, result.Status);
@@ -292,7 +308,7 @@ public sealed class Fase25IntegrationTests
         vm.SelectedProject = "CQT PROJ 7 - AV PADRE DECAMINADA (Rev 2)";
         await vm.ExecuteCalculationAsync();
 
-        Assert.Equal(CalculationUiState.Success, vm.UiState);
+        Assert.Equal(CalculationUiState.EvidenceBlocked, vm.UiState);
         Assert.Equal(7, vm.Segments.Count);
         Assert.True(vm.MaxShortCircuit3PhaseAmperes > 8090);
         Assert.True(vm.MinShortCircuit1PhaseAmperes > 400);
@@ -312,7 +328,7 @@ public sealed class Fase25IntegrationTests
         vm.SelectedProject = "CQT PROJ 4 - AV PADRE DECAMINADA (Rev 1)";
         await vm.ExecuteCalculationAsync();
 
-        Assert.Equal(CalculationUiState.Success, vm.UiState);
+        Assert.Equal(CalculationUiState.EvidenceBlocked, vm.UiState);
         Assert.Equal(7, vm.Segments.Count);
 
         // PROJ 4: Icc3φ CB13 = 8098.064... A
@@ -333,7 +349,7 @@ public sealed class Fase25IntegrationTests
     {
         var vm = new MainViewModel();
         await vm.ExecuteCalculationAsync();
-        Assert.Equal(CalculationUiState.Success, vm.UiState);
+        Assert.Equal(CalculationUiState.EvidenceBlocked, vm.UiState);
 
         vm.SelectedProject = "CQT PROJ 4 - AV PADRE DECAMINADA (Rev 1)";
 
@@ -345,7 +361,7 @@ public sealed class Fase25IntegrationTests
         Assert.Equal("-", vm.OutputHash);
 
         await vm.ExecuteCalculationAsync();
-        Assert.Equal(CalculationUiState.Success, vm.UiState);
+        Assert.Equal(CalculationUiState.EvidenceBlocked, vm.UiState);
         Assert.Equal(7, vm.Segments.Count);
     }
 }

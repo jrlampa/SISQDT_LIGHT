@@ -49,24 +49,64 @@ public sealed class UnifiedCalculationPipeline
         }
 
         var topologyValidator = new TopologyValidator();
+        var topologicalOrderByCircuit = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal);
+        foreach (var circuit in networkModel.Circuits)
+        {
+            var topologyValidation = topologyValidator.Validate(networkModel, circuit.Id);
+            if (!topologyValidation.IsValid)
+            {
+                var firstDiagnostic = topologyValidation.Diagnostics.First();
+                return CalculationResult.Blocked(request, $"TOPOLOGY_{firstDiagnostic.Code}", firstDiagnostic.Message);
+            }
+
+            topologicalOrderByCircuit[circuit.Id] = topologyValidation.OrderedNodeIds;
+        }
+
+        var conductorByEdge = new Dictionary<string, Conductor>(StringComparer.Ordinal);
+        foreach (var edge in networkModel.Edges)
+        {
+            var conductor = networkModel.Conductors.FirstOrDefault(candidate =>
+                string.Equals(candidate.Id, edge.ConductorId, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(candidate.CatalogKey, edge.ConductorId, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(candidate.Name, edge.ConductorId, StringComparison.OrdinalIgnoreCase));
+            if (conductor is null)
+            {
+                return CalculationResult.Blocked(request, "MISSING_CONDUCTOR_CATALOG", $"O trecho '{edge.Id}' não possui condutor correspondente no catálogo do modelo.");
+            }
+
+            conductorByEdge[edge.Id] = conductor;
+        }
+
+        var transformerByCircuit = new Dictionary<string, Transformer>(StringComparer.Ordinal);
+        foreach (var circuit in networkModel.Circuits)
+        {
+            var transformer = networkModel.Transformers.FirstOrDefault(candidate => candidate.Id == circuit.TransformerId);
+            if (transformer is null)
+            {
+                return CalculationResult.Blocked(request, "MISSING_TRANSFORMER_CATALOG", $"O circuito '{circuit.Id}' não possui transformador correspondente no modelo.");
+            }
+
+            transformerByCircuit[circuit.Id] = transformer;
+        }
+
         var segmentResults = new List<SegmentCalculationResult>();
         var nodeResults = new List<NodeCalculationResult>();
         var trafoResults = new List<TransformerCalculationResult>();
+        var edgeTemperatureEvidenceIds = new Dictionary<string, string>(StringComparer.Ordinal);
 
         // Parmetros globais de circuito / projeto
-        double defaultVoltage = GetNumericParam(networkModel, "V", 220.0);
+        var nominalVoltageParameter = networkModel.Parameters.FirstOrDefault(p => string.Equals(p.Key, "V", StringComparison.OrdinalIgnoreCase));
+        if (nominalVoltageParameter is null || !nominalVoltageParameter.IsKnown ||
+            nominalVoltageParameter.NumericValue is not double defaultVoltage || !double.IsFinite(defaultVoltage) || defaultVoltage <= 0.0)
+        {
+            return CalculationResult.Blocked(request, "MISSING_NOMINAL_VOLTAGE", "Tensão nominal conhecida e positiva é obrigatória para calcular a rede.");
+        }
+
         string applyFloorParam = GetTextParam(networkModel, "CH5", "SIM");
         double mtDropParam = GetNumericParam(networkModel, "MtVoltageDropPercent", 0.0);
 
         foreach (var circuit in networkModel.Circuits)
         {
-            var topoValidation = topologyValidator.Validate(networkModel, circuit.Id);
-            if (!topoValidation.IsValid)
-            {
-                var firstDiag = topoValidation.Diagnostics.First();
-                return CalculationResult.Blocked(request, $"TOPOLOGY_{firstDiag.Code}", firstDiag.Message);
-            }
-
             var circuitNodes = networkModel.Nodes.Where(n => n.CircuitId == circuit.Id).ToList();
             var circuitEdges = networkModel.Edges.Where(e => e.CircuitId == circuit.Id).ToList();
 
@@ -102,7 +142,8 @@ public sealed class UnifiedCalculationPipeline
             // 2. Acumulao a Montante (Post-Order / Jusante -> Montante)
             var accumulatedLoadKva = new Dictionary<string, double>(StringComparer.Ordinal);
             var accumulatedConsumers = new Dictionary<string, double>(StringComparer.Ordinal);
-            var reverseTopologicalNodes = topoValidation.OrderedNodeIds.Reverse().ToList();
+            var orderedNodeIds = topologicalOrderByCircuit[circuit.Id];
+            var reverseTopologicalNodes = orderedNodeIds.Reverse().ToList();
 
             foreach (var nodeId in reverseTopologicalNodes)
             {
@@ -160,11 +201,7 @@ public sealed class UnifiedCalculationPipeline
                 edgeEndLoadKva[edge.Id] = mKva;
 
                 // Consulta do condutor no catlogo do modelo
-                var conductor = networkModel.Conductors.FirstOrDefault(c =>
-                    string.Equals(c.Id, edge.ConductorId, StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(c.CatalogKey, edge.ConductorId, StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(c.Name, edge.ConductorId, StringComparison.OrdinalIgnoreCase))
-                    ?? FallbackConductor(edge.ConductorId);
+                var conductor = conductorByEdge[edge.Id];
 
                 double rcc20 = conductor.Resistance.Magnitude;
                 double xReactance = conductor.Reactance.Magnitude;
@@ -201,6 +238,7 @@ public sealed class UnifiedCalculationPipeline
 
                 // Temperatura de regime contnuo (T)
                 double operatingTemp = 30.0;
+                string? operatingTemperatureEvidenceId = null;
                 if (phaseCount == 3 && totalAmpacity > 0)
                 {
                     var tempResult = _cableTempRule.Execute(new[]
@@ -215,7 +253,12 @@ public sealed class UnifiedCalculationPipeline
                     if (tempResult.Status == CalculationStatus.Pass)
                     {
                         operatingTemp = (double)tempResult.OutputValue!;
+                        operatingTemperatureEvidenceId = CandidateCableTemperatureRule.EvidenceId;
                     }
+                }
+                if (operatingTemperatureEvidenceId is not null)
+                {
+                    edgeTemperatureEvidenceIds[edge.Id] = operatingTemperatureEvidenceId;
                 }
                 else
                 {
@@ -260,9 +303,7 @@ public sealed class UnifiedCalculationPipeline
             }
 
             // 4. Queda de Tensão do Transformador e Média Tensão
-            var trafo = networkModel.Transformers.FirstOrDefault(t => t.Id == circuit.TransformerId)
-                ?? networkModel.Transformers.FirstOrDefault()
-                ?? new Transformer("TR_DEF", "TR", new UnitValue(112.5, UnitCode.Kva), new UnitValue(3.5, UnitCode.Percent), new UnitValue(220, UnitCode.V), new UnitValue(0, UnitCode.Kva));
+            var trafo = transformerByCircuit[circuit.Id];
 
             // Carga do transformador é a carga do trecho inicial saindo do TR
             var rootNode = circuitNodes.FirstOrDefault(n => n.IsSource) ?? circuitNodes.First();
@@ -319,7 +360,7 @@ public sealed class UnifiedCalculationPipeline
             accumulatedBtImpedanceX[rootNode.Id] = 0.0;
             accumulatedBtRfn[rootNode.Id] = 0.0;
 
-            foreach (var nodeId in topoValidation.OrderedNodeIds)
+            foreach (var nodeId in orderedNodeIds)
             {
                 if (nodeId == rootNode.Id) continue;
 
@@ -338,11 +379,7 @@ public sealed class UnifiedCalculationPipeline
                     accumulatedVoltageDropPercent[nodeId] = myCa;
 
                     // Condutor do trecho
-                    var conductor = networkModel.Conductors.FirstOrDefault(c =>
-                        string.Equals(c.Id, edge.ConductorId, StringComparison.OrdinalIgnoreCase) ||
-                        string.Equals(c.CatalogKey, edge.ConductorId, StringComparison.OrdinalIgnoreCase) ||
-                        string.Equals(c.Name, edge.ConductorId, StringComparison.OrdinalIgnoreCase))
-                        ?? FallbackConductor(edge.ConductorId);
+                    var conductor = conductorByEdge[edge.Id];
 
                     double apCables = 1.0;
                     if (!string.IsNullOrWhiteSpace(edge.InstallationMethod) && double.TryParse(edge.InstallationMethod, out var apVal) && apVal > 0)
@@ -503,32 +540,49 @@ public sealed class UnifiedCalculationPipeline
         {
             var endSegment = segmentResults.OrderBy(s => s.ShortCircuit1PhaseAmperes).First();
             double minIcc1ph = endSegment.ShortCircuit1PhaseAmperes;
-            string criticalConductor = endSegment.ConductorKey ?? "16 Al_CONC_Tri";
+            var criticalEdge = networkModel.Edges.FirstOrDefault(edge => edge.Id == endSegment.EdgeId);
+            var cataloguedCriticalConductor = criticalEdge is null
+                ? null
+                : networkModel.Conductors.FirstOrDefault(conductor =>
+                    string.Equals(conductor.Id, criticalEdge.ConductorId, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(conductor.CatalogKey, criticalEdge.ConductorId, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(conductor.Name, criticalEdge.ConductorId, StringComparison.OrdinalIgnoreCase));
+            string criticalConductor = cataloguedCriticalConductor?.CatalogKey ?? string.Empty;
             double criticalTemp = endSegment.OperatingTemperatureCelsius;
-            double rootLoadKva = trafoResults.FirstOrDefault()?.OperatingLoadKva ?? 112.5;
+            edgeTemperatureEvidenceIds.TryGetValue(endSegment.EdgeId, out var criticalTemperatureEvidenceId);
+            double? rootLoadKva = trafoResults.FirstOrDefault()?.OperatingLoadKva;
+            double maxIcc3ph = segmentResults.Max(s => s.ShortCircuit3PhaseAmperes);
 
             var protRuleResult = _protectionRule.Execute(new[]
             {
                 new RuleInput("RootLoadKva", rootLoadKva, UnitCode.Kva),
                 new RuleInput("Vnom", defaultVoltage, UnitCode.V),
                 new RuleInput("MinIcc1Phase", minIcc1ph, UnitCode.Ampere),
+                new RuleInput("MaxIcc3Phase", maxIcc3ph, UnitCode.Ampere),
                 new RuleInput("CriticalTemperature", criticalTemp, UnitCode.Celsius),
-                new RuleInput("CriticalConductorKey", criticalConductor, UnitCode.ConductorKey)
+                new RuleInput("CriticalTemperatureEvidenceId", criticalTemperatureEvidenceId, UnitCode.Unknown),
+                new RuleInput("CriticalConductorKey", criticalConductor, UnitCode.ConductorKey),
+                new RuleInput("DeviceEvidence", null, UnitCode.Unknown)
             }, new RuleExecutionContext(runId, "PROTECTION"));
 
-            if (protRuleResult.Status == CalculationStatus.Pass && protRuleResult.OutputValue is ProtectionAssessment ass)
+            if (protRuleResult.OutputValue is ProtectionAssessment ass)
             {
                 protectionResult = new ProtectionCalculationResult(
                     ProjectCurrentAmperes: ass.ProjectCurrentAmperes,
-                    RecommendedFuseCurrentAmperes: ass.FuseRatedCurrentAmperes,
                     MinSinglePhaseShortCircuitAmperes: ass.MinSinglePhaseShortCircuitAmperes,
+                    MaxThreePhaseShortCircuitAmperes: ass.MaxThreePhaseShortCircuitAmperes,
                     CriticalConductorKey: ass.ConductorKey,
                     CriticalConductorSectionMm2: ass.ConductorSectionMm2,
+                    ConductorSectionEvidenceId: ass.ConductorSectionEvidenceId,
                     CriticalOperatingTemperatureCelsius: ass.ConductorOperatingTemperatureCelsius,
+                    ConductorTemperatureEvidenceId: ass.ConductorTemperatureEvidenceId,
                     MaxAdmissibleTimeSeconds: ass.MaxAdmissibleTimeSeconds,
-                    FuseMeltingTimeSeconds: ass.FuseMeltingTimeSeconds,
+                    EvidenceStatus: ass.EvidenceStatus,
+                    AssessmentStatus: ass.AssessmentStatus,
+                    DeviceEvidence: ass.DeviceEvidence,
                     IsRatedCurrentAdequate: ass.IsRatedCurrentAdequate,
                     IsThermalWithstandAdequate: ass.IsThermalWithstandAdequate,
+                    IsInterruptingCapacityAdequate: ass.IsInterruptingCapacityAdequate,
                     StatusMessage: ass.StatusMessage);
             }
         }
@@ -565,17 +619,4 @@ public sealed class UnifiedCalculationPipeline
         return param?.TextValue ?? defaultValue;
     }
 
-    private static Conductor FallbackConductor(string? key)
-    {
-        string norm = key ?? "240 Cu";
-        if (norm.Contains("70", StringComparison.OrdinalIgnoreCase))
-        {
-            return new Conductor("70_Al", "1", "70 Al - MX", "70 Al - MX", new UnitValue(195, UnitCode.Ampere), new UnitValue(0.472, UnitCode.Ohm), new UnitValue(0.126, UnitCode.Ohm));
-        }
-        if (norm.Contains("16", StringComparison.OrdinalIgnoreCase))
-        {
-            return new Conductor("16_Al", "1", "16 Al_CONC_Tri", "16 Al_CONC_Tri", new UnitValue(80, UnitCode.Ampere), new UnitValue(2.06, UnitCode.Ohm), new UnitValue(0.85, UnitCode.Ohm));
-        }
-        return new Conductor("240_Cu", "1", "240 Cu", "240 Cu", new UnitValue(430, UnitCode.Ampere), new UnitValue(0.0762, UnitCode.Ohm), new UnitValue(0.0897, UnitCode.Ohm));
-    }
 }

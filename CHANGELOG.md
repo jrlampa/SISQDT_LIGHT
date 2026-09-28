@@ -1,5 +1,21 @@
 # Changelog
 
+## Fase 26 — Integridade da Proteção, Fail-Closed e Reconciliação de Governança
+
+- Removidos da `CandidateProtectionRule` os defaults silenciosos de NH-1600 A e 0,1 s; seção sem mapeamento deixa de assumir 16 mm².
+- Removidos também os fallbacks produtivos de catálogo de condutor e `TR_DEF`; sem condutor/transformador correspondente no modelo, o cálculo retorna diagnóstico `Blocked` em vez de sintetizar ampacidade, impedância ou parâmetros de transformador.
+- Adicionados contratos explícitos `ProtectionDeviceEvidence`, `ProtectionEvidenceStatus` e `ProtectionAssessmentStatus` (`Pass`, `Fail`, `EvidenceBlocked`), com valores de adequação anuláveis quando a evidência não existe.
+- A regra calcula `Ib` sem curva e calcula Onderdonk apenas quando seção catalogada e temperatura validada têm referências identificáveis. Evidência de dispositivo requer fonte, SHA-256, fabricante, modelo, curva, corrente nominal, ponto de avaliação, tempo total de interrupção e capacidade de interrupção.
+- O pipeline passa a propagar a ausência de evidência sem bloquear Icc3φ/Icc1φ ou o relatório global do cálculo. Tensão nominal desconhecida bloqueia o pipeline em vez de usar 220 V como fallback.
+- A WPF exibe `EvidenceBlocked` sem classificar como erro de cálculo, preserva os segmentos/Icc e não apresenta fusível recomendado sem dados do dispositivo.
+- Evidência de temperatura propagada somente após sucesso de `CandidateCableTemperatureRule`; condutor inexistente no catálogo impede cálculo de seção/tempo térmico.
+- Corrigidos testes legados que afirmavam adequação de NH sem curva. Incluídos testes para falta/invalidez de evidência, cálculo térmico, consumo de contrato explícito e estado WPF.
+- Golden values completos mantidos. Os checks de curto-circuito são classificados `TOLERANCE_PARITY` com tolerância absoluta de `1e-9 A`; os fluxos WPF são `BEHAVIORAL`. A alegação anterior de “bit-a-bit” da Fase 24 foi reclassificada após constatação de diferenças de poucos ULPs, sem alterar o motor.
+- README, CAC, RAG e índice de fases reconciliados. `VERSION_MANIFEST.json` permanece como registro da release commitada Fase 25 (0.6.0) até autorização para o ciclo de commits previsto.
+- Roadmap posterior: `NEXT_PHASE_NOT_DEFINED`.
+- **Gates:** `PROTECTION_PROVENANCE_GATE=GO (restrito ao que é consumido)`, `NO_SILENT_DEFAULT_GATE=GO`, `FAIL_CLOSED_GATE=GO`, `SHORT_CIRCUIT_REGRESSION_GATE=GO`, `THERMAL_REGRESSION_GATE=GO (restrito)`, `WPF_EVIDENCE_GATE=GO`, `PARITY_GATE=GO (tolerância)`, `DOCUMENTATION_GATE=GO (manifesto é release anterior)`, `DOMAIN_ISOLATION_GATE=GO`, `BUILD_GATE=GO`, `TEST_GATE=GO`.
+- **Validação final:** `dotnet restore` OK; `dotnet build --no-restore` OK (0 erros, 0 warnings); `dotnet test --no-build --no-restore`: **149 aprovados, 0 falhas, 0 ignorados**. `git diff --check` executado ao final.
+
 ## Fase 25 — 2026-09-28
 
 - **Consolidação do Motor de Cálculo, Integração WPF e Contrato Normalizado.**
@@ -42,7 +58,7 @@
     $R_{\text{total}} = R_{\text{fonte}} (0) + R_{\text{MT}} (0.00039839) + R_{\text{trafo}} (0) + R_{\text{BT}} (0.00017742) = 0.000575805501 \;\Omega$.
     $X_{\text{total}} = X_{\text{fonte}} (0.000242) + X_{\text{MT}} (0.00019511) + X_{\text{trafo}} (0.01505778) + X_{\text{BT}} (0.0001794) = 0.015674288889 \;\Omega$.
     $|\mathbf{Z}_{\text{eq}}| = \sqrt{R_{\text{total}}^2 + X_{\text{total}}^2} = 0.015684861623 \;\Omega$.
-  - Paridade bit-a-bit confirmada:
+  - Paridade originalmente reportada como bit-a-bit (reclassificada na Fase 26 como `TOLERANCE_PARITY` após auditoria IEEE-754):
     Excel `CB13` = `8098.066930449716 A`, Motor = `8098.066930449716 A`, Erro = $0.00 \times 10^0\text{ A}$ (IEEE-754).
 - **Curto-Circuito Monofásico (Icc 1φ):**
   - Identificada e comprovada a fórmula da coluna `CC13`:

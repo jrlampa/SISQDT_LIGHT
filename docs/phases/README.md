@@ -31,6 +31,9 @@ Este diretório contém os relatórios e registros de evidência matemática de 
 | **Fase 22.1** | [fase22_1/](fase22_1/) | Auditoria Corretiva Matemática e Paridade Estrita QDT + CQTS | `GO` (100% Paridade Bit-a-Bit / 6 Gates Aprovados) | 80 |
 | **Fase 22.2** | docs/architecture/ | Observabilidade, Logging Estruturado e Rastreabilidade de Cálculo | `GO` (Logging, Trace, Audit Trail e Reprodutibilidade) | 95 |
 | **Fase 23** | docs/brand/ | Integração Ponta a Ponta + Identidade Visual Oficial (sisQDT_LIGHT) | `GO` (Cadeia Ponta a Ponta 100% Validada + Brand Assets Aprovados) | 122 |
+| **Fase 24** | [CHANGELOG.md](../../CHANGELOG.md) | Curto-circuito 3φ/1φ e análise delimitada de evidências de proteção | `GO` para curto-circuito; curvas bloqueadas por ausência de evidência | 134 |
+| **Fase 25** | [CHANGELOG.md](../../CHANGELOG.md) | Consolidação do motor, integração WPF e contratos | `GO` nos gates declarados; curvas permanecem fora do escopo | 146 |
+| **Fase 26** | [fase26/](fase26/) | Integridade da proteção, fail-closed e reconciliação de governança | `GO` restrito; 149 testes aprovados | 149 |
 
 
 
@@ -38,5 +41,5 @@ Este diretório contém os relatórios e registros de evidência matemática de 
 
 ## Diretrizes de Consulta
 
-1. Cada fase possui seu respectivo relatório de decisão (`FASE*_GATE_DECISION_*.md`) e relatórios de paridade ou validação.
+1. Cada fase possui registro de decisão e relatórios de paridade ou validação; Fases 24 e 25 foram registradas no changelog/RAG, sem diretórios individuais neste checkout.
 2. Nenhuma regra anterior deve ser modificada retroativamente sem que haja nova decisão de gate documentada.

@@ -66,15 +66,20 @@ public sealed record TransformerCalculationResult(
 /// </remarks>
 public sealed record ProtectionCalculationResult(
     double ProjectCurrentAmperes,
-    double RecommendedFuseCurrentAmperes,
     double MinSinglePhaseShortCircuitAmperes,
+    double MaxThreePhaseShortCircuitAmperes,
     string CriticalConductorKey,
-    double CriticalConductorSectionMm2,
+    double? CriticalConductorSectionMm2,
+    string? ConductorSectionEvidenceId,
     double CriticalOperatingTemperatureCelsius,
-    double MaxAdmissibleTimeSeconds,
-    double FuseMeltingTimeSeconds,
-    bool IsRatedCurrentAdequate,
-    bool IsThermalWithstandAdequate,
+    string? ConductorTemperatureEvidenceId,
+    double? MaxAdmissibleTimeSeconds,
+    ProtectionEvidenceStatus EvidenceStatus,
+    ProtectionAssessmentStatus AssessmentStatus,
+    ProtectionDeviceEvidence? DeviceEvidence,
+    bool? IsRatedCurrentAdequate,
+    bool? IsThermalWithstandAdequate,
+    bool? IsInterruptingCapacityAdequate,
     string StatusMessage);
 
 /// <summary>
