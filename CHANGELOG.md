@@ -1,5 +1,16 @@
 # Changelog
 
+## Fase 27B — Contratos de Apresentação e Projeção do Grafo para o Unifilar
+
+- Estabelecida a camada de apresentação do diagrama unifilar (`QdtCqts.Desktop.Wpf.ViewModels.Unifilar`), desacoplada de regras elétricas e renderização XAML definitiva.
+- Criados contratos de apresentação com preservação estrita de identificadores de domínio: `UnifilarNodeViewModel`, `UnifilarEdgeViewModel`, `UnifilarTransformerViewModel`, `UnifilarDiagramViewModel` e `SelectedElementDetailViewModel`.
+- Implementado o motor de layout geométrico puro `HierarchicalTreeLayoutEngine` com interface `IUnifilarLayoutEngine`, garantindo posicionamento determinístico e livre de recálculos elétricos.
+- Construtor determinístico `UnifilarPresentationBuilder` orquestrando a fusão de `NetworkModel`, `TopologyValidationResult` e `NetworkCalculationReport`.
+- Corrigida a duplicação arquitetural do `OverloadStatus` em `SegmentDisplayModel` e `UnifilarEdgeViewModel`, que agora consomem diretamente o campo `IsOverloaded` calculado pelo motor no backend.
+- Classificação de nós em `UnifilarNodeType` derivada estritamente da topologia estrutural (`Source`, `Transformer`, `PassThrough`, `Branch`, `Terminal`).
+- Decisões de domínio fundamentadas: QT não formalizado no contrato atual (não inventado); demanda acumulada e curto-circuito preservados em seus contratos autoritativos do backend; nenhuma fórmula nova de tensão inserida na apresentação.
+- Adicionados 7 novos testes de integração e integridade de grafo em `UnifilarProjectionTests.cs`, expandindo a suíte para **156 testes aprovados, 0 falhas, 0 warnings**.
+
 ## Fase 26 — Integridade da Proteção, Fail-Closed e Reconciliação de Governança
 
 - Removidos da `CandidateProtectionRule` os defaults silenciosos de NH-1600 A e 0,1 s; seção sem mapeamento deixa de assumir 16 mm².

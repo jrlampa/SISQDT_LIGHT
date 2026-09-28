@@ -178,23 +178,24 @@ O pipeline de cálculo orquestra de ponta a ponta:
 - O pipeline não sintetiza condutor nem transformador quando faltam no modelo: ampacidade, R/X, potência e impedância de catálogo devem estar presentes; caso contrário, o cálculo é bloqueado com diagnóstico explícito.
 - O pipeline mantém o resultado elétrico geral `Pass` e a WPF sinaliza separadamente `EvidenceBlocked`; isso não deve ser convertido em `CalculationError` nem ocultar os resultados elétricos calculáveis.
 - O identificador e o SHA-256 de uma evidência externa são metadados de proveniência. Como o Evidence Store histórico está ausente, o sistema não afirma validar o hash contra o conteúdo do arquivo.
-- Paridade dos goldens de curto-circuito é `TOLERANCE_PARITY` (`1e-9 A` absoluta), não igualdade bit-a-bit; a ordem de operações IEEE-754 observada difere por poucos ULPs. Nenhuma alteração de motor foi feita para forçar igualdade.
-- Estado de fases: Fase 24 fechada no escopo acima; Fase 25 e Fase 26 concluídas; Fase 27A concluída. Próxima fase: `FASE27B`.
+- Estado de fases: Fase 24 fechada no escopo acima; Fase 25, Fase 26, Fase 27A e Fase 27B concluídas. Próxima fase: `FASE27C`.
 
 ---
 
-## 10. Arquitetura do Cockpit Operacional e Unifilar Elétrico (Fase 27A)
+## 10. Arquitetura do Cockpit Operacional e Unifilar Elétrico (Fases 27A e 27B)
 
 ### 10.1 Princípio da Projeção Visual Unificada
 - O Unifilar Elétrico é estritamente uma **projeção visual do modelo de rede (`NetworkModel`) e do relatório imutável de cálculo (`NetworkCalculationReport`)**.
 - É **terminantemente proibido** criar uma segunda representação elétrica paralela ou recalcular qualquer grandeza na camada de apresentação (WPF).
-- A WPF consome `Presentation Models` construídos de forma determinística por um builder/serviço especializado (`UnifilarPresentationBuilder`).
+- A WPF consome `Presentation Models` construídos de forma determinística por um builder especializado (`UnifilarPresentationBuilder`).
 
-### 10.2 Contratos de Apresentação
-1. `UnifilarDiagramViewModel`: Orquestrador visual com coleções observáveis de nós e arestas, controle de zoom/pan e seleção bidirecional sincronizada.
-2. `UnifilarNodeViewModel`: Projeção gráfica do nó com posicionamento esquemático ortogonal, identificação, tensão resultante calculada, queda acumulada $CA\%$ e nível de falta no barramento.
-3. `UnifilarEdgeViewModel`: Projeção gráfica da linha de distribuição com espessura proporcional ao condutor, cor mapeada por severidade/heatmap e grandezas elétricas prontas ($I_b$, $I_z$, sobrecarga, $\Delta V\%$, $I_{\text{cc}}$).
-4. `SelectedElementDetailViewModel`: Projeção contextual no painel lateral de inspeção para o elemento atualmente selecionado (nó, trecho ou transformador), exibindo metadados Half-way BIM e rastreabilidade.
+### 10.2 Contratos de Apresentação Implementados (Fase 27B)
+1. `UnifilarDiagramViewModel`: Orquestrador visual com coleções observáveis de nós, arestas e transformadores, controle de seleção bidirecional sincronizada e metadados de rastreabilidade (`RunId`, `InputHash`, `OutputHash`, `AlgorithmVersion`, `UiState`).
+2. `UnifilarNodeViewModel`: Projeção gráfica do nó com posicionamento esquemático ortogonal, identificação (`NodeId`, `ExternalKey`), tipo topológico derivado (`UnifilarNodeType`), queda acumulada $CA\%$, carga local kVA e consumidores locais.
+3. `UnifilarEdgeViewModel`: Projeção gráfica da linha de distribuição com espessura proporcional ao condutor e grandezas elétricas prontas ($I_b$, $I_z$, $M$, $E$, $D$, $\Delta V\%$, $I_{\text{cc}3\phi}$, $I_{\text{cc}1\phi}$), consumindo o status de sobrecarga diretamente de `SegmentCalculationResult.IsOverloaded`.
+4. `UnifilarTransformerViewModel`: Projeção gráfica do transformador de alimentação e queda interna/MT.
+5. `SelectedElementDetailViewModel`: Projeção contextual no painel lateral de inspeção para o elemento atualmente selecionado (nó, trecho ou transformador), exibindo metadados Half-way BIM e rastreabilidade agrupados por categoria.
+6. `HierarchicalTreeLayoutEngine`: Motor geométrico determinístico (`IUnifilarLayoutEngine`) que calcula coordenadas visuais $(X, Y)$ através de árvore radial hierárquica, 100% desacoplado de grandezas elétricas.
 
 
 

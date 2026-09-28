@@ -85,6 +85,7 @@ Substituir o legado instável por uma aplicação desktop de alta precisão, det
 
 - **Fase 26 (Concluída — fail-closed de proteção):** Removidos defaults NH-1600 A/0,1 s, fallback de seção, catálogos sintéticos de condutor e `TR_DEF`; ausência de entradas de catálogo bloqueia com diagnóstico. Evidência de dispositivo passou a ter contrato e status próprios (`Available/Missing/Invalid`, `Pass/Fail/EvidenceBlocked`). `Ib`, Icc3φ/Icc1φ e `t_adm` com proveniência identificada permanecem calculáveis; a WPF mantém resultados elétricos e sinaliza `EvidenceBlocked` quando não há curva. Golden Icc foi reclassificado como `TOLERANCE_PARITY` com erro absoluto máximo de `1e-9 A`; fluxo WPF é `BEHAVIORAL`. Evidence Store histórico segue ausente e o SHA-256 externo não é verificado contra arquivo. Commit funcional `29c46ad`; release `0.7.0` registrada no `VERSION_MANIFEST.json` pelo commit de governança.
 - **Fase 27A (Concluída — Auditoria WPF, Contratos e Unifilar Operacional):** Auditoria aprofundada da interface WPF existente, validação do princípio Thin Frontend e mapeamento das lacunas de contrato para a evolução em Cockpit Operacional. Confirmado que a WPF não recalcula grandezas elétricas. Identificados achados de apresentação (duplicação da verificação de sobrecarga em `SegmentDisplayModel` e falta de exposição de nós/trafos na UI). Mapeadas as lacunas de `NodeCalculationResult` (tensão nodal em Volts e Icc no barramento do nó). Especificada a arquitetura completa da projeção visual unificada e os Presentation Models para a Fase 27B (`UnifilarDiagramViewModel`, `UnifilarNodeViewModel`, `UnifilarEdgeViewModel`, `SelectedElementDetailViewModel`, `UnifilarLayoutEngine`). Relatório oficial em `docs/phases/fase27/FASE27A_AUDITORIA_WPF_E_UNIFILAR.md`.
+- **Fase 27B (Concluída — Contratos de Apresentação e Projeção do Grafo para o Unifilar):** Estabelecida a camada de apresentação do diagrama unifilar (`QdtCqts.Desktop.Wpf.ViewModels.Unifilar`), desacoplada de regras elétricas e renderização XAML definitiva. Criados contratos com preservação de identificadores de domínio: `UnifilarNodeViewModel`, `UnifilarEdgeViewModel`, `UnifilarTransformerViewModel`, `UnifilarDiagramViewModel`, `SelectedElementDetailViewModel` e motor geométrico `HierarchicalTreeLayoutEngine`. Sanada a duplicação de `OverloadStatus` em `SegmentDisplayModel`, consumindo `IsOverloaded` direto do motor. 7 novos testes de unidade e integridade de grafo adicionados em `UnifilarProjectionTests.cs`. Suíte expandida para **156 testes aprovados, 0 falhas, 0 warnings**.
 
 ---
 
@@ -100,10 +101,10 @@ Substituir o legado instável por uma aplicação desktop de alta precisão, det
 - `src/QdtCqts.Infrastructure.Sqlite`: Banco de dados relacional e repositórios de dados SQLite.
 - `src/QdtCqts.Infrastructure.ExcelEvidence`: Importador seguro OpenXML e construção de grafo de precedência celular.
 - `src/QdtCqts.Infrastructure.Parity`: Mecanismos de comparação numérica e paridade com tolerância de engenharia.
-- `src/QdtCqts.Desktop.Wpf`: Aplicação desktop WPF para operadores de engenharia da Light com identidade visual e ícone oficial integrado.
+- `src/QdtCqts.Desktop.Wpf`: Aplicação desktop WPF para operadores de engenharia da Light com identidade visual, ícone oficial e camada de apresentação unifilar.
 
 ### 4.2 Métricas de Teste
-- Total de testes automatizados: **149 aprovados, 0 falhas, 0 ignorados**; restore/build finalizados com 0 erros e 0 warnings.
+- Total de testes automatizados: **156 aprovados, 0 falhas, 0 ignorados**; restore/build finalizados com 0 erros e 0 warnings.
 - Falhas: **0**.
 - Duração da execução: **~1.5 segundos**.
 
@@ -115,6 +116,8 @@ Substituir o legado instável por uma aplicação desktop de alta precisão, det
 - Fase 25: concluída; integração WPF ao `CalculationService` consolidada.
 - Fase 26: concluída; governança, fail-closed de proteção e paridade com tolerância formalizada.
 - Fase 27A: concluída; auditoria completa da interface WPF, contratos e especificação do Unifilar Operacional.
-- Próxima fase: **Fase 27B** — Implementação do Cockpit Operacional com Unifilar Elétrico Interativo e Painel de Detalhes.
+- Fase 27B: concluída; contratos de apresentação, layout geométrico e projeção do grafo para o unifilar.
+- Próxima fase: **Fase 27C** — Renderização visual do Unifilar no Canvas WPF, interação gráfica e Painel de Detalhes.
+
 
 

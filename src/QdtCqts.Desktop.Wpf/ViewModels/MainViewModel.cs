@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using QdtCqts.Application;
 using QdtCqts.Calculation.Abstractions;
+using QdtCqts.Desktop.Wpf.ViewModels.Unifilar;
 using QdtCqts.Domain;
 
 namespace QdtCqts.Desktop.Wpf.ViewModels;
@@ -27,6 +28,7 @@ public enum CalculationUiState
 
 // ─────────────────────────────────────────────
 // Modelo de apresentação de trecho (sem lógica elétrica)
+// Fase 27B: consome IsOverloaded calculado diretamente pelo motor.
 // ─────────────────────────────────────────────
 public sealed class SegmentDisplayModel
 {
@@ -41,7 +43,8 @@ public sealed class SegmentDisplayModel
     public double SegmentVoltageDropPercent { get; init; }
     public double ShortCircuit3PhaseAmperes { get; init; }
     public double ShortCircuit1PhaseAmperes { get; init; }
-    public string OverloadStatus => OperatingCurrentAmperes > RatedAmpacityAmperes ? "SOBRECARGA" : "OK";
+    public bool IsOverloaded { get; init; }
+    public string OverloadStatus => IsOverloaded ? "SOBRECARGA" : "OK";
 }
 
 // ─────────────────────────────────────────────
@@ -210,6 +213,14 @@ public sealed class MainViewModel : INotifyPropertyChanged
         private set => SetField(ref _isThermalWithstandAdequate, value);
     }
 
+    // ── Unifilar (Fase 27B) ──
+    private UnifilarDiagramViewModel? _unifilarDiagram;
+    public UnifilarDiagramViewModel? UnifilarDiagram
+    {
+        get => _unifilarDiagram;
+        private set => SetField(ref _unifilarDiagram, value);
+    }
+
     // ── Execução ──
     public async Task ExecuteCalculationAsync()
     {
@@ -234,7 +245,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
             if (result.Status == Domain.CalculationStatus.Pass && result.Report != null)
             {
-                ApplySuccessState(result, runCorrelationId);
+                ApplySuccessState(result, runCorrelationId, projectVersion);
             }
             else
             {
@@ -262,7 +273,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
         }
     }
 
-    private void ApplySuccessState(CalculationResult result, string runCorrelationId)
+    private void ApplySuccessState(CalculationResult result, string runCorrelationId, ProjectVersion projectVersion)
     {
         var report = result.Report!;
 
@@ -289,7 +300,8 @@ public sealed class MainViewModel : INotifyPropertyChanged
                 TemperatureCelsius = seg.OperatingTemperatureCelsius,
                 SegmentVoltageDropPercent = seg.SegmentVoltageDropPercent,
                 ShortCircuit3PhaseAmperes = seg.ShortCircuit3PhaseAmperes,
-                ShortCircuit1PhaseAmperes = seg.ShortCircuit1PhaseAmperes
+                ShortCircuit1PhaseAmperes = seg.ShortCircuit1PhaseAmperes,
+                IsOverloaded = seg.IsOverloaded
             });
         }
 
@@ -306,6 +318,17 @@ public sealed class MainViewModel : INotifyPropertyChanged
             : 0.0;
 
         ApplyProtectionState(report.Protection);
+
+        // Fase 27B: Projeção de apresentação do unifilar a partir dos resultados reais
+        var topologyValidator = new TopologyValidator();
+        var circuitId = projectVersion.NetworkModel.Circuits.FirstOrDefault()?.Id ?? "CIRC_1";
+        var topologyResult = topologyValidator.Validate(projectVersion.NetworkModel, circuitId);
+        var presentationBuilder = new UnifilarPresentationBuilder();
+        UnifilarDiagram = presentationBuilder.BuildDiagram(
+            projectVersion.NetworkModel,
+            topologyResult,
+            report,
+            UiState);
 
         string calculationSummary = $"Cálculo elétrico executado em {ExecutionDurationMs:F1} ms · {Segments.Count} trechos · " +
                                     $"ΔV máx: {MaxVoltageDropPercent:F2}% · Icc1φ mín: {MinShortCircuit1PhaseAmperes:F0} A";
@@ -373,6 +396,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
         InputHash = "-";
         OutputHash = "-";
         ExecutionDurationMs = 0.0;
+        UnifilarDiagram = null;
     }
 
     private ProjectVersion BuildSelectedProjectVersion()
