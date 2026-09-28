@@ -1,5 +1,14 @@
 # Changelog
 
+## Fase 30E — Rastreio da Origem do Crosswalk Físico-Lógico
+
+- No ZNA19165, comparados 36 pontos do `.srua`, 36 placemarks do KMZ e 36 linhas do CSV: nome/lat-lon coincidem integralmente; conversão UTM documentada no importer local reproduz o CSV com arredondamento a 0,001 m.
+- Três rastros confirmam correspondência local até linhas CQTS por PONTO/contexto e coordenadas. Isso é coerência de dados, não prova a direção de geração entre `.srua`, KMZ e CSV.
+- O histórico de exportação dentro do `.srua` registra cinco postes e zero arestas, não os 36 do estado atual; o link `localhost` associado não foi localizado. Serializador/origem do snapshot continuam sem prova.
+- CSV/KMZ/.srua/CQTS não carregam handle ou revisão DWG. Rótulos DWG se repetem e a varredura geométrica anterior não encontrou join dos pontos CSV com INSERT/POINT/linhas.
+- Gate: `CROSSWALK DE DADOS CONFIRMADO ATÉ CQTS; ORIGEM E VÍNCULO AO HANDLE DWG NÃO DETERMINADOS`. Sem alteração de código, CAD/LISP, fixtures ou `VERSION_MANIFEST.json`; Fase 31 não aprovada.
+- Relatório: `docs/phases/fase30e/FASE30E_RASTREAMENTO_ORIGEM_CROSSWALK.md`.
+
 ## Fase 30D — Protocolo de Identidade Física-Lógica
 
 - Inventariadas 47 pastas de projetos locais: 37 com CAD+workbook e 25 que também contêm CSV/JSON/KMZ/KML; amostras mantidas identificadas por obra.

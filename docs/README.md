@@ -10,7 +10,7 @@ Bem-vindo à documentação centralizada do projeto de reconstrução e unifica�
 docs/
 ├── specs/       # Modelos conceituais, topologia, contratos de cálculo, DDL e matrizes
 ├── manifests/   # Manifestos de hashes SHA-256 e controle de integridade dos baselines
-└── phases/      # Relatórios de engenharia reversa e portões de decisão (Fases 03 a 30D)
+└── phases/      # Relatórios de engenharia reversa e portões de decisão (Fases 03 a 30E)
 ```
 
 ---
@@ -27,7 +27,7 @@ docs/
   - [Especificação Consolidada](specs/ESPECIFICACAO_QDT_CQTS_ZNA855820.md)
 
 - **[Controle de Fases e Gates (phases/)](phases/README.md)**:
-  - Registros de avanço técnico, evidência e decisão de gate das fases 03 a 30D.
+  - Registros de avanço técnico, evidência e decisão de gate das fases 03 a 30E.
 
 - **[Manifestos de Hashes (manifests/)](manifests/README.md)**:
   - Rastreabilidade estrita SHA-256 de artefatos de código e evidência.

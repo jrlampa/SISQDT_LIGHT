@@ -179,7 +179,7 @@ O pipeline de cálculo orquestra de ponta a ponta:
 - O pipeline não sintetiza condutor nem transformador quando faltam no modelo: ampacidade, R/X, potência e impedância de catálogo devem estar presentes; caso contrário, o cálculo é bloqueado com diagnóstico explícito.
 - O pipeline mantém o resultado elétrico geral `Pass` e a WPF sinaliza separadamente `EvidenceBlocked`; isso não deve ser convertido em `CalculationError` nem ocultar os resultados elétricos calculáveis.
 - O identificador e o SHA-256 de uma evidência externa são metadados de proveniência. Como o Evidence Store histórico está ausente, o sistema não afirma validar o hash contra o conteúdo do arquivo.
-- Estado de fases: Fases 24, 25, 26, 27A, 27B, 27C, 27D, 30A, 30B e 30C concluídas nos escopos documentados; Fase 30C encerra com identidade física/lógica ainda não determinada.
+- Estado de fases: Fases 24–28 e 30A–30E concluídas nos escopos documentados; Fase 30E confirma crosswalk local até CQTS, mas mantém origem e identidade handle-DWG não determinadas.
 
 ---
 
@@ -266,6 +266,14 @@ QDT/CQTS (Grafo Calculado)
 - Fonte canônica físico-lógica e procedimento humano escrito não encontrados. Estado: `IDENTIDADE NÃO DETERMINADA — REQUISITO EXTERNO NECESSÁRIO`; a identidade assistida é apenas hipótese de processo, não regra confirmada. Fase31 não aprovada.
 - Unidade/CRS seguem específicos por arquivo: DWG ZNA19165 `INSUNITS=0`, `MAPCSASSIGN=nil`; isso não declara unidade/CRS das coordenadas de modelo. Não propagar metro/fuso 23/EPSG entre obras.
 - Relatório: `docs/phases/fase30d/FASE30D_PROTOCOLO_IDENTIDADE_FISICA_LOGICA.md`.
+
+### 12.3 Origem do Crosswalk e Rastreio até DWG (Fase 30E)
+
+- No ZNA19165, 36 registros `.srua` têm `title`/lat-lon idênticos aos placemarks KML; o importer local, com fuso 23 e arredondamento a 0,001 m, reproduz as coordenadas do CSV para os 36. Há nomes repetidos (`P15` em duas posições e `.` cinco vezes), portanto nome não é chave única.
+- Três pontos foram rastreados a linhas CQTS por contexto de aba, `PONTO`/montante e coordenadas inteiras: `P2`, `P24 - TRAFO` e `P25`. Isso é uma crosswalk local corroborada, sem contrato universal ou prova da direção de geração.
+- `id` do `.srua` difere de `title` (`P1`→`P2`); o histórico declara cinco postes e zero arestas, enquanto a topologia atual tem 36. Seu link `localhost` não foi localizado e não prova a origem dos registros atuais.
+- `.srua`, KMZ, CSV e CQTS não guardam handle/revisão/hash do DWG. O DWG tem rótulos P#/TR repetidos; a varredura das classes físicas não encontrou join de coordenadas. Não associar `Node`, `Transformer` ou `Edge` a entidades CAD por nome, ordem ou proximidade.
+- Origem causal do snapshot, revisão CAD, CRS/unidade oficial e procedimento do operador seguem indeterminados. Sem mudança de domínio, produto ou LISP; Fase 31 continua não aprovada. Relatório: `docs/phases/fase30e/FASE30E_RASTREAMENTO_ORIGEM_CROSSWALK.md`.
 
 
 
