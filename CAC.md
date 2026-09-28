@@ -3,7 +3,7 @@
 > **Conhecimento Arquitetural Compartilhado e Contratos de Componentes**  
 > **Sistema:** SISQDT_LIGHT (QdtCqts)  
 > **Status:** Ativo / Governança Técnica Estrita  
-> **Data:** 2026-09-26  
+> **Data:** 2026-09-27  
 
 ---
 
@@ -79,6 +79,13 @@ public interface ICalculationEngine
 ### 3.2 Topologia 2.5D e Half-way BIM
 - **2.5D:** Os nós da rede contêm coordenadas geográficas bidimensionais projetadas ($X, Y$ em UTM/SIRGAS2000).
 - **Half-way BIM:** A cota altimétrica ($Z$), tipo de estrutura (poste, poço de visita, galeria), material e ampacidade são armazenados como atributos de metadados de engenharia associados aos nós e trechos, dispensando a complexidade de renderizadores 3D pesados sem perda da precisão física.
+
+### 3.3 Contrato de Curto-Circuito (`CandidateShortCircuitRule`)
+- **Curto-Circuito Trifásico ($I_{\text{cc}3\phi}$):**
+  $$I_{\text{cc}3\phi} = \frac{V_{\text{fn}}}{|\mathbf{Z}_{\text{up}} + \mathbf{Z}_{\text{bt, prior}} + \mathbf{Z}_{\text{seg}}|}$$
+- **Curto-Circuito Monofásico ($I_{\text{cc}1\phi}$):**
+  $$I_{\text{cc}1\phi} = \frac{V_{\text{fn}}}{\sqrt{(R_{\text{up}} + R_{\text{loop FN, prior}} + R_{\text{loop FN, trecho}})^2 + X_{\text{up}}^2}}$$
+- **Isolamento de Domínio:** A regra de curto-circuito é pura e opera via `IIsolatedRule` sem acoplamento a Excel, I/O ou banco. As impedâncias a montante são decompostas fisicamente em fonte, MT e transformador referidas à tensão nominal secundária.
 
 ---
 

@@ -3,9 +3,29 @@ namespace QdtCqts.Domain;
 public enum CalculationMode { Qdt, Cqts }
 public enum CalculationStatus { Ready, Pass, Fail, Unknown, Blocked }
 public enum ResultScope { Transformer, Circuit, Branch, Node, Edge, Load, Point, Global }
-public enum UnitCode { Unknown, Mva, Kva, Kv, V, Ampere, Meter, Ohm, OhmPerKilometer, Celsius, Percent, Factor, UtmMeter, ConductorKey }
+public enum UnitCode { Unknown, Mva, Kva, Kv, V, Ampere, Meter, Ohm, OhmPerKilometer, Celsius, Percent, Factor, UtmMeter, ConductorKey, Second, SquareMillimeter }
 public enum LoadKind { Point, Ramal, Client, Distributed, Unknown }
 public enum TopologyDiagnosticCode { MissingRoot, MultipleRoots, SelfLoop, Cycle, Orphan, MultipleParents, MissingEndpoint, CrossCircuitEdge, InvalidBranch, InvalidTerminal, NegativeLength }
+
+public sealed record ComplexImpedance(double Real, double Imaginary)
+{
+    public static readonly ComplexImpedance Zero = new(0.0, 0.0);
+    public double Magnitude => Math.Sqrt((Real * Real) + (Imaginary * Imaginary));
+    public static ComplexImpedance operator +(ComplexImpedance a, ComplexImpedance b) => new(a.Real + b.Real, a.Imaginary + b.Imaginary);
+}
+
+public sealed record ProtectionAssessment(
+    string ConductorKey,
+    double ConductorSectionMm2,
+    double MinSinglePhaseShortCircuitAmperes,
+    double ConductorOperatingTemperatureCelsius,
+    double MaxAdmissibleTimeSeconds,
+    double ProjectCurrentAmperes,
+    double FuseRatedCurrentAmperes,
+    double FuseMeltingTimeSeconds,
+    bool IsRatedCurrentAdequate,
+    bool IsThermalWithstandAdequate,
+    string StatusMessage);
 
 public sealed record UnitValue(double Magnitude, UnitCode Unit)
 {

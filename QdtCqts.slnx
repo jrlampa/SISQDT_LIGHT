@@ -16,5 +16,7 @@
     <Project Path="tests/QdtCqts.Tests.Import/QdtCqts.Tests.Import.csproj" />
     <Project Path="tests/QdtCqts.Tests.Parity/QdtCqts.Tests.Parity.csproj" />
     <Project Path="tests/QdtCqts.Tests.Topology/QdtCqts.Tests.Topology.csproj" />
+    <Project Path="tests/QdtCqts.Tests.Wpf/QdtCqts.Tests.Wpf.csproj" />
   </Folder>
 </Solution>
+

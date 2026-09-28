@@ -24,6 +24,8 @@ public sealed class UnifiedCalculationPipeline
     private readonly CandidateSegmentVoltageDropRule _segmentDropRule = new();
     private readonly CandidateTransformerVoltageDropRule _trafoDropRule = new();
     private readonly CandidateAccumulatedVoltageDropRule _accumulatedDropRule = new();
+    private readonly CandidateShortCircuitRule _shortCircuitRule = new();
+    private readonly CandidateProtectionRule _protectionRule = new();
 
     public UnifiedCalculationPipeline(ILogger? logger = null)
     {
@@ -255,38 +257,14 @@ public sealed class UnifiedCalculationPipeline
 
                 double deltaVPercent = dropResult.Status == CalculationStatus.Pass ? (double)dropResult.OutputValue! : mKva * factorBj * equivLength * phaseMultiplier;
                 edgeSegmentDropPercent[edge.Id] = deltaVPercent;
-
-                segmentResults.Add(new SegmentCalculationResult(
-                    edge.Id,
-                    edge.FromNodeId,
-                    edge.ToNodeId,
-                    conductor.CatalogKey,
-                    phaseCount,
-                    apCables,
-                    physicalLength,
-                    equivLength,
-                    dConsumers,
-                    eLoad,
-                    gFactor,
-                    mKva,
-                    ibCurrent,
-                    totalAmpacity,
-                    isOverloaded,
-                    operatingTemp,
-                    rca,
-                    xReactance,
-                    zImpedance,
-                    factorBj,
-                    phaseMultiplier,
-                    deltaVPercent));
             }
 
-            // 4. Queda de Tenso do Transformador e Mdia Tenso
+            // 4. Queda de Tensão do Transformador e Média Tensão
             var trafo = networkModel.Transformers.FirstOrDefault(t => t.Id == circuit.TransformerId)
                 ?? networkModel.Transformers.FirstOrDefault()
                 ?? new Transformer("TR_DEF", "TR", new UnitValue(112.5, UnitCode.Kva), new UnitValue(3.5, UnitCode.Percent), new UnitValue(220, UnitCode.V), new UnitValue(0, UnitCode.Kva));
 
-            // Carga do transformador  a carga do trecho inicial saindo do TR
+            // Carga do transformador é a carga do trecho inicial saindo do TR
             var rootNode = circuitNodes.FirstOrDefault(n => n.IsSource) ?? circuitNodes.First();
             var firstEdge = outgoingEdges[rootNode.Id].FirstOrDefault();
             double trafoOperatingLoadKva = firstEdge != null && edgeEndLoadKva.TryGetValue(firstEdge.Id, out var fLoad) ? fLoad : accumulatedLoadKva.Values.DefaultIfEmpty(0.0).Max();
@@ -311,16 +289,39 @@ public sealed class UnifiedCalculationPipeline
                 mtDropParam,
                 totalOriginDrop));
 
-            // 5. Queda de Tenso Acumulada (CA %) (Pre-Order / Montante -> Jusante)
+            // 5. Cadeia de Impedâncias a Montante (Subestação AT/MT + MT + Trafo de Distribuição)
+            double stationMva = GetNumericParam(networkModel, "StationMva", 40.0);
+            double stationZPercent = GetNumericParam(networkModel, "StationZPercent", 20.0);
+            double mtVoltageKv = GetNumericParam(networkModel, "MtVoltageKv", 13.2);
+            double mtCableLengthKm = GetNumericParam(networkModel, "MtCableLengthKm", 2.0);
+            double mtResistancePerKm = GetNumericParam(networkModel, "MtResistancePerKm", 0.7171);
+            double mtReactancePerKm = GetNumericParam(networkModel, "MtReactancePerKm", 0.3512);
+
+            double ratioSq = Math.Pow(defaultVoltage / (mtVoltageKv * 1000.0), 2.0);
+            double zEstX = (stationZPercent / 100.0 * Math.Pow(mtVoltageKv, 2.0) / stationMva) * ratioSq;
+            double zEstR = 0.0;
+            double zMtR = mtResistancePerKm * ratioSq * mtCableLengthKm;
+            double zMtX = mtReactancePerKm * ratioSq * mtCableLengthKm;
+            double zTrafoX = (trafo.Impedance.Magnitude / 100.0 * Math.Pow(defaultVoltage, 2.0)) / (trafo.Power.Magnitude * 1000.0);
+            double zTrafoR = 0.0;
+
+            double zUpstreamR = zEstR + zMtR + zTrafoR;
+            double zUpstreamX = zEstX + zMtX + zTrafoX;
+
+            // 6. Queda de Tensão Acumulada e Propagação de Impedância Radial de BT
             var accumulatedVoltageDropPercent = new Dictionary<string, double>(StringComparer.Ordinal);
+            var accumulatedBtImpedanceR = new Dictionary<string, double>(StringComparer.Ordinal);
+            var accumulatedBtImpedanceX = new Dictionary<string, double>(StringComparer.Ordinal);
+            var accumulatedBtRfn = new Dictionary<string, double>(StringComparer.Ordinal);
+
             accumulatedVoltageDropPercent[rootNode.Id] = totalOriginDrop;
+            accumulatedBtImpedanceR[rootNode.Id] = 0.0;
+            accumulatedBtImpedanceX[rootNode.Id] = 0.0;
+            accumulatedBtRfn[rootNode.Id] = 0.0;
 
             foreach (var nodeId in topoValidation.OrderedNodeIds)
             {
-                if (nodeId == rootNode.Id)
-                {
-                    continue;
-                }
+                if (nodeId == rootNode.Id) continue;
 
                 if (incomingEdge.TryGetValue(nodeId, out var edge))
                 {
@@ -335,6 +336,152 @@ public sealed class UnifiedCalculationPipeline
 
                     double myCa = caResult.Status == CalculationStatus.Pass ? (double)caResult.OutputValue! : parentDrop + segDrop;
                     accumulatedVoltageDropPercent[nodeId] = myCa;
+
+                    // Condutor do trecho
+                    var conductor = networkModel.Conductors.FirstOrDefault(c =>
+                        string.Equals(c.Id, edge.ConductorId, StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(c.CatalogKey, edge.ConductorId, StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(c.Name, edge.ConductorId, StringComparison.OrdinalIgnoreCase))
+                        ?? FallbackConductor(edge.ConductorId);
+
+                    double apCables = 1.0;
+                    if (!string.IsNullOrWhiteSpace(edge.InstallationMethod) && double.TryParse(edge.InstallationMethod, out var apVal) && apVal > 0)
+                        apCables = apVal;
+
+                    int phaseCount = 3;
+                    if (!string.IsNullOrWhiteSpace(edge.Phase) && int.TryParse(edge.Phase, out var pVal) && pVal > 0)
+                        phaseCount = pVal;
+
+                    double physicalLength = edge.Length.Magnitude;
+                    double equivLength = physicalLength / apCables;
+
+                    double mKva = edgeEndLoadKva.TryGetValue(edge.Id, out var mk) ? mk : 0.0;
+                    double dConsumers = accumulatedConsumers.TryGetValue(edge.Id, out var dc) ? dc : 1.0;
+                    double eLoad = accumulatedLoadKva.TryGetValue(edge.Id, out var el) ? el : 0.0;
+                    double gFactor = 1.0;
+                    var attachedLoad = networkModel.Loads.FirstOrDefault(l => l.NodeId == edge.ToNodeId);
+                    if (attachedLoad?.Factor.HasValue == true) gFactor = attachedLoad.Factor.Value;
+
+                    double ibCurrent = phaseCount switch
+                    {
+                        3 => mKva / (defaultVoltage * Math.Sqrt(3) / 1000.0),
+                        2 => mKva / (defaultVoltage / 1000.0),
+                        _ => mKva / (defaultVoltage / Math.Sqrt(3) / 1000.0)
+                    };
+                    double izAmpacity = conductor.Ampacity.Magnitude;
+                    double totalAmpacity = izAmpacity * apCables;
+                    bool isOverloaded = ibCurrent > totalAmpacity;
+
+                    double operatingTemp = 30.0;
+                    if (phaseCount == 3 && totalAmpacity > 0)
+                    {
+                        var tempResult = _cableTempRule.Execute(new[]
+                        {
+                            new RuleInput("M13", mKva, UnitCode.Kva),
+                            new RuleInput("BX6", defaultVoltage, UnitCode.V),
+                            new RuleInput("H13", 3.0, UnitCode.ConductorKey),
+                            new RuleInput("AN13", izAmpacity, UnitCode.Ampere),
+                            new RuleInput("AP13", apCables, UnitCode.Meter)
+                        }, new RuleExecutionContext(runId, "TEMPERATURE"));
+                        if (tempResult.Status == CalculationStatus.Pass) operatingTemp = (double)tempResult.OutputValue!;
+                    }
+                    else
+                    {
+                        operatingTemp = 30.0 + (ibCurrent / Math.Max(1.0, totalAmpacity)) * 60.0;
+                    }
+
+                    double rcc20 = conductor.Resistance.Magnitude;
+                    double xReactance = conductor.Reactance.Magnitude;
+                    double alpha20 = conductor.CatalogKey.Contains("Al", StringComparison.OrdinalIgnoreCase) ? 0.00403 : 0.00393;
+                    double kStar = 1.0652244659520294;
+
+                    var rcaResult = _thermalResistanceRule.Execute(new[]
+                    {
+                        new RuleInput("Rcc20", rcc20, UnitCode.Ohm),
+                        new RuleInput("Alpha20", alpha20, UnitCode.Unknown),
+                        new RuleInput("Temperature", operatingTemp, UnitCode.Celsius),
+                        new RuleInput("KStar", kStar, UnitCode.Unknown)
+                    }, new RuleExecutionContext(runId, "RCA"));
+
+                    double rca = rcaResult.Status == CalculationStatus.Pass ? (double)rcaResult.OutputValue! : rcc20 * (1 + alpha20 * (operatingTemp - 20)) * kStar;
+                    double zImpedance = Math.Sqrt((rca * rca) + (xReactance * xReactance));
+                    double factorBj = zImpedance / ((defaultVoltage * defaultVoltage) / 100.0);
+                    double phaseMultiplier = phaseCount == 2 ? 2.0 : (phaseCount == 1 ? 6.0 : 1.0);
+
+                    // Resistência de neutro aproximada ou catálogo
+                    double rcaNeutral = rca;
+                    if (conductor.CatalogKey.Contains("240 Cu", StringComparison.OrdinalIgnoreCase))
+                    {
+                        rcaNeutral = rca * 2.0; // Neutro de 120mm² típico Light para cabo de 240
+                    }
+                    else if (conductor.CatalogKey.Contains("185 Al", StringComparison.OrdinalIgnoreCase))
+                    {
+                        rcaNeutral = rca * (185.0 / 120.0); // Neutro de 120mm² típico Light para cabo de 185
+                    }
+
+                    // Impedâncias acumuladas do nó pai
+                    double zBtPriorR = accumulatedBtImpedanceR.TryGetValue(edge.FromNodeId, out var zbr) ? zbr : 0.0;
+                    double zBtPriorX = accumulatedBtImpedanceX.TryGetValue(edge.FromNodeId, out var zbx) ? zbx : 0.0;
+                    double rfnPrior = accumulatedBtRfn.TryGetValue(edge.FromNodeId, out var rfn) ? rfn : 0.0;
+
+                    var scResult = _shortCircuitRule.Execute(new[]
+                    {
+                        new RuleInput("Vnom", defaultVoltage, UnitCode.V),
+                        new RuleInput("Z_Upstream_Real", zUpstreamR, UnitCode.Ohm),
+                        new RuleInput("Z_Upstream_Imag", zUpstreamX, UnitCode.Ohm),
+                        new RuleInput("Z_BtPrior_Real", zBtPriorR, UnitCode.Ohm),
+                        new RuleInput("Z_BtPrior_Imag", zBtPriorX, UnitCode.Ohm),
+                        new RuleInput("Rca_Phase", rca, UnitCode.Ohm),
+                        new RuleInput("Rca_Neutral", rcaNeutral, UnitCode.Ohm),
+                        new RuleInput("X_Phase", xReactance, UnitCode.Ohm),
+                        new RuleInput("Length_Equiv_Meters", equivLength, UnitCode.Meter),
+                        new RuleInput("Rfn_Prior", rfnPrior, UnitCode.Ohm)
+                    }, new RuleExecutionContext(runId, "SHORT_CIRCUIT"));
+
+                    double icc3ph = 0.0;
+                    double icc1ph = 0.0;
+                    if (scResult.Status == CalculationStatus.Pass && scResult.OutputValue is ValueTuple<double, double, double, double, double, double, double> scTuple)
+                    {
+                        icc3ph = scTuple.Item1;
+                        icc1ph = scTuple.Item2;
+                        accumulatedBtImpedanceR[nodeId] = zBtPriorR + scTuple.Item3;
+                        accumulatedBtImpedanceX[nodeId] = zBtPriorX + scTuple.Item4;
+                        accumulatedBtRfn[nodeId] = rfnPrior + scTuple.Item5;
+                    }
+                    else
+                    {
+                        accumulatedBtImpedanceR[nodeId] = zBtPriorR + (rca * equivLength / 1000.0);
+                        accumulatedBtImpedanceX[nodeId] = zBtPriorX + (xReactance * equivLength / 1000.0);
+                        accumulatedBtRfn[nodeId] = rfnPrior + ((rca + rcaNeutral) * equivLength / 1000.0);
+                    }
+
+                    segmentResults.Add(new SegmentCalculationResult(
+                        edge.Id,
+                        edge.FromNodeId,
+                        edge.ToNodeId,
+                        conductor.CatalogKey,
+                        phaseCount,
+                        apCables,
+                        physicalLength,
+                        equivLength,
+                        dConsumers,
+                        eLoad,
+                        gFactor,
+                        mKva,
+                        ibCurrent,
+                        totalAmpacity,
+                        isOverloaded,
+                        operatingTemp,
+                        rca,
+                        xReactance,
+                        zImpedance,
+                        factorBj,
+                        phaseMultiplier,
+                        segDrop,
+                        icc3ph,
+                        icc1ph,
+                        zUpstreamR,
+                        zUpstreamX));
                 }
             }
 
@@ -347,6 +494,42 @@ public sealed class UnifiedCalculationPipeline
                     localConsumers.TryGetValue(node.Id, out var lc) ? lc : 0,
                     localLoadKva.TryGetValue(node.Id, out var ll) ? ll : 0.0,
                     ca));
+            }
+        }
+
+        // 7. Avaliação de Proteção do Circuito (Corrente do Fusível e Suportabilidade Térmica)
+        ProtectionCalculationResult? protectionResult = null;
+        if (segmentResults.Count > 0)
+        {
+            var endSegment = segmentResults.OrderBy(s => s.ShortCircuit1PhaseAmperes).First();
+            double minIcc1ph = endSegment.ShortCircuit1PhaseAmperes;
+            string criticalConductor = endSegment.ConductorKey ?? "16 Al_CONC_Tri";
+            double criticalTemp = endSegment.OperatingTemperatureCelsius;
+            double rootLoadKva = trafoResults.FirstOrDefault()?.OperatingLoadKva ?? 112.5;
+
+            var protRuleResult = _protectionRule.Execute(new[]
+            {
+                new RuleInput("RootLoadKva", rootLoadKva, UnitCode.Kva),
+                new RuleInput("Vnom", defaultVoltage, UnitCode.V),
+                new RuleInput("MinIcc1Phase", minIcc1ph, UnitCode.Ampere),
+                new RuleInput("CriticalTemperature", criticalTemp, UnitCode.Celsius),
+                new RuleInput("CriticalConductorKey", criticalConductor, UnitCode.ConductorKey)
+            }, new RuleExecutionContext(runId, "PROTECTION"));
+
+            if (protRuleResult.Status == CalculationStatus.Pass && protRuleResult.OutputValue is ProtectionAssessment ass)
+            {
+                protectionResult = new ProtectionCalculationResult(
+                    ass.ProjectCurrentAmperes,
+                    ass.FuseRatedCurrentAmperes,
+                    ass.MinSinglePhaseShortCircuitAmperes,
+                    ass.ConductorKey,
+                    ass.ConductorSectionMm2,
+                    ass.ConductorOperatingTemperatureCelsius,
+                    ass.MaxAdmissibleTimeSeconds,
+                    ass.FuseMeltingTimeSeconds,
+                    ass.IsRatedCurrentAdequate,
+                    ass.IsThermalWithstandAdequate,
+                    ass.StatusMessage);
             }
         }
 
@@ -363,10 +546,12 @@ public sealed class UnifiedCalculationPipeline
             segmentResults,
             nodeResults,
             networkModel.Circuits.Count,
-            stopwatch.Elapsed.TotalMilliseconds);
+            stopwatch.Elapsed.TotalMilliseconds,
+            protectionResult);
 
         return CalculationResult.Succeeded(request, report);
     }
+
 
     private static double GetNumericParam(NetworkModel model, string key, double defaultValue)
     {

@@ -4,13 +4,185 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:QdtCqts.Desktop.Wpf"
+        xmlns:vm="clr-namespace:QdtCqts.Desktop.Wpf.ViewModels"
         mc:Ignorable="d"
-        Title="sisQDT_LIGHT" Icon="Assets/sisQDT_LIGHT.ico" Height="700" Width="1100">
-    <Grid Background="#0F172A">
-        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Image Source="Assets/sisQDT_LIGHT.png" Width="600" Margin="0,0,0,20"/>
-            <TextBlock Text="Sistema Unificado de Cálculo de Redes Elétricas (QDT + CQTS)" 
-                       Foreground="#94A3B8" FontSize="14" HorizontalAlignment="Center" FontWeight="SemiBold"/>
-        </StackPanel>
+        Title="sisQDT_LIGHT — Sistema Unificado de Cálculo Elétrico" 
+        Icon="Assets/sisQDT_LIGHT.ico" 
+        Height="780" Width="1180"
+        WindowStartupLocation="CenterScreen"
+        Background="#0F172A">
+
+    <Window.DataContext>
+        <vm:MainViewModel/>
+    </Window.DataContext>
+
+    <Window.Resources>
+        <SolidColorBrush x:Key="HeaderBg" Color="#1E293B"/>
+        <SolidColorBrush x:Key="CardBg" Color="#1E293B"/>
+        <SolidColorBrush x:Key="BorderBrushColor" Color="#334155"/>
+        <SolidColorBrush x:Key="TextPrimary" Color="#F8FAFC"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#94A3B8"/>
+        <SolidColorBrush x:Key="AccentBlue" Color="#0284C7"/>
+        <SolidColorBrush x:Key="AccentCyan" Color="#38BDF8"/>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <!-- Header bar -->
+            <RowDefinition Height="Auto"/>
+            <!-- Action bar (projeto, botão, status) -->
+            <RowDefinition Height="Auto"/>
+            <!-- Metrics cards -->
+            <RowDefinition Height="Auto"/>
+            <!-- Main grid (Segments) -->
+            <RowDefinition Height="*"/>
+            <!-- Footer bar (Traceability) -->
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 1. Header Bar -->
+        <Border Grid.Row="0" Background="#0B1120" Padding="18,12" BorderBrush="{StaticResource BorderBrushColor}" BorderThickness="0,0,0,1">
+            <DockPanel LastChildFill="True">
+                <Image Source="Assets/sisQDT_LIGHT.png" Height="36" DockPanel.Dock="Left" Margin="0,0,16,0"/>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="sisQDT_LIGHT" Foreground="{StaticResource TextPrimary}" FontSize="18" FontWeight="Bold"/>
+                    <TextBlock Text="Cálculo Elétrico Unificado de Queda de Tensão, Curto-Circuito e Proteção" Foreground="{StaticResource TextSecondary}" FontSize="12"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- 2. Controls & Actions -->
+        <Border Grid.Row="1" Background="{StaticResource HeaderBg}" Padding="18,12" BorderBrush="{StaticResource BorderBrushColor}" BorderThickness="0,0,0,1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="340"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="Projeto Real:" Foreground="{StaticResource TextPrimary}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                <ComboBox Grid.Column="1" ItemsSource="{Binding AvailableProjects}" SelectedItem="{Binding SelectedProject, Mode=TwoWay}"
+                          Background="#0F172A" Foreground="#FFFFFF" Padding="8,6" FontSize="13" Height="34" VerticalContentAlignment="Center"/>
+
+                <Button Grid.Column="2" Command="{Binding ExecuteCalculationCommand}" Margin="16,0,0,0"
+                        Background="#0284C7" Foreground="#FFFFFF" Padding="20,6" Height="34" FontWeight="Bold" FontSize="13" Cursor="Hand" BorderThickness="0">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="⚡ Executar Cálculo"/>
+                    </StackPanel>
+                </Button>
+
+                <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Status: " Foreground="{StaticResource TextSecondary}" FontSize="13"/>
+                    <Border CornerRadius="12" Padding="12,4" Background="{Binding StatusColor}">
+                        <TextBlock Text="{Binding CalculationStatus}" Foreground="#FFFFFF" FontWeight="Bold" FontSize="12"/>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- 3. Metrics Cards -->
+        <Grid Grid.Row="2" Margin="18,14">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Card 1: Queda de Tensão Máxima -->
+            <Border Grid.Column="0" Background="{StaticResource CardBg}" CornerRadius="8" Padding="14" Margin="0,0,8,0" BorderBrush="{StaticResource BorderBrushColor}" BorderThickness="1">
+                <StackPanel>
+                    <TextBlock Text="QUEDA DE TENSÃO MÁXIMA" Foreground="{StaticResource TextSecondary}" FontSize="11" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding MaxVoltageDropPercent, StringFormat='{}{0:F2} %'}" Foreground="{StaticResource AccentCyan}" FontSize="22" FontWeight="Bold" Margin="0,4,0,0"/>
+                    <TextBlock Text="Acumulada na ponta da BT" Foreground="{StaticResource TextSecondary}" FontSize="11" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Card 2: Curto-Circuito Trifásico Máximo -->
+            <Border Grid.Column="1" Background="{StaticResource CardBg}" CornerRadius="8" Padding="14" Margin="4,0,4,0" BorderBrush="{StaticResource BorderBrushColor}" BorderThickness="1">
+                <StackPanel>
+                    <TextBlock Text="CURTO-CIRCUITO TRIFÁSICO (Icc 3φ)" Foreground="{StaticResource TextSecondary}" FontSize="11" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding MaxShortCircuit3PhaseAmperes, StringFormat='{}{0:F0} A'}" Foreground="#38BDF8" FontSize="22" FontWeight="Bold" Margin="0,4,0,0"/>
+                    <TextBlock Text="Saída do transformador" Foreground="{StaticResource TextSecondary}" FontSize="11" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Card 3: Curto-Circuito Monofásico Mínimo -->
+            <Border Grid.Column="2" Background="{StaticResource CardBg}" CornerRadius="8" Padding="14" Margin="4,0,4,0" BorderBrush="{StaticResource BorderBrushColor}" BorderThickness="1">
+                <StackPanel>
+                    <TextBlock Text="CURTO-CIRCUITO MONOFÁSICO (Icc 1φ)" Foreground="{StaticResource TextSecondary}" FontSize="11" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding MinShortCircuit1PhaseAmperes, StringFormat='{}{0:F0} A'}" Foreground="#FBBF24" FontSize="22" FontWeight="Bold" Margin="0,4,0,0"/>
+                    <TextBlock Text="Sensibilidade na ponta (BTG)" Foreground="{StaticResource TextSecondary}" FontSize="11" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Card 4: Proteção Fusível NH -->
+            <Border Grid.Column="3" Background="{StaticResource CardBg}" CornerRadius="8" Padding="14" Margin="8,0,0,0" BorderBrush="{StaticResource BorderBrushColor}" BorderThickness="1">
+                <StackPanel>
+                    <TextBlock Text="PROTEÇÃO / FUSÍVEL RECOMENDADO" Foreground="{StaticResource TextSecondary}" FontSize="11" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding RecommendedFuse}" Foreground="#34D399" FontSize="22" FontWeight="Bold" Margin="0,4,0,0"/>
+                    <TextBlock Text="{Binding ProtectionStatus}" TextTrimming="CharacterEllipsis" Foreground="{StaticResource TextSecondary}" FontSize="11" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- 4. Segments DataGrid -->
+        <Border Grid.Row="3" Margin="18,0,18,14" Background="{StaticResource CardBg}" CornerRadius="8" BorderBrush="{StaticResource BorderBrushColor}" BorderThickness="1">
+            <DataGrid ItemsSource="{Binding Segments}" AutoGenerateColumns="False" IsReadOnly="True"
+                      Background="Transparent" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#334155"
+                      BorderThickness="0" HeadersVisibility="Column" SelectionMode="Single"
+                      Foreground="{StaticResource TextPrimary}" RowBackground="#1E293B" AlternatingRowBackground="#182234">
+                <DataGrid.ColumnHeaderStyle>
+                    <Style TargetType="DataGridColumnHeader">
+                        <Setter Property="Background" Value="#0F172A"/>
+                        <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                        <Setter Property="Padding" Value="10,8"/>
+                        <Setter Property="BorderBrush" Value="#334155"/>
+                        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                    </Style>
+                </DataGrid.ColumnHeaderStyle>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Trecho" Binding="{Binding FromTo}" Width="110"/>
+                    <DataGridTextColumn Header="Condutor" Binding="{Binding Conductor}" Width="150"/>
+                    <DataGridTextColumn Header="Comp. (m)" Binding="{Binding LengthMeters, StringFormat='{}{0:F1}'}" Width="85"/>
+                    <DataGridTextColumn Header="Carga (kVA)" Binding="{Binding LoadKva, StringFormat='{}{0:F2}'}" Width="95"/>
+                    <DataGridTextColumn Header="Ib (A)" Binding="{Binding OperatingCurrentAmperes, StringFormat='{}{0:F1}'}" Width="80"/>
+                    <DataGridTextColumn Header="Iz (A)" Binding="{Binding RatedAmpacityAmperes, StringFormat='{}{0:F0}'}" Width="75"/>
+                    <DataGridTextColumn Header="Temp. (°C)" Binding="{Binding TemperatureCelsius, StringFormat='{}{0:F1}'}" Width="85"/>
+                    <DataGridTextColumn Header="ΔV Trecho (%)" Binding="{Binding SegmentVoltageDropPercent, StringFormat='{}{0:F3}'}" Width="105"/>
+                    <DataGridTextColumn Header="Icc 3φ (A)" Binding="{Binding ShortCircuit3PhaseAmperes, StringFormat='{}{0:F0}'}" Width="95"/>
+                    <DataGridTextColumn Header="Icc 1φ (A)" Binding="{Binding ShortCircuit1PhaseAmperes, StringFormat='{}{0:F0}'}" Width="95"/>
+                    <DataGridTextColumn Header="Condição" Binding="{Binding OverloadStatus}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <!-- 5. Footer Bar (Observabilidade & Rastreabilidade) -->
+        <Border Grid.Row="4" Background="#0B1120" Padding="18,10" BorderBrush="{StaticResource BorderBrushColor}" BorderThickness="0,1,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding StatusMessage}" Foreground="{StaticResource TextSecondary}" FontSize="12"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="CorrelationId: " Foreground="{StaticResource TextSecondary}" FontSize="11"/>
+                    <TextBlock Text="{Binding CorrelationId}" Foreground="{StaticResource TextPrimary}" FontSize="11" Margin="0,0,14,0"/>
+
+                    <TextBlock Text="Execução: " Foreground="{StaticResource TextSecondary}" FontSize="11"/>
+                    <TextBlock Text="{Binding ExecutionDurationMs, StringFormat='{}{0:F1} ms'}" Foreground="{StaticResource AccentCyan}" FontSize="11" Margin="0,0,14,0"/>
+
+                    <TextBlock Text="Hash: " Foreground="{StaticResource TextSecondary}" FontSize="11"/>
+                    <TextBlock Text="{Binding OutputHash}" Foreground="{StaticResource TextSecondary}" FontSize="11" TextTrimming="CharacterEllipsis" MaxWidth="120"/>
+                </StackPanel>
+            </Grid>
+        </Border>
     </Grid>
 </Window>

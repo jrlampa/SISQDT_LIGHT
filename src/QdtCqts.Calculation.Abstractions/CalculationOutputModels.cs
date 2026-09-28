@@ -28,7 +28,11 @@ public sealed record SegmentCalculationResult(
     double ImpedanceOhmPerKm,
     double FactorBj,
     double PhaseFactor,
-    double SegmentVoltageDropPercent);
+    double SegmentVoltageDropPercent,
+    double ShortCircuit3PhaseAmperes = 0.0,
+    double ShortCircuit1PhaseAmperes = 0.0,
+    double UpstreamResistanceOhm = 0.0,
+    double UpstreamReactanceOhm = 0.0);
 
 /// <summary>
 /// Resultado de cálculo para um nó da rede (poste, caixa, derivação, carga).
@@ -54,6 +58,22 @@ public sealed record TransformerCalculationResult(
     double TotalOriginVoltageDropPercent);
 
 /// <summary>
+/// Resultado de avaliação de proteção e suportabilidade térmica do circuito.
+/// </summary>
+public sealed record ProtectionCalculationResult(
+    double ProjectCurrentAmperes,
+    double RecommendedFuseCurrentAmperes,
+    double MinSinglePhaseShortCircuitAmperes,
+    string CriticalConductorKey,
+    double CriticalConductorSectionMm2,
+    double CriticalOperatingTemperatureCelsius,
+    double MaxAdmissibleTimeSeconds,
+    double FuseMeltingTimeSeconds,
+    bool IsCurrentAdequate,
+    bool IsThermalAdequate,
+    string StatusMessage);
+
+/// <summary>
 /// Relatório consolidado e imutável de cálculo da rede elétrica para um circuito ou rede completa.
 /// </summary>
 public sealed record NetworkCalculationReport(
@@ -66,4 +86,6 @@ public sealed record NetworkCalculationReport(
     IReadOnlyList<SegmentCalculationResult> Segments,
     IReadOnlyList<NodeCalculationResult> Nodes,
     int TotalCircuitsCalculated,
-    double ExecutionDurationMs);
+    double ExecutionDurationMs,
+    ProtectionCalculationResult? Protection = null);
+

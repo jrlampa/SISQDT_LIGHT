@@ -1,5 +1,38 @@
 # Changelog
 
+## Fase 24 — 2026-09-27
+
+- **Reconstrução da Cadeia de Curto-Circuito (Icc 3φ e Icc 1φ) e Análise de Evidências de Proteção.**
+- **Decomposição Auditável de Impedância Equivalente (Zeq) e Curto-Circuito Trifásico (Icc 3φ):**
+  - Mapeamento analítico e computacional completo da fórmula `LADO 1!CB13`:
+    `=($BX$6/SQRT(3))/IMABS(IMSUM($AS$8,BK13,BL13,$CA$8,$CF$8))`
+  - Decomposição exata dos 12 parâmetros constituintes (`BX6`, `CF8`, `CG8`, `BW6`, `AS6`, `BB13`, `BI13`, `AR13`, `C6`, `D6`, `E6`, `G6`).
+  - Demonstração analítica da impedância equivalente de Thévenin:
+    $R_{\text{total}} = R_{\text{fonte}} (0) + R_{\text{MT}} (0.00039839) + R_{\text{trafo}} (0) + R_{\text{BT}} (0.00017742) = 0.000575805501 \;\Omega$.
+    $X_{\text{total}} = X_{\text{fonte}} (0.000242) + X_{\text{MT}} (0.00019511) + X_{\text{trafo}} (0.01505778) + X_{\text{BT}} (0.0001794) = 0.015674288889 \;\Omega$.
+    $|\mathbf{Z}_{\text{eq}}| = \sqrt{R_{\text{total}}^2 + X_{\text{total}}^2} = 0.015684861623 \;\Omega$.
+  - Paridade bit-a-bit confirmada:
+    Excel `CB13` = `8098.066930449716 A`, Motor = `8098.066930449716 A`, Erro = $0.00 \times 10^0\text{ A}$ (IEEE-754).
+- **Curto-Circuito Monofásico (Icc 1φ):**
+  - Identificada e comprovada a fórmula da coluna `CC13`:
+    `=($BX$6/SQRT(3))/IMABS(IMSUM($AS$8,BN13,BO13,$CA$8,$CF$8))`
+  - Comprovada a resistência de laço fase-neutro: $BO13 = (R_{\text{fase}} + R_{\text{neutro}}) \times \frac{L_{\text{equiv}}}{1000}$.
+  - Paridade confirmada em `CC13`:
+    Excel = `8182.488711140876 A`, Motor = `8182.488711140876 A`, Erro = $0.00 \times 10^0\text{ A}$.
+- **Validação Cruzada em Corpus Homologado (CQT PROJ 7 REV2 e CQT PROJ 4 REV1):**
+  - Confirmação de que a estrutura de cálculo de curto-circuito é idêntica nos dois projetos reais.
+  - CQT PROJ 4 `CB13`: Excel = `8098.06418783237 A`, Motor = `8098.06418783237 A`, Erro = $0.00 \times 10^0\text{ A}$.
+  - CQT PROJ 4 `CC13`: Excel = `8182.474839937445 A`, Motor = `8182.474839937445 A`, Erro = $0.00 \times 10^0\text{ A}$.
+- **Auditoria de Evidências de Proteção:**
+  - Inspecionadas as abas `Curva NH` e `Curva Disj.`: constatado que contêm unicamente imagens estáticas WMF e referências textuais externas a documentos DOC/PDF (`..\ARQ_2_ANEXOS\Curvas de disjuntores de BT.doc` e `..\ARQ_2_ANEXOS\Curva disj trif_Trafo AP_ GES-6300B.pdf`), sem nenhuma tabela numérica ou curva digitalizada.
+  - Coordenação/seletividade de curvas classificada rigorosamente como: `BLOCKED_BY_MISSING_EVIDENCE`.
+  - Mapeadas as fórmulas existentes de proteção em `LADO 1`: corrente de projeto de raiz (`CH40 = 195.3753 A`), menor corrente monofásica de falta (`CH36 = 500.1808 A`) e tempo admissível de curto pelo critério de suportabilidade térmica do condutor mais crítico (Equação de Onderdonk em `CR37` e `CR38`).
+- **Implementação e Testes:**
+  - Regra isolada `CandidateShortCircuitRule` consolidada em `src/QdtCqts.Calculation.Cqts`.
+  - Integração no `UnifiedCalculationPipeline` propagando impedâncias e calculando correntes por trecho da rede radial.
+  - Suíte de testes expandida para **134 testes automatizados aprovados, 0 falhas, 0 warnings**.
+  - Gates: `SHORT_CIRCUIT_3PH_GATE = GO`, `IMPEDANCE_DECOMPOSITION_GATE = GO`, `SHORT_CIRCUIT_1PH_GATE = GO`, `PROTECTION_EVIDENCE_GATE = BLOCKED_BY_MISSING_EVIDENCE (Curvas NH/Disjuntor sem dados numéricos)`, `PARITY_GATE = GO`, `TEST_GATE = GO`.
+
 ## Fase 23 — 2026-09-26
 
 - **Integração Ponta a Ponta da Cadeia de Cálculo + Identidade Visual Oficial (sisQDT_LIGHT).**
