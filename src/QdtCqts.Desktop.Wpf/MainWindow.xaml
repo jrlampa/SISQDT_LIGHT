@@ -147,7 +147,7 @@
             <!-- 3A. Unifilar Diagram Canvas Area -->
             <Border Grid.Column="0" Background="#0A0F1D" CornerRadius="8" BorderBrush="{StaticResource BorderBrushColor}" BorderThickness="1" ClipToBounds="True">
                 <Grid>
-                    <!-- Toolbar do Diagrama Unifilar (Zoom/Pan/Fit/Legenda) -->
+                    <!-- Toolbar do Diagrama Unifilar (Zoom/Pan/Fit/Filtros/Legenda) -->
                     <Border VerticalAlignment="Top" HorizontalAlignment="Left" Margin="12" Background="#1E293B" CornerRadius="6" Padding="6,4" Panel.ZIndex="10" BorderBrush="#334155" BorderThickness="1">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="Diagrama Unifilar" Foreground="{StaticResource TextPrimary}" FontWeight="Bold" FontSize="12" VerticalAlignment="Center" Margin="6,0,12,0"/>
@@ -163,6 +163,19 @@
 
                             <TextBlock Text="{Binding UnifilarDiagram.ZoomLevel, StringFormat='{}{0:P0}'}" Foreground="{StaticResource AccentCyan}"
                                        VerticalAlignment="Center" Margin="8,0,6,0" FontSize="11" FontWeight="SemiBold"/>
+
+                            <Border Width="1" Background="#334155" Margin="6,2"/>
+
+                            <TextBlock Text="Filtro:" Foreground="{StaticResource TextSecondary}" FontSize="11" VerticalAlignment="Center" Margin="2,0,4,0"/>
+                            <ComboBox x:Name="CmbVisualFilter" SelectionChanged="CmbVisualFilter_SelectionChanged"
+                                      Background="#0F172A" Foreground="#FFFFFF" BorderBrush="#334155" Height="26" FontSize="11" Cursor="Hand" VerticalContentAlignment="Center">
+                                <ComboBoxItem Content="Todos" IsSelected="True" Tag="Todos"/>
+                                <ComboBoxItem Content="Sobrecarga" Tag="Sobrecarga"/>
+                                <ComboBoxItem Content="Queda ΔV &gt; 5%" Tag="QuedaTensaoLimite"/>
+                                <ComboBoxItem Content="Evidência Bloqueada" Tag="EvidenceBlocked"/>
+                                <ComboBoxItem Content="Selecionados" Tag="Selecionados"/>
+                                <ComboBoxItem Content="Trace (Caminho)" Tag="Trace"/>
+                            </ComboBox>
                         </StackPanel>
                     </Border>
 
@@ -229,24 +242,38 @@
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Canvas Cursor="Hand" MouseLeftButtonDown="Edge_MouseLeftButtonDown" Tag="{Binding EdgeId}">
+                                            <Canvas.Style>
+                                                <Style TargetType="Canvas">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsDimmed}" Value="True">
+                                                            <Setter Property="Opacity" Value="0.18"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Canvas.Style>
+
                                             <!-- Linha de fundo para área de clique ampliada -->
                                             <Line X1="{Binding X1}" Y1="{Binding Y1}" X2="{Binding X2}" Y2="{Binding Y2}"
                                                   Stroke="Transparent" StrokeThickness="14"/>
 
-                                            <!-- Linha representativa do trecho -->
+                                            <!-- Linha representativa do trecho com suporte a Trace, Sobrecarga e Seleção -->
                                             <Line X1="{Binding X1}" Y1="{Binding Y1}" X2="{Binding X2}" Y2="{Binding Y2}">
                                                 <Line.Style>
                                                     <Style TargetType="Line">
                                                         <Setter Property="Stroke" Value="#38BDF8"/>
                                                         <Setter Property="StrokeThickness" Value="3.5"/>
                                                         <Style.Triggers>
+                                                             <DataTrigger Binding="{Binding IsInTrace}" Value="True">
+                                                                 <Setter Property="Stroke" Value="#FBBF24"/>
+                                                                 <Setter Property="StrokeThickness" Value="5.5"/>
+                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding IsOverloaded}" Value="True">
                                                                 <Setter Property="Stroke" Value="#EF4444"/>
-                                                                <Setter Property="StrokeThickness" Value="4.5"/>
+                                                                <Setter Property="StrokeThickness" Value="5"/>
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                                <Setter Property="Stroke" Value="#FBBF24"/>
-                                                                <Setter Property="StrokeThickness" Value="5"/>
+                                                                <Setter Property="Stroke" Value="#F59E0B"/>
+                                                                <Setter Property="StrokeThickness" Value="6"/>
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
@@ -280,15 +307,29 @@
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Canvas Canvas.Left="{Binding X}" Canvas.Top="{Binding Y}" Cursor="Hand" MouseLeftButtonDown="Transformer_MouseLeftButtonDown" Tag="{Binding TransformerId}">
+                                            <Canvas.Style>
+                                                <Style TargetType="Canvas">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsDimmed}" Value="True">
+                                                            <Setter Property="Opacity" Value="0.18"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Canvas.Style>
+
                                             <Border Width="110" Height="68" CornerRadius="8" Background="#1E293B" Padding="8,6" Margin="-55,-34,0,0">
                                                 <Border.Style>
                                                     <Style TargetType="Border">
                                                         <Setter Property="BorderBrush" Value="#0284C7"/>
                                                         <Setter Property="BorderThickness" Value="2"/>
                                                         <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                            <DataTrigger Binding="{Binding IsInTrace}" Value="True">
                                                                 <Setter Property="BorderBrush" Value="#FBBF24"/>
                                                                 <Setter Property="BorderThickness" Value="3"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                                <Setter Property="BorderBrush" Value="#FBBF24"/>
+                                                                <Setter Property="BorderThickness" Value="3.5"/>
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
@@ -317,6 +358,16 @@
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Canvas Canvas.Left="{Binding X}" Canvas.Top="{Binding Y}" Cursor="Hand" MouseLeftButtonDown="Node_MouseLeftButtonDown" Tag="{Binding NodeId}">
+                                            <Canvas.Style>
+                                                <Style TargetType="Canvas">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsDimmed}" Value="True">
+                                                            <Setter Property="Opacity" Value="0.18"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Canvas.Style>
+
                                             <!-- Nó Visual: Caixa de Identificação com métricas calculadas -->
                                             <Border MinWidth="74" Height="48" CornerRadius="6" Background="#1E293B" Padding="6,4" Margin="-37,-24,0,0">
                                                 <Border.Style>
@@ -337,9 +388,13 @@
                                                                 <Setter Property="BorderBrush" Value="#A855F7"/>
                                                                 <Setter Property="BorderThickness" Value="2"/>
                                                             </DataTrigger>
-                                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                            <DataTrigger Binding="{Binding IsInTrace}" Value="True">
                                                                 <Setter Property="BorderBrush" Value="#FBBF24"/>
                                                                 <Setter Property="BorderThickness" Value="3"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                                <Setter Property="BorderBrush" Value="#FFFFFF"/>
+                                                                <Setter Property="BorderThickness" Value="3.5"/>
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>

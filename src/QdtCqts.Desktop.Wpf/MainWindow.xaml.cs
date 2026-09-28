@@ -136,6 +136,17 @@ public partial class MainWindow : Window
         }
     }
 
+    private void CmbVisualFilter_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (ViewModel?.UnifilarDiagram != null && CmbVisualFilter.SelectedItem is ComboBoxItem item && item.Tag is string tag)
+        {
+            if (Enum.TryParse<ViewModels.Unifilar.UnifilarVisualFilter>(tag, out var filter))
+            {
+                ViewModel.UnifilarDiagram.CurrentFilter = filter;
+            }
+        }
+    }
+
     private void BtnClearSelection_Click(object sender, RoutedEventArgs e)
     {
         ViewModel?.UnifilarDiagram?.ClearSelection();

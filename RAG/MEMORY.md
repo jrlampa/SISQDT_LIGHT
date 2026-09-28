@@ -87,6 +87,13 @@ Substituir o legado instável por uma aplicação desktop de alta precisão, det
 - **Fase 27A (Concluída — Auditoria WPF, Contratos e Unifilar Operacional):** Auditoria aprofundada da interface WPF existente, validação do princípio Thin Frontend e mapeamento das lacunas de contrato para a evolução em Cockpit Operacional. Confirmado que a WPF não recalcula grandezas elétricas. Identificados achados de apresentação (duplicação da verificação de sobrecarga em `SegmentDisplayModel` e falta de exposição de nós/trafos na UI). Mapeadas as lacunas de `NodeCalculationResult` (tensão nodal em Volts e Icc no barramento do nó). Especificada a arquitetura completa da projeção visual unificada e os Presentation Models para a Fase 27B (`UnifilarDiagramViewModel`, `UnifilarNodeViewModel`, `UnifilarEdgeViewModel`, `SelectedElementDetailViewModel`, `UnifilarLayoutEngine`). Relatório oficial em `docs/phases/fase27/FASE27A_AUDITORIA_WPF_E_UNIFILAR.md`.
 - **Fase 27B (Concluída — Contratos de Apresentação e Projeção do Grafo para o Unifilar):** Estabelecida a camada de apresentação do diagrama unifilar (`QdtCqts.Desktop.Wpf.ViewModels.Unifilar`), desacoplada de regras elétricas e renderização XAML definitiva. Criados contratos com preservação de identificadores de domínio: `UnifilarNodeViewModel`, `UnifilarEdgeViewModel`, `UnifilarTransformerViewModel`, `UnifilarDiagramViewModel`, `SelectedElementDetailViewModel` e motor geométrico `HierarchicalTreeLayoutEngine`. Sanada a duplicação de `OverloadStatus` em `SegmentDisplayModel`, consumindo `IsOverloaded` direto do motor. 7 novos testes de unidade e integridade de grafo adicionados em `UnifilarProjectionTests.cs`. Suíte expandida para **156 testes aprovados, 0 falhas, 0 warnings**.
 - **Fase 27C (Concluída — Unifilar Visual WPF + Correção da Identidade Git):** Implementada a primeira versão funcional e interativa do Unifilar Operacional em WPF (`MainWindow.xaml` e `MainWindow.xaml.cs`) sobre os contratos da Fase 27B. Renderização vetorial de transformadores, trechos (arestas) e nós (barras); suporte a zoom (25% a 400%), pan contínuo e ajuste à tela (*Fit to View*); painel lateral categorizado com dados de engenharia e Half-way BIM; sincronização de seleção entre o diagrama e o DataGrid de trechos; suporte a redes com bifurcações (1 → N); correção da identidade Git local (`Jonatas`) sem reescrever histórico. Suíte expandida para **161 testes aprovados, 0 falhas, 0 warnings**.
+- **Fase 27D (Concluída — Navegação Avançada, Trace Elétrico, Filtros Visuais e Otimização Controlada do Unifilar):**
+  - **Zero Fallbacks Sintéticos (27D-AUDIT-01):** Eliminada a criação artificial de entidades de domínio na apresentação; seleção com ID inexistente cancela com diagnóstico determinístico (`SelectedElement = null`, `SelectedDetail = null`).
+  - **Trace Elétrico Topológico da Raiz à Ponta (Fase 27D-A):** Algoritmo ascendente $O(\text{profundidade})$ rastreando o caminho da seleção até o transformador de alimentação sem recalcular física elétrica. Isolamento perfeito de bifurcações (seleção de um ramo não destaca ramos irmãos).
+  - **Filtros Visuais de Condição Elétrica (Fase 27D-B):** Enum `UnifilarVisualFilter` (Todos, Sobrecarga, QuedaTensaoLimite, EvidenceBlocked, Selecionados, Trace). Atenuação visual (dimming 18%) via triggers WPF sem destruir coleções observáveis ou recalcular geometria. Consumo estrito de `IsOverloaded` e `EvidenceBlocked` do backend e threshold explícito configurável de $\Delta V$ (default 5.0%).
+  - **FitToView Robusto (27D-AUDIT-02):** Centralização de métricas em `UnifilarVisualMetrics` e proteção total contra NaN/Infinity e viewports degenerados.
+  - **Indexação $O(1)$ (27D-AUDIT-03):** Otimização de lookups por ID para grafos de grande escala.
+  - **Suíte de Testes:** 25 novos testes dedicados em `UnifilarTraceAndNavigationTests.cs`. Suíte canônica expandida de 161 para **186 testes aprovados, 0 falhas, 0 warnings**.
 
 ---
 
@@ -102,12 +109,12 @@ Substituir o legado instável por uma aplicação desktop de alta precisão, det
 - `src/QdtCqts.Infrastructure.Sqlite`: Banco de dados relacional e repositórios de dados SQLite.
 - `src/QdtCqts.Infrastructure.ExcelEvidence`: Importador seguro OpenXML e construção de grafo de precedência celular.
 - `src/QdtCqts.Infrastructure.Parity`: Mecanismos de comparação numérica e paridade com tolerância de engenharia.
-- `src/QdtCqts.Desktop.Wpf`: Aplicação desktop WPF para operadores de engenharia da Light com identidade visual, ícone oficial, cockpit operacional com diagrama unifilar interativo e painel de detalhes.
+- `src/QdtCqts.Desktop.Wpf`: Aplicação desktop WPF para operadores de engenharia da Light com identidade visual, ícone oficial, cockpit operacional com diagrama unifilar interativo, trace elétrico determinístico, filtros visuais e painel de detalhes.
 
 ### 4.2 Métricas de Teste
-- Total de testes automatizados: **161 aprovados, 0 falhas, 0 ignorados**; restore/build finalizados com 0 erros e 0 warnings.
+- Total de testes automatizados: **186 aprovados, 0 falhas, 0 ignorados**; restore/build finalizados com 0 erros e 0 warnings.
 - Falhas: **0**.
-- Duração da execução: **~1.6 segundos**.
+- Duração da execução: **~1.7 segundos**.
 
 ---
 

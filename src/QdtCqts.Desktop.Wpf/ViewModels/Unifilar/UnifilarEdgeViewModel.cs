@@ -83,6 +83,20 @@ public sealed class UnifilarEdgeViewModel : INotifyPropertyChanged
         set => SetField(ref _isSelected, value);
     }
 
+    private bool _isInTrace;
+    public bool IsInTrace
+    {
+        get => _isInTrace;
+        set => SetField(ref _isInTrace, value);
+    }
+
+    private bool _isDimmed;
+    public bool IsDimmed
+    {
+        get => _isDimmed;
+        set => SetField(ref _isDimmed, value);
+    }
+
     public event PropertyChangedEventHandler? PropertyChanged;
 
     private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)

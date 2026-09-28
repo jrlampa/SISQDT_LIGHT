@@ -178,11 +178,11 @@ O pipeline de cálculo orquestra de ponta a ponta:
 - O pipeline não sintetiza condutor nem transformador quando faltam no modelo: ampacidade, R/X, potência e impedância de catálogo devem estar presentes; caso contrário, o cálculo é bloqueado com diagnóstico explícito.
 - O pipeline mantém o resultado elétrico geral `Pass` e a WPF sinaliza separadamente `EvidenceBlocked`; isso não deve ser convertido em `CalculationError` nem ocultar os resultados elétricos calculáveis.
 - O identificador e o SHA-256 de uma evidência externa são metadados de proveniência. Como o Evidence Store histórico está ausente, o sistema não afirma validar o hash contra o conteúdo do arquivo.
-- Estado de fases: Fase 24 fechada no escopo acima; Fase 25, Fase 26, Fase 27A, Fase 27B e Fase 27C concluídas. Próxima fase: `FASE27D`.
+- Estado de fases: Fases 24, 25, 26, 27A, 27B, 27C e 27D concluídas.
 
 ---
 
-## 10. Arquitetura do Cockpit Operacional e Unifilar Elétrico (Fases 27A, 27B e 27C)
+## 10. Arquitetura do Cockpit Operacional e Unifilar Elétrico (Fases 27A, 27B, 27C e 27D)
 
 ### 10.1 Princípio da Projeção Visual Unificada
 - O Unifilar Elétrico é estritamente uma **projeção visual do modelo de rede (`NetworkModel`) e do relatório imutável de cálculo (`NetworkCalculationReport`)**.
@@ -202,6 +202,14 @@ O pipeline de cálculo orquestra de ponta a ponta:
 2. **Painel de Inspeção Lateral:** Integrado em split-view redimensionável com `GridSplitter`, exibindo títulos, subtítulos e categorias dinâmicas de dados técnicos (`DetailCategoryGroup` e `DetailItem`).
 3. **Sincronização de Seleção Bidirecional:** Seleção cruzada entre o Unifilar e o DataGrid de Segmentos sem duplicação de dados de engenharia.
 4. **Governança de Identidade Git:** Configuração local vinculada a `Jonatas` para novos commits sem reescrever histórico legado.
+
+### 10.4 Trace Elétrico, Filtros Visuais e Resolução O(1) (Fase 27D)
+1. **Zero Fallbacks Sintéticos:** Rejeição segura de seleções com IDs inválidos sem fabricar entidades de domínio na apresentação.
+2. **Trace Elétrico Topológico da Raiz à Ponta:** Algoritmo determinístico $O(\text{profundidade})$ que percorre a árvore radial upstream a partir da seleção (`ToNodeId -> Edge -> FromNodeId -> ... -> Root`), destacando o caminho com isolamento estrito de ramos em bifurcações.
+3. **Filtros Visuais de Condição Elétrica:** Enum `UnifilarVisualFilter` (`Todos`, `Sobrecarga`, `QuedaTensaoLimite`, `EvidenceBlocked`, `Selecionados`, `Trace`).
+4. **Atenuação Visual por Hardware:** Propriedade `IsDimmed` associada a triggers XAML de opacidade (18%), preservando posições de tela e coleções sem causar redesenhos estruturais.
+5. **Métricas Visuais e FitToView Centralizados:** `UnifilarVisualMetrics` e proteção total contra viewports nulos/degenerados e valores `NaN`/`Infinity`.
+6. **Lookup Indexado:** Dicionários indexados por ID no orquestrador visual para acesso $O(1)$ sem degradação em grafos extensos.
 
 
 

@@ -1,5 +1,30 @@
 # Changelog
 
+## Fase 27D — Navegação Avançada, Trace Elétrico, Filtros Visuais e Otimização Controlada do Unifilar
+
+- **Zero Fallbacks Sintéticos de Domínio (27D-AUDIT-01):**
+  - Eliminada totalmente a fabricação de entidades artificiais (`?? new Node(...)`, `?? new Edge(...)`, `?? new Transformer(...)`) em `UnifilarDiagramViewModel.SelectNode/SelectEdge/SelectTransformer`.
+  - Passagem de ID inexistente cancela a seleção determinística (`SelectedElement = null`, `SelectedDetail = null`) sem inventar dados, garantindo fidelidade de modelo.
+- **Trace Elétrico Topológico da Raiz à Ponta (Fase 27D-A):**
+  - Implementado algoritmo de rastreamento ascendente `ComputeAndApplyTrace` conectando a ponta/trecho selecionado até o transformador e nó fonte na topologia radial real.
+  - Complexidade $O(\text{profundidade})$, instantâneo e estritamente determinístico.
+  - Isolamento estrito de bifurcações: selecionar um nó/ramo não destaca ramos irmãos.
+  - Zero recálculo de grandezas elétricas (operação puramente de apresentação/topologia).
+- **Filtros Visuais de Condição Elétrica (Fase 27D-B):**
+  - Criado enum `UnifilarVisualFilter` com modos 100% pt-BR: `Todos`, `Sobrecarga`, `QuedaTensaoLimite`, `EvidenceBlocked`, `Selecionados`, `Trace`.
+  - Mecanismo de atenuação visual (dimming) via propriedade `IsDimmed` (opacidade 18% em elementos filtrados) acionado via triggers de hardware no WPF, sem destruir coleções observáveis ou recalcular posições de layout.
+  - Filtro de sobrecarga consome estritamente o status `IsOverloaded` calculado pelo motor de backend.
+  - Filtro de queda de tensão opera com threshold explícito configurável de apresentação (`VoltageDropThresholdPercent`, default 5.0%).
+  - Filtro de `EvidenceBlocked` preserva semântica canônica da Fase 26.
+- **Robustez do FitToView e Métricas Visuais (27D-AUDIT-02):**
+  - Centralizadas métricas de apresentação em `UnifilarVisualMetrics` (`NodeWidth`, `NodeHeight`, `TransformerWidth`, `TransformerHeight`, `DefaultMargin`, `ViewportPaddingRatio`, `MinZoom = 0.25`, `MaxZoom = 4.0`, `FitToViewMaxZoom = 2.5`).
+  - Proteção completa contra viewport degenerado, ausência de elementos e valores `NaN` ou `Infinity`.
+- **Indexação e Performance (27D-AUDIT-03):**
+  - Índices $O(1)$ (`_nodeVmById`, `_edgeVmById`, `_trafoVmById`, `_incomingEdgeByToNodeId`) no orquestrador de apresentação do unifilar, eliminando varreduras lineares repetidas em grafos de grande escala.
+- **Expansão da Suíte de Testes:**
+  - Criado `UnifilarTraceAndNavigationTests.cs` com 25 novos testes unitários e de integração cobrindo trace, isolamento de bifurcações, filtros, dimming, robustez de viewport e zero fallbacks sintéticos.
+  - Suíte canônica expandida de 161 para **186 testes aprovados, 0 falhas, 0 warnings**.
+
 ## Fase 27C — Unifilar Visual WPF + Correção da Identidade Git
 
 - **Workstream A — Identidade Git:** Investigada a origem da identificação `Jonathan IM3` (originada da chave `user.name` na configuração local `.git/config`) e reconfigurada formalmente para `Jonatas`. Histórico de commits anteriores preservado sem rebase.
