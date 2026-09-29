@@ -39,6 +39,7 @@ Este diretório contém os relatórios e registros de evidência matemática de 
 | **Fase 30C** | [fase30c/](fase30c/) | Reconciliação de identidade física/lógica no ZNA855820 | `GO PARA PRÓXIMA DECISÃO` — identidade e CRS/unidade não determinados | 0 novos; suíte 212 |
 | **Fase 30D** | [fase30d/](fase30d/) | Protocolo de identidade física/lógica em corpus multi-projeto | `IDENTIDADE NÃO DETERMINADA — REQUISITO EXTERNO NECESSÁRIO` | 0 novos; suíte 212 |
 | **Fase 30E** | [fase30e/](fase30e/) | Origem do crosswalk `.srua`/CSV/KMZ/CQTS e rastreio até DWG | Dados coerentes até CQTS; origem e handle DWG não determinados | 0 novos; suíte 212 |
+| **Fase 30F** | [fase30f/](fase30f/) | Reconciliação DWG ↔ crosswalk físico-lógico no ZNA19165 | `NO-GO — IDENTIDADE FÍSICO-LÓGICA AINDA NÃO DETERMINADA` | 0 novos; suíte 212 |
 
 
 

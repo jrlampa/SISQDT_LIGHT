@@ -179,7 +179,7 @@ O pipeline de cálculo orquestra de ponta a ponta:
 - O pipeline não sintetiza condutor nem transformador quando faltam no modelo: ampacidade, R/X, potência e impedância de catálogo devem estar presentes; caso contrário, o cálculo é bloqueado com diagnóstico explícito.
 - O pipeline mantém o resultado elétrico geral `Pass` e a WPF sinaliza separadamente `EvidenceBlocked`; isso não deve ser convertido em `CalculationError` nem ocultar os resultados elétricos calculáveis.
 - O identificador e o SHA-256 de uma evidência externa são metadados de proveniência. Como o Evidence Store histórico está ausente, o sistema não afirma validar o hash contra o conteúdo do arquivo.
-- Estado de fases: Fases 24–28 e 30A–30E concluídas nos escopos documentados; Fase 30E confirma crosswalk local até CQTS, mas mantém origem e identidade handle-DWG não determinadas.
+- Estado de fases: Fases 24–28 e 30A–30F concluídas nos escopos documentados; Fase 30F confirmou que a identidade DWG↔crosswalk do ZNA19165 continua não determinada e bloqueia associação automática.
 
 ---
 
@@ -274,6 +274,17 @@ QDT/CQTS (Grafo Calculado)
 - `id` do `.srua` difere de `title` (`P1`→`P2`); o histórico declara cinco postes e zero arestas, enquanto a topologia atual tem 36. Seu link `localhost` não foi localizado e não prova a origem dos registros atuais.
 - `.srua`, KMZ, CSV e CQTS não guardam handle/revisão/hash do DWG. O DWG tem rótulos P#/TR repetidos; a varredura das classes físicas não encontrou join de coordenadas. Não associar `Node`, `Transformer` ou `Edge` a entidades CAD por nome, ordem ou proximidade.
 - Origem causal do snapshot, revisão CAD, CRS/unidade oficial e procedimento do operador seguem indeterminados. Sem mudança de domínio, produto ou LISP; Fase 31 continua não aprovada. Relatório: `docs/phases/fase30e/FASE30E_RASTREAMENTO_ORIGEM_CROSSWALK.md`.
+
+### 12.4 Reconciliação DWG ↔ Crosswalk (Fase 30F)
+
+- Três traces ZNA19165 foram reproduzidos até o CQTS: `P2` (`LADO 1 PROJ2`), `P24 - TRAFO` e `P25` (`LADO 1`). CSV/KMZ/`.srua` concordam em nome e posição; as linhas CQTS concordam no contexto/PONTO e coordenadas armazenadas. Isso confirma a crosswalk até o CQTS, não a última seta para CAD.
+- No DWG principal, `NUM_PLAN.XX=P2` ocorre 18 vezes; `XX=24` e `XX=25`, três vezes cada. Não há literal `P24/P25`, chave CQTS, ID de projeto ou revisão nesses registros. Em dois pares os valores numéricos estão sobrepostos a `TR`/`P2`; nenhum critério escolhe a ocorrência física correta.
+- O scan contou 13.219 entidades, 313 atributos, 0 entidades com XDATA, 59 APPIDs, 368 extension dictionaries, 211 reactors e classes customizadas reportadas pelo Core Console. As chaves diretas visíveis não revelaram identidade lógica; payloads customizados não decodificados continuam uma limitação.
+- Handles são únicos no arquivo, mas não aparecem na crosswalk; são referências técnicas locais à revisão. O BAK de mesmo basename é quase idêntico; o BAK “JUC” tem conteúdo/posições alteradas. Nenhum deles traz mapa aprovado para os artefatos geográficos.
+- `INSUNITS=0`, `MAPCSASSIGN` vazio e ausência de `ACAD_GEOGRAPHICDATA` deixam unidade/CRS indeterminados. Não usar a coordenada bruta, nome, layer, ordem ou proximidade como critério de associação.
+- Workbooks auxiliares PONTO_24/25 têm projeto interno “CACUIA - RUA PEDREIRA - NOVA IGUAÇU”; o workbook Estruturas & Clientes do ZNA19165 é uma tabela PONTO/POSTE/tipo sem handle. A convenção genérica `DomainId`/Handle/XData de `aux cad` não foi encontrada gravada neste DWG.
+- Gate: `NO-GO — IDENTIDADE FÍSICO-LÓGICA AINDA NÃO DETERMINADA`. Fase 31 não aprovada. Requer crosswalk versionada e validada pela engenharia, ou identidade persistente de domínio explicitamente gravada e verificada no DWG, mais definição de CRS/unidade se a geometria for usada.
+- Relatório: `docs/phases/fase30f/FASE30F_RECONCILIACAO_DWG_CROSSWALK.md`.
 
 
 

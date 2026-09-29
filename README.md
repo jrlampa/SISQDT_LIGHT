@@ -5,7 +5,7 @@
 [![.NET 8.0](https://img.shields.io/badge/.NET-8.0-blue.svg)](https://dotnet.microsoft.com/)
 [![Tests](https://img.shields.io/badge/Tests-212%20passed-brightgreen.svg)]()
 [![Database](https://img.shields.io/badge/Database-SQLite%203-lightgrey.svg)](https://www.sqlite.org/)
-[![Status](https://img.shields.io/badge/Fase-30E%20Crosswalk-orange.svg)]()
+[![Status](https://img.shields.io/badge/Fase-30F%20DWG-orange.svg)]()
 
 ---
 
@@ -25,7 +25,7 @@ O ecossistema é modularizado em bibliotecas e camadas com estrita separação d
 SISQDT_LIGHT/
 ├── docs/                                  # Documentação completa e centralizada
 │   ├── manifests/                         # Hashes SHA-256 e controle de integridade dos baselines
-│   ├── phases/                            # Relatórios cronológicos e decisões de gate (Fases 03 a 30E)
+│   ├── phases/                            # Relatórios cronológicos e decisões de gate (Fases 03 a 30F)
 │   └── specs/                             # Especificações de arquitetura, domínio, contratos e topologia
 ├── RAG/                                   # Base de conhecimento e memória persistente
 │   └── MEMORY.md                          # Memória contextual viva do projeto
@@ -90,7 +90,7 @@ Estado da suíte no checkout atual: **212 testes aprovados, 0 falhas, 0 ignorado
 
 ## 5. Estado de Engenharia
 
-- Fases 24–28 e 30A–30E concluídas nos escopos documentados; a Fase 30E confirmou equivalência `.srua`/CSV/KMZ/CQTS no recorte ZNA19165, mas não determinou a origem causal nem a identidade handle-DWG↔NetworkModel.
+- Fases 24–28 e 30A–30F concluídas nos escopos documentados; a Fase 30F confirmou a crosswalk até CQTS, mas não encontrou regra única que associe esses pontos a handles/entidades do DWG ZNA19165. Gate: `NO-GO — IDENTIDADE FÍSICO-LÓGICA AINDA NÃO DETERMINADA`.
 - O domínio preserva `Node.PhysicalPosition` separado de `Node.LayoutX/LayoutY` e consome JSON gerado pela ferramenta do acervo.
 - Icc trifásico e monofásico permanecem calculáveis e independentes das curvas de proteção.
 - Sem evidência identificável de dispositivo/curva, a avaliação retorna `EvidenceBlocked`; a suportabilidade térmica só é calculada com seção e temperatura com proveniência identificada.

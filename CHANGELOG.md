@@ -1,5 +1,15 @@
 # Changelog
 
+## Fase 30F — Reconciliação DWG ↔ Crosswalk Físico-Lógico
+
+- Varrido em cópia somente leitura o DWG principal ZNA19165 (13.219 entidades), o BAK de mesmo basename (13.220; conteúdo quase idêntico) e o BAK “JUC” (13.155; contexto/posições diferentes). Original e BAKs não foram alterados.
+- A crosswalk `CQTS → CSV ↔ KMZ ↔ .srua` foi reproduzida para `P2`, `P24 - TRAFO` e `P25`; os candidatos DWG são conjuntos ambíguos: 18 `XX=P2`, três `XX=24` e três `XX=25`. Não há `P24/P25` literal nem handle compartilhado.
+- DWG principal tem `INSUNITS=0`, `MAPCSASSIGN` vazio, sem `ACAD_GEOGRAPHICDATA`, XDATA=0; CRS e unidade seguem sem contrato. Handles são únicos no arquivo, mas só identificam entidades naquela revisão.
+- Foram encontrados 59 APPIDs, 368 extension dictionaries, 211 reactors e custom objects semânticos não decodificados; nenhum dado de identidade lógica foi demonstrado nos candidatos.
+- Planilhas auxiliares PONTO_24/25 declaram internamente outro projeto (“CACUIA - RUA PEDREIRA - NOVA IGUAÇU”); não foram usadas para associar postes do ZNA19165.
+- Gate: `NO-GO — IDENTIDADE FÍSICO-LÓGICA AINDA NÃO DETERMINADA`. Sem alteração de produto, fixture, CAD/LISP ou `VERSION_MANIFEST.json`; Fase 31 não aprovada.
+- Relatório: `docs/phases/fase30f/FASE30F_RECONCILIACAO_DWG_CROSSWALK.md`.
+
 ## Fase 30E — Rastreio da Origem do Crosswalk Físico-Lógico
 
 - No ZNA19165, comparados 36 pontos do `.srua`, 36 placemarks do KMZ e 36 linhas do CSV: nome/lat-lon coincidem integralmente; conversão UTM documentada no importer local reproduz o CSV com arredondamento a 0,001 m.
